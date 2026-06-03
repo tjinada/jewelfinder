@@ -14,7 +14,7 @@ function normalizeForCategory(input: JewelryBody) {
     category: input.category,
     images: input.images,
     availability: input.availability ?? 'available',
-    set: allowed.includes('set') ? input.set ?? null : null,
+    setId: allowed.includes('set') ? input.set ?? null : null,
   };
   for (const key of ATTRIBUTE_KEYS) {
     out[key] = allowed.includes(key) ? input[key] : undefined;
@@ -33,7 +33,7 @@ function toClient(doc: IJewelryDocument): JewelryItem {
     category: doc.category as JewelryItem['category'],
     images: doc.images,
     availability: doc.availability,
-    set: doc.set ? String(doc.set) : null,
+    set: doc.setId ? String(doc.setId) : null,
     metal: doc.metal as JewelryItem['metal'],
     colour: doc.colour as JewelryItem['colour'],
     size: doc.size as JewelryItem['size'],
@@ -49,7 +49,7 @@ export const jewelryService = {
     for (const key of ['category', 'metal', 'colour', 'size', 'necklaceType', 'availability'] as const) {
       if (filters[key]) query[key] = filters[key];
     }
-    if (filters.set) query.set = filters.set;
+    if (filters.set) query.setId = filters.set;
     if (filters.q?.trim()) query.name = { $regex: filters.q.trim(), $options: 'i' };
 
     const docs = await Jewelry.find(query).populate('owner', 'displayName').sort({ createdAt: -1 });

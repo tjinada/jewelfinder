@@ -6,7 +6,7 @@ export interface IJewelry {
   category: string;
   images: string[];
   availability: 'available' | 'onLoan';
-  set: Types.ObjectId | null;
+  setId: Types.ObjectId | null;
   metal?: string;
   colour?: string;
   size?: string;
@@ -31,7 +31,8 @@ const JewelrySchema = new Schema<IJewelryDocument, IJewelryModel>(
       index: true,
     },
     // Set membership lands in Phase 4; nullable until then.
-    set: { type: Schema.Types.ObjectId, ref: 'Set', default: null, index: true },
+    // (DB field is `setId` — `set` is a reserved Mongoose Document method.)
+    setId: { type: Schema.Types.ObjectId, ref: 'Set', default: null, index: true },
     // Optional per-category attributes (which apply is enforced in validation).
     metal: String,
     colour: String,
