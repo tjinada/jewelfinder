@@ -30,6 +30,7 @@ export const JewelryItemSchema = JewelryAttributesSchema.extend({
   _id: z.string(),
   owner: z.string(),
   ownerName: z.string().optional(),
+  name: z.string().max(60).optional(),
   category: CategorySchema,
   images: z.array(z.string()).default([]),
   availability: AvailabilitySchema.default('available'),
@@ -40,6 +41,7 @@ export const JewelryItemSchema = JewelryAttributesSchema.extend({
 export type JewelryItem = z.infer<typeof JewelryItemSchema>;
 
 export const CreateJewelryInputSchema = JewelryAttributesSchema.extend({
+  name: z.string().max(60).optional(),
   category: CategorySchema,
   images: z.array(z.string()).default([]),
   availability: AvailabilitySchema.optional(),

@@ -36,7 +36,6 @@ export function RegisterPage() {
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             className={inputClass}
-            placeholder="Priya R."
           />
         </div>
 

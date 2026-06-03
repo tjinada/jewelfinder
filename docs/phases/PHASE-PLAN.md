@@ -41,10 +41,10 @@ MEDIA_DIR=                       # filesystem path for uploaded images
 - Frontend `authStore` (Zustand), login/register pages, `ProtectedRoute`.
 - *Done when:* a user can register, log in, and reach a protected empty home.
 
-## Phase 2 — Jewelry catalog + media
+## Phase 2 — Jewelry catalog + media ✅
 
 - `jewelry` model + module (CRUD, owner checks, per-category Zod validation).
-- `media` module (image upload + serve; SW `CacheFirst` for `/api/media/*`).
+- `media` module (image upload + resize/thumbnail via `sharp`; SW `CacheFirst` for `/api/media/*`).
 - Frontend: upload flow (camera/file → category → config-driven fields), item detail with
   glass chrome, availability toggle.
 - *Done when:* a user can add a piece with photos and see it on its detail screen.
@@ -77,5 +77,5 @@ MEDIA_DIR=                       # filesystem path for uploaded images
 
 ## Deferred (revisit only if needed — YAGNI)
 
-Thumbnail/resize pipeline (`sharp`); admin role / moderation; loan borrower + dates +
-history; real-time websockets (push covers message alerts).
+Admin role / moderation; loan borrower + dates + history; real-time websockets (push covers
+message alerts). (Thumbnail/resize via `sharp` is now implemented in Phase 2.)

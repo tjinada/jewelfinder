@@ -8,6 +8,7 @@ import { ProtectedRoute } from '@/components/routing/ProtectedRoute';
 import { OfflineIndicator, PWAUpdatePrompt } from '@/components/pwa';
 import { LoginPage, RegisterPage } from '@/features/auth';
 import { HomePage } from '@/features/home';
+import { JewelryFormPage, ItemDetailPage } from '@/features/jewelry';
 
 /** Marks loading complete when there's no token to validate. */
 function AuthInitializer({ children }: { children: ReactNode }) {
@@ -34,7 +35,10 @@ export default function App() {
               {/* Protected */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/" element={<HomePage />} />
-                {/* search, item, add, set, messages, profile — added in later phases */}
+                <Route path="/add" element={<JewelryFormPage />} />
+                <Route path="/item/:id" element={<ItemDetailPage />} />
+                <Route path="/item/:id/edit" element={<JewelryFormPage />} />
+                {/* search, set, messages, profile — added in later phases */}
               </Route>
 
               <Route path="*" element={<Navigate to="/" replace />} />

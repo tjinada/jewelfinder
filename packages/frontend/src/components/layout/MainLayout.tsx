@@ -109,7 +109,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
                     className="fixed inset-0 z-40 cursor-default"
                     tabIndex={-1}
                   />
-                  <GlassSurface className="absolute right-0 z-50 mt-2 w-56 rounded-2xl p-2 text-ink">
+                  <div className="absolute right-0 z-50 mt-2 w-56 rounded-2xl border border-line bg-surface p-2 text-ink shadow-xl">
                     <div className="px-3 py-2">
                       <p className="truncate text-sm font-semibold">{user?.displayName}</p>
                       <p className="truncate text-xs text-muted">{user?.email}</p>
@@ -121,7 +121,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
                     >
                       <LogOut className="h-4 w-4" /> Log out
                     </button>
-                  </GlassSurface>
+                  </div>
                 </>
               )}
             </div>
