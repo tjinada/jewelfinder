@@ -15,7 +15,7 @@ export function HomePage() {
 
   return (
     <MainLayout>
-      <h1 className="mb-4 font-display text-2xl text-ink md:text-3xl">Available jewelry</h1>
+      <h1 className="mb-4 font-display text-2xl text-ink md:text-3xl">Browse jewelry</h1>
 
       <div className="no-scrollbar mb-6 flex gap-2 overflow-x-auto md:flex-wrap">
         <Chip active={active === 'all'} onClick={() => setActive('all')}>

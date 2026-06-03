@@ -113,22 +113,11 @@ export function ItemDetailPage() {
         )}
 
         {/* Details */}
-        <div className="mt-5">
+        <div className="mt-6">
           <h1 className="font-display text-2xl text-ink md:text-3xl">{itemTitle(item)}</h1>
           {item.ownerName && (
             <p className="mt-1 text-sm text-muted">Shared by {item.ownerName}</p>
           )}
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            {chips.map((c) => (
-              <span
-                key={c}
-                className="rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink/70"
-              >
-                {c}
-              </span>
-            ))}
-          </div>
 
           {item.set && (
             <Link
@@ -139,26 +128,44 @@ export function ItemDetailPage() {
             </Link>
           )}
 
-          {/* Actions */}
-          <div className="mt-7">
-            {isOwner ? (
-              <div className="flex flex-wrap gap-3">
-                <Button onClick={toggleAvailability} disabled={setAvailability.isPending} variant="gold">
-                  <RefreshCw className="h-4 w-4" />
-                  {item.availability === 'available' ? 'Mark on loan' : 'Mark available'}
-                </Button>
-                <Button variant="ghost" onClick={() => navigate(`/item/${item._id}/edit`)}>
-                  <Pencil className="h-4 w-4" /> Edit
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={onDelete}
-                  disabled={del.isPending}
-                  className="border-accent/40 text-accent hover:bg-accent/10"
+          {/* Attributes */}
+          <div className="mt-6">
+            <h2 className="mb-2.5 text-xs font-bold uppercase tracking-wide text-muted">Details</h2>
+            <div className="flex flex-wrap gap-2">
+              {chips.map((c) => (
+                <span
+                  key={c}
+                  className="rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink/70"
                 >
-                  <Trash2 className="h-4 w-4" /> Delete
-                </Button>
-              </div>
+                  {c}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Actions footer */}
+          <div className="mt-8 border-t border-line pt-6">
+            {isOwner ? (
+              <>
+                <h2 className="mb-3 text-xs font-bold uppercase tracking-wide text-muted">Manage</h2>
+                <div className="flex flex-wrap gap-3">
+                  <Button onClick={toggleAvailability} disabled={setAvailability.isPending} variant="gold">
+                    <RefreshCw className="h-4 w-4" />
+                    {item.availability === 'available' ? 'Mark on loan' : 'Mark available'}
+                  </Button>
+                  <Button variant="ghost" onClick={() => navigate(`/item/${item._id}/edit`)}>
+                    <Pencil className="h-4 w-4" /> Edit
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={onDelete}
+                    disabled={del.isPending}
+                    className="border-accent/40 text-accent hover:bg-accent/10"
+                  >
+                    <Trash2 className="h-4 w-4" /> Delete
+                  </Button>
+                </div>
+              </>
             ) : (
               <Button disabled className="w-full sm:w-auto">
                 <MessageCircle className="h-4 w-4" /> Message owner (coming soon)

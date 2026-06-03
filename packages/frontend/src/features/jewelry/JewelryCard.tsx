@@ -28,8 +28,8 @@ export function JewelryCard({ item }: { item: JewelryItem }) {
             )}
           </div>
           {item.set && (
-            <span className="absolute left-2 top-2 flex items-center gap-1 rounded-full bg-primary px-2 py-1 text-[10px] font-bold text-gold-light">
-              <Link2 className="h-3 w-3" /> SET
+            <span className="absolute left-2 top-2 flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-extrabold uppercase tracking-wide text-gold-light shadow-md ring-1 ring-white/40">
+              <Link2 className="h-3.5 w-3.5" /> Set
             </span>
           )}
         </div>
