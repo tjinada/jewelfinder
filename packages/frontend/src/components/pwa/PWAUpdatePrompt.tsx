@@ -15,7 +15,7 @@ export function PWAUpdatePrompt() {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
-    onRegisteredSW(swUrl, registration) {
+    onRegisteredSW(_swUrl, registration) {
       if (registration) {
         registration.update();
         setInterval(() => registration.update(), 5 * 60 * 1000);

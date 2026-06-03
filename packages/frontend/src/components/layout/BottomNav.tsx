@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 const items = [
   { to: '/', label: 'Home', icon: Home, end: true },
-  { to: '/search', label: 'Search', icon: Search },
+  { to: '/search', label: 'Search', icon: Search, end: false },
 ] as const;
 
 const right = [
