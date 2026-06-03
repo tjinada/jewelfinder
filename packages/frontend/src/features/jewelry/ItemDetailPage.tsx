@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Pencil, Trash2, Loader2, MessageCircle, RefreshCw } from 'lucide-react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Pencil, Trash2, Loader2, MessageCircle, RefreshCw, Link2 } from 'lucide-react';
 import { CATEGORY_LABELS, METAL_LABELS, NECKLACE_TYPE_LABELS, COLOURS } from '@jewel/shared';
 import { MainLayout } from '@/components/layout';
 import { Button, AvailabilityPill, GlassSurface } from '@/components/ui';
@@ -129,6 +129,15 @@ export function ItemDetailPage() {
               </span>
             ))}
           </div>
+
+          {item.set && (
+            <Link
+              to={`/set/${item.set}`}
+              className="mt-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-4 py-2 text-sm font-semibold text-primary"
+            >
+              <Link2 className="h-4 w-4" /> Part of a set — view all
+            </Link>
+          )}
 
           {/* Actions */}
           <div className="mt-7">

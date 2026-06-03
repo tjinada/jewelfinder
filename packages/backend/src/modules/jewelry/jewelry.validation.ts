@@ -26,9 +26,9 @@ const baseItem = z.object({
 });
 
 /**
- * The OCP centerpiece: an attribute may only be set if `CATEGORY_ATTRIBUTES`
- * lists it for that category. Adding/altering categories or attributes is a
- * change to that single config — this rule needs no edits.
+ * The OCP centerpiece: a physical attribute may only be set if
+ * `CATEGORY_ATTRIBUTES` lists it for that category. (Set membership is universal
+ * and validated separately in the service.)
  */
 function enforceApplicableAttributes(val: z.infer<typeof baseItem>, ctx: z.RefinementCtx) {
   const allowed = CATEGORY_ATTRIBUTES[val.category as Category];
@@ -40,13 +40,6 @@ function enforceApplicableAttributes(val: z.infer<typeof baseItem>, ctx: z.Refin
         message: `${key} does not apply to ${val.category}`,
       });
     }
-  }
-  if (val.set != null && !allowed.includes('set')) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['set'],
-      message: `set does not apply to ${val.category}`,
-    });
   }
 }
 

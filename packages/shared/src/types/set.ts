@@ -4,7 +4,7 @@ import { JewelryItemSchema } from './jewelry';
 export const JewelrySetSchema = z.object({
   _id: z.string(),
   owner: z.string(),
-  name: z.string().max(80).optional(),
+  name: z.string().min(1).max(80),
   createdAt: z.string().or(z.date()),
   updatedAt: z.string().or(z.date()),
 });

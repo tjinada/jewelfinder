@@ -76,19 +76,17 @@ export const AVAILABILITY = ['available', 'onLoan'] as const;
 export type Availability = (typeof AVAILABILITY)[number];
 
 // ---- Category -> attributes -------------------------------------------------
-export type AttributeKey = 'metal' | 'colour' | 'size' | 'necklaceType' | 'set';
+// Physical attributes only. Set membership is universal (any item may join a
+// set) and is handled separately, so it is intentionally NOT an attribute here.
+export type AttributeKey = 'metal' | 'colour' | 'size' | 'necklaceType';
 
 export const CATEGORY_ATTRIBUTES: Record<Category, AttributeKey[]> = {
   anklet: ['metal'],
   bangle: ['size', 'metal', 'colour'],
-  earring: ['metal', 'colour', 'set'],
-  necklace: ['necklaceType', 'metal', 'colour', 'set'],
-  earChain: ['metal', 'colour', 'set'],
-  tikka: ['metal', 'colour', 'set'],
+  earring: ['metal', 'colour'],
+  necklace: ['necklaceType', 'metal', 'colour'],
+  earChain: ['metal', 'colour'],
+  tikka: ['metal', 'colour'],
   ring: ['colour', 'metal'],
   waistChain: ['metal'],
 };
-
-/** True if the given category supports being part of a set. */
-export const categoryAllowsSet = (category: Category): boolean =>
-  CATEGORY_ATTRIBUTES[category].includes('set');

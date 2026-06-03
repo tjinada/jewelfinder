@@ -57,10 +57,14 @@ MEDIA_DIR=                       # filesystem path for uploaded images
   text search always matches).
 - *Done when:* the home grid and category filters work end to end.
 
-## Phase 4 — Sets
+## Phase 4 — Sets ✅
 
-- `sets` model + module; attach/detach items.
-- Set badge on items; set-view page ("browse the rest of the set").
+- `sets` model + module; membership managed from the item side via `setId` (one set per
+  item), owner-scoped, owner-validated.
+- Set selector in the Add/Edit form (any category; create-new inline); SET badge on cards;
+  set-view page ("browse the rest of the set"); owner can delete a set (items survive).
+- Set membership decoupled from `CATEGORY_ATTRIBUTES` (now physical attributes only); set
+  names required like item names.
 - *Done when:* an item in a set shows the badge and links to its siblings.
 
 ## Phase 5 — Messaging + push

@@ -26,6 +26,7 @@ import {
   type JewelryInput,
 } from './api';
 import { getErrorMessage } from '@/features/auth';
+import { SetSelect, type SetSelection, useCreateSet } from '@/features/sets';
 
 const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wide text-muted';
 const selectClass =
@@ -49,6 +50,7 @@ export function JewelryFormPage() {
   const upload = useUploadImages();
   const create = useCreateJewelry();
   const update = useUpdateJewelry(id ?? '');
+  const createSet = useCreateSet();
 
   const [name, setName] = useState('');
   const [category, setCategory] = useState<Category | ''>('');
@@ -58,6 +60,7 @@ export function JewelryFormPage() {
   const [colour, setColour] = useState<string | undefined>();
   const [size, setSize] = useState<string | undefined>();
   const [necklaceType, setNecklaceType] = useState<string | undefined>();
+  const [setSel, setSetSel] = useState<SetSelection>({ mode: 'none' });
   const [error, setError] = useState('');
 
   // Prefill in edit mode
@@ -71,6 +74,7 @@ export function JewelryFormPage() {
       setColour(existing.colour);
       setSize(existing.size);
       setNecklaceType(existing.necklaceType);
+      setSetSel(existing.set ? { mode: 'existing', id: existing.set } : { mode: 'none' });
     }
   }, [existing]);
 
@@ -107,19 +111,30 @@ export function JewelryFormPage() {
     if (!name.trim()) return setError('Please enter a name.');
     if (!category) return setError('Please choose a category.');
     if (images.length === 0) return setError('Please add at least one photo.');
-
-    const payload: JewelryInput = {
-      name: name.trim(),
-      category,
-      images,
-      availability,
-      metal: applicable.includes('metal') ? metal : undefined,
-      colour: applicable.includes('colour') ? colour : undefined,
-      size: applicable.includes('size') ? size : undefined,
-      necklaceType: applicable.includes('necklaceType') ? necklaceType : undefined,
-    };
+    if (setSel.mode === 'new' && !setSel.name.trim()) {
+      return setError('Please name the new set, or choose “Not part of a set”.');
+    }
 
     try {
+      let setId: string | null = null;
+      if (setSel.mode === 'existing') setId = setSel.id;
+      else if (setSel.mode === 'new') {
+        const created = await createSet.mutateAsync(setSel.name.trim());
+        setId = created._id;
+      }
+
+      const payload: JewelryInput = {
+        name: name.trim(),
+        category,
+        images,
+        availability,
+        set: setId,
+        metal: applicable.includes('metal') ? metal : undefined,
+        colour: applicable.includes('colour') ? colour : undefined,
+        size: applicable.includes('size') ? size : undefined,
+        necklaceType: applicable.includes('necklaceType') ? necklaceType : undefined,
+      };
+
       const result = editing ? await update.mutateAsync(payload) : await create.mutateAsync(payload);
       navigate(`/item/${result._id}`, { replace: true });
     } catch (err) {
@@ -127,7 +142,7 @@ export function JewelryFormPage() {
     }
   };
 
-  const saving = create.isPending || update.isPending;
+  const saving = create.isPending || update.isPending || createSet.isPending;
 
   if (editing && loadingExisting) {
     return (
@@ -290,11 +305,10 @@ export function JewelryFormPage() {
             </Field>
           )}
 
-          {applicable.includes('set') && (
-            <p className="rounded-xl border border-dashed border-line px-4 py-3 text-xs text-muted">
-              Grouping items into a set arrives in a later update.
-            </p>
-          )}
+          {/* Set membership — available for any category */}
+          <Field label="Set">
+            <SetSelect value={setSel} onChange={setSetSel} />
+          </Field>
 
           {/* Availability */}
           <Field label="Availability">

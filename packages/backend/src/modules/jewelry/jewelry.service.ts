@@ -1,12 +1,21 @@
 import { Jewelry, IJewelryDocument } from './jewelry.model.js';
 import { AppError } from '../../middleware/error.middleware.js';
 import { removeImage } from '../media/media.service.js';
+import { JewelrySet } from '../sets/set.model.js';
 import { CATEGORY_ATTRIBUTES, type Category, type JewelryItem } from '@jewel/shared';
 import type { JewelryBody, ListJewelryQuery } from './jewelry.validation.js';
 
 const ATTRIBUTE_KEYS = ['metal', 'colour', 'size', 'necklaceType'] as const;
 
-/** Keep only attributes applicable to the category; clear the rest. */
+/** A set referenced by an item must exist and belong to the same owner. */
+async function assertOwnedSet(ownerId: string, setId: string | null | undefined): Promise<void> {
+  if (!setId) return;
+  const set = await JewelrySet.findById(setId);
+  if (!set) throw new AppError('Set not found', 400);
+  if (String(set.owner) !== ownerId) throw new AppError('You can only use your own sets', 403);
+}
+
+/** Keep only physical attributes applicable to the category; clear the rest. */
 function normalizeForCategory(input: JewelryBody) {
   const allowed = CATEGORY_ATTRIBUTES[input.category as Category];
   const out: Record<string, unknown> = {
@@ -14,7 +23,7 @@ function normalizeForCategory(input: JewelryBody) {
     category: input.category,
     images: input.images,
     availability: input.availability ?? 'available',
-    setId: allowed.includes('set') ? input.set ?? null : null,
+    setId: input.set ?? null,
   };
   for (const key of ATTRIBUTE_KEYS) {
     out[key] = allowed.includes(key) ? input[key] : undefined;
@@ -63,6 +72,7 @@ export const jewelryService = {
   },
 
   async create(ownerId: string, input: JewelryBody): Promise<JewelryItem> {
+    await assertOwnedSet(ownerId, input.set);
     const doc = await Jewelry.create({ ...normalizeForCategory(input), owner: ownerId });
     await doc.populate('owner', 'displayName');
     return toClient(doc);
@@ -72,6 +82,7 @@ export const jewelryService = {
     const doc = await Jewelry.findById(id);
     if (!doc) throw new AppError('Item not found', 404);
     if (String(doc.owner) !== ownerId) throw new AppError('You can only edit your own items', 403);
+    await assertOwnedSet(ownerId, input.set);
 
     const removed = doc.images.filter((f) => !input.images.includes(f));
     Object.assign(doc, normalizeForCategory(input));

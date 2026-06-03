@@ -12,6 +12,7 @@ import { errorHandler, requestLogger } from './middleware/index.js';
 import { sendSuccess } from './utils/response.js';
 import { authRoutes } from './modules/auth/index.js';
 import { jewelryRoutes } from './modules/jewelry/index.js';
+import { setRoutes } from './modules/sets/index.js';
 import { mediaRoutes, ensureMediaDirs } from './modules/media/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -58,6 +59,7 @@ app.get('/api/health/db', async (_req, res, next) => {
 // Feature routes
 app.use('/api/auth', authRoutes);
 app.use('/api/jewelry', jewelryRoutes);
+app.use('/api/sets', setRoutes);
 app.use('/api/media', mediaRoutes);
 
 // Serve the built frontend in production
