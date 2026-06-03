@@ -22,6 +22,7 @@ services:
 
   jewel-finder:
     container_name: jewel-finder
+    user: "99:100"   # Unraid nobody:users — uploaded files match your other shares
     build:
       context: .
       dockerfile: Dockerfile
@@ -36,8 +37,8 @@ services:
       - NODE_ENV=production
       - PORT=3000
     volumes:
-      # Persist uploaded jewelry images
-      - media-data:/app/media
+      # Uploaded jewelry images -> Unraid share (bind mount)
+      - /mnt/user/data/media/jewelry:/app/media
     depends_on:
       - mongo
     networks:
@@ -56,4 +57,3 @@ networks:
 
 volumes:
   mongo-data:
-  media-data:

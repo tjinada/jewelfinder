@@ -24,8 +24,21 @@ App is served at <http://localhost:8090> (host) → port 3000 (container).
 
 ## Volumes
 
-- `mongo-data` — MongoDB database files.
-- `media-data` — uploaded jewelry images (`MEDIA_DIR=/app/media`).
+- `mongo-data` — MongoDB database files (named volume).
+- Uploaded jewelry images — the `jewel-finder` service bind-mounts the host share
+  `/mnt/user/data/media/jewelry` onto the container's `/app/media` (`MEDIA_DIR`).
+
+## Unraid notes
+
+- The `jewel-finder` service runs as `user: "99:100"` (Unraid's `nobody:users`), so uploaded
+  files are owned like the rest of your shares. Make sure the host media folder is owned
+  `nobody:users` (`chown -R nobody:users /mnt/user/data/media/jewelry`).
+- `MONGO_URI` is overridden in compose to `mongodb://mongo:27017/jewel-finder` (the bundled
+  Mongo service name), so the `localhost` value in `.env` is ignored under Docker.
+- The bundled Mongo publishes no host port — it's reachable only on the internal `jewel`
+  network — so it won't clash with other Mongo containers.
+- DB data is a named volume by default. To keep it in appdata instead, bind-mount a
+  cache-backed path onto `/data/db` of the `mongo` service.
 
 ## Notes
 
