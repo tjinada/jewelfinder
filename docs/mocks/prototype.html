@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Jewel Finder — Prototype (Ivory &amp; Peacock)</title>
+<style>
+  :root{
+    --bg:#F4F0E6; --card:#fff; --line:#E5E0D2;
+    --primary:#116E78; --primary-d:#0C525A; --accent:#D14B6A;
+    --gold:#C9A24A; --gold-l:#F2E6C8; --ink:#1E2A2C; --muted:#889092;
+    --green:#2E8B6E; --amber:#C57F33;
+    --serif:Georgia,'Times New Roman',serif;
+    --sans:'Helvetica Neue',Arial,system-ui,sans-serif;
+    --tile:linear-gradient(#F0ECDD,#E3DBC4);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:#16211F;font-family:var(--sans);color:var(--ink);
+       display:flex;justify-content:center;align-items:flex-start;padding:24px;min-height:100vh}
+  .phone{width:390px;height:844px;background:var(--bg);border-radius:42px;
+         box-shadow:0 30px 80px rgba(0,0,0,.5);overflow:hidden;position:relative;
+         border:10px solid #121a19}
+  .statusbar{height:40px;display:flex;align-items:center;justify-content:space-between;
+             padding:0 26px;font-size:13px;font-weight:600}
+  .battery{width:22px;height:11px;border:1.4px solid var(--ink);border-radius:3px;position:relative}
+  .battery:after{content:"";position:absolute;right:-4px;top:3px;width:2px;height:5px;background:var(--ink);border-radius:1px}
+  .screen{position:absolute;inset:0;display:none;flex-direction:column;padding-top:40px}
+  .screen.active{display:flex}
+  .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .scroll::-webkit-scrollbar{display:none}
+
+  h1.brand{font-family:var(--serif);color:var(--primary);font-size:27px;margin:10px 24px 0}
+  .iconbtn{width:38px;height:38px;border-radius:50%;background:#fff;border:1px solid var(--line);
+           display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--primary)}
+  .row{display:flex;align-items:center}
+  .header{display:flex;align-items:center;justify-content:space-between;padding:6px 18px}
+
+  .chips{display:flex;gap:8px;overflow-x:auto;padding:14px 16px 4px}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto;padding:8px 16px;border-radius:18px;background:#fff;border:1px solid var(--line);
+        font-size:13px;font-weight:600;color:#5E6A6B;cursor:pointer;transition:.15s}
+  .chip.active{background:var(--primary);color:var(--bg);border-color:var(--primary)}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px 16px 110px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;cursor:pointer;
+        transition:transform .15s, box-shadow .15s;animation:rise .5s both}
+  .card:active{transform:scale(.97)}
+  .card:hover{box-shadow:0 10px 24px rgba(17,110,120,.12)}
+  @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .thumb{height:140px;background:var(--tile);display:flex;align-items:center;justify-content:center;position:relative;margin:8px;border-radius:11px}
+  .cardbody{padding:4px 12px 14px}
+  .cardbody .name{font-family:var(--serif);font-size:16px}
+  .cardbody .meta{font-size:12px;color:var(--muted);margin:3px 0 7px}
+  .avail{font-size:11.5px;font-weight:600;display:flex;align-items:center;gap:6px}
+  .avail:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .avail.loan{color:var(--amber)} .avail.loan:before{background:var(--amber)}
+  .avail.ok{color:var(--green)}
+  .setbadge{position:absolute;top:8px;left:8px;background:var(--primary);color:var(--gold-l);
+            font-size:10px;font-weight:700;padding:4px 9px 4px 7px;border-radius:11px;display:flex;align-items:center;gap:5px}
+  .links{width:14px;height:8px}
+
+  .nav{position:absolute;bottom:0;left:0;right:0;height:74px;background:#fff;border-top:1px solid var(--line);
+       display:flex;align-items:flex-start;justify-content:space-around;padding-top:10px}
+  .nav button{background:none;border:none;font:inherit;color:var(--muted);font-size:10px;font-weight:600;
+              display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;width:60px}
+  .nav button.active{color:var(--primary)}
+  .nav .add{width:46px;height:46px;border-radius:50%;background:var(--primary);color:var(--gold-l);
+            margin-top:-12px;display:flex;align-items:center;justify-content:center;font-size:26px;line-height:1}
+
+  .hero{height:330px;background:linear-gradient(#F0ECDD,#E1D7BF);display:flex;align-items:center;justify-content:center;position:relative}
+  .floatbtn{position:absolute;top:14px;width:36px;height:36px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;color:var(--primary)}
+  .floatbtn.fav{color:var(--accent)}
+  .pad{padding:0 24px}
+  .pill{padding:6px 12px;border-radius:15px;font-size:13px;font-weight:700;background:#E2F0EA;color:var(--green);display:inline-flex;align-items:center;gap:7px}
+  .pill:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .pill.loan{background:#F4E7D5;color:var(--amber)} .pill.loan:before{background:var(--amber)}
+  .attrs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:18px 0}
+  .attr{border:1px solid var(--line);border-radius:12px;padding:12px}
+  .attr .k{font-size:12px;color:var(--muted)} .attr .v{font-size:14px;font-weight:700;margin-top:5px}
+  .setbanner{background:linear-gradient(135deg,var(--primary),var(--primary-d));border:1.5px solid var(--gold);
+             border-radius:16px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer;color:#fff}
+  .setbanner .t{font-weight:700} .setbanner .s{color:var(--gold-l);font-size:12.5px;margin-top:2px}
+  .setbanner .arrow{margin-left:auto;color:var(--gold-l);font-weight:700;font-size:13px}
+  .cta{width:100%;border:none;border-radius:16px;padding:17px;font-size:16px;font-weight:700;cursor:pointer;margin:18px 0 24px}
+  .cta.gold{background:var(--gold);color:#3A2A10}
+  .owner{display:flex;align-items:center;gap:12px;padding:16px 0;border-top:1px solid var(--line)}
+  .ava{width:34px;height:34px;border-radius:50%;background:var(--primary);color:var(--gold-l);display:flex;align-items:center;justify-content:center;font-weight:700}
+
+  .setband{background:linear-gradient(135deg,var(--primary),var(--primary-d));border:1.5px solid var(--gold);
+           border-radius:20px;padding:20px;color:#fff}
+  .setband .kicker{color:var(--gold-l);font-size:11.5px;font-weight:700;letter-spacing:1.5px}
+  .setband h2{font-family:var(--serif);font-weight:400;font-size:22px;margin:8px 0 6px}
+  .setband .sub{color:var(--gold-l);font-size:13px}
+  .addtile{border:1.5px dashed #CBB97E;background:#FBF4DF;border-radius:16px;display:flex;flex-direction:column;
+           align-items:center;justify-content:center;color:#8A6D2E;font-weight:700;font-size:12.5px;gap:6px;cursor:pointer}
+  .addtile .plus{font-size:30px;color:var(--gold);line-height:1}
+
+  .label{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:1px;margin:20px 0 10px}
+  .photos{display:flex;gap:12px}
+  .photo{width:96px;height:96px;border-radius:14px;background:var(--tile);display:flex;align-items:center;justify-content:center}
+  .photo.add{background:#fff;border:1.5px dashed #7FB7BD;color:var(--primary);flex-direction:column;font-size:10.5px;font-weight:600;gap:4px;cursor:pointer}
+  .photo.add .plus{font-size:24px;line-height:1}
+  .select{width:100%;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;
+          font:inherit;font-size:15px;font-weight:600;color:var(--ink);appearance:none;cursor:pointer;
+          background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><path d='M3 5l5 6 5-6' fill='none' stroke='%23889092' stroke-width='1.8'/></svg>");
+          background-repeat:no-repeat;background-position:right 16px center}
+  .hint{background:#E2F0EA;color:#10625A;font-size:11.5px;border-radius:8px;padding:8px 10px;margin-top:12px}
+  .pillrow{display:flex;gap:10px;flex-wrap:wrap}
+  .opt{padding:9px 18px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:13px;font-weight:600;color:#5E6A6B;cursor:pointer;transition:.12s}
+  .opt.sel{background:var(--primary);color:var(--bg);border-color:var(--primary)}
+  .swatches{display:flex;gap:10px;flex-wrap:wrap}
+  .sw{width:30px;height:30px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer}
+  .sw.sel{box-shadow:0 0 0 2px var(--primary)}
+  .toggle{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:10px}
+  .toggle .lab{font-size:14px;font-weight:600}
+  .sw-track{width:44px;height:26px;border-radius:13px;background:#D6CFC0;position:relative;cursor:pointer;transition:.18s}
+  .sw-track.on{background:var(--green)} .sw-track.set.on{background:var(--primary)}
+  .sw-knob{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.18s}
+  .sw-track.on .sw-knob{left:21px}
+  .save{width:100%;border:none;border-radius:16px;padding:18px;font-size:16px;font-weight:700;background:var(--primary);color:var(--gold-l);cursor:pointer;margin:24px 0}
+
+  .toast{position:absolute;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);opacity:0;
+         background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font-size:13.5px;font-weight:600;
+         transition:.25s;pointer-events:none;white-space:nowrap}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+  .back{font-size:22px}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>9:41</span><span class="battery"></span></div>
+
+  <section class="screen active" id="home">
+    <div class="header">
+      <h1 class="brand">Jewel Finder</h1>
+      <div class="iconbtn" onclick="toast('Search')">&#128269;</div>
+    </div>
+    <div class="chips" id="homechips"></div>
+    <div class="scroll"><div class="grid" id="homegrid"></div></div>
+    <nav class="nav">
+      <button class="active">&#8962;<span>Home</span></button>
+      <button onclick="toast('Search')">&#9678;<span>Search</span></button>
+      <button class="add" onclick="go('upload')">+</button>
+      <button onclick="toast('Messages')">&#128172;<span>Messages</span></button>
+      <button onclick="toast('Profile')">&#9680;<span>Profile</span></button>
+    </nav>
+  </section>
+
+  <section class="screen" id="detail">
+    <div class="scroll">
+      <div class="hero">
+        <button class="floatbtn" style="left:14px" onclick="back()">&#8249;</button>
+        <button class="floatbtn fav" style="right:14px" onclick="toast('Saved to favourites')">&#9825;</button>
+        <div id="heroart"></div>
+      </div>
+      <div class="pad" style="padding-top:18px">
+        <div class="row" style="justify-content:space-between;align-items:flex-start">
+          <div><div style="font-family:var(--serif);font-size:26px" id="d-name">Kemp Choker</div>
+               <div style="color:var(--muted);font-size:14px" id="d-cat">Necklace</div></div>
+          <span class="pill" id="d-avail">Available</span>
+        </div>
+        <div class="owner"><div class="ava">P</div>
+          <div><div style="font-size:12px;color:var(--muted)">Owned by</div>
+               <div style="font-weight:700">Priya R.</div></div></div>
+        <div class="attrs">
+          <div class="attr"><div class="k">Metal</div><div class="v">Gold</div></div>
+          <div class="attr"><div class="k">Colour</div><div class="v">Maroon</div></div>
+          <div class="attr"><div class="k">Type</div><div class="v">Choker</div></div>
+        </div>
+        <div class="setbanner" id="d-setbanner" onclick="go('setview')">
+          <span class="links">&#9939;</span>
+          <div><div class="t">Part of a set</div><div class="s">Bridal Maroon Set &middot; 3 pieces</div></div>
+          <span class="arrow">View set &rsaquo;</span>
+        </div>
+        <button class="cta gold" onclick="toast('Message sent to Priya')">&#9993;  Ask about availability</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="setview">
+    <div class="header"><button class="iconbtn" onclick="go('detail')"><span class="back">&#8249;</span></button></div>
+    <div class="scroll" style="padding-bottom:24px">
+      <div class="pad">
+        <div class="setband">
+          <div class="kicker">&#9939; MATCHING SET</div>
+          <h2>Bridal Maroon Set</h2>
+          <div class="sub">Owned by Priya R. &middot; 3 pieces &middot; Gold &middot; Maroon</div>
+        </div>
+      </div>
+      <div class="grid" style="padding-bottom:24px" id="setgrid"></div>
+    </div>
+  </section>
+
+  <section class="screen" id="upload">
+    <div class="header">
+      <h1 class="brand" style="font-size:24px">Add jewelry</h1>
+      <div class="iconbtn" onclick="go('home')">&#10005;</div>
+    </div>
+    <div class="scroll"><div class="pad" style="padding-bottom:20px">
+      <div class="label">PHOTOS</div>
+      <div class="photos" id="photos">
+        <div class="photo">&#128144;</div>
+        <div class="photo add" onclick="addPhoto()"><span class="plus">+</span>Add photo</div>
+      </div>
+
+      <div class="label">CATEGORY</div>
+      <select class="select" id="category" onchange="renderFields()">
+        <option value="anklet">Anklet</option>
+        <option value="bangle">Bangle</option>
+        <option value="earring">Earring</option>
+        <option value="necklace" selected>Necklace</option>
+        <option value="earChain">Ear chain</option>
+        <option value="tikka">Tikka / Utchi pattam</option>
+        <option value="ring">Ring</option>
+        <option value="waistChain">Waist chain</option>
+      </select>
+      <div class="hint">Fields below adjust to the chosen category &mdash; driven by one shared config.</div>
+
+      <div id="fields"></div>
+
+      <div class="toggle"><span class="lab" id="availlab">Available</span>
+        <div class="sw-track on" id="availtrack" onclick="toggleAvail()"><div class="sw-knob"></div></div></div>
+
+      <button class="save" onclick="toast('Jewelry saved'); setTimeout(function(){go('home')},700)">Save jewelry</button>
+    </div></div>
+  </section>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+const CATEGORY_ATTRIBUTES = {
+  anklet:['metal'], bangle:['size','metal','colour'], earring:['metal','colour','set'],
+  necklace:['necklaceType','metal','colour','set'], earChain:['metal','colour','set'],
+  tikka:['metal','colour','set'], ring:['colour','metal'], waistChain:['metal']
+};
+const METALS=['Gold','Silver','Bronze','Pink gold','Pearl'];
+const NECKLACE_TYPES=['Choker','Long'];
+const BANGLE_SIZES=['2.2','2.4','2.6','2.8','2.10'];
+const COLOURS=[['Red','#C0392B'],['Maroon','#7A1F2B'],['Orange','#E07A2F'],['Peach','#F0B27A'],
+  ['Gold Yellow','#E4C24A'],['Green','#3F7D5B'],['Dark Green','#1E5631'],['Mint','#9DD9C0'],
+  ['Blue','#2E6DB4'],['Light Blue','#7FB5E6'],['Navy','#1F3F66'],['Purple','#7E5AA0'],
+  ['Lavender','#B9A7D6'],['Pink','#E8B4C4'],['White','#F4EFE6'],
+  ['Multi','conic-gradient(from 0deg,#C0392B,#E4C24A,#3F7D5B,#2E6DB4,#7E5AA0,#C0392B)']];
+
+const G='stroke="#C9A24A" stroke-width="2" fill="none" stroke-linecap="round"';
+const art={
+  necklace:s=>`<svg width="${s}" height="${s}" viewBox="0 0 100 100"><g ${G}><path d="M28 38 Q50 78 72 38"/><circle cx="28" cy="38" r="3" fill="#C9A24A"/><circle cx="72" cy="38" r="3" fill="#C9A24A"/><circle cx="50" cy="70" r="7" fill="#116E78"/></g></svg>`,
+  earring:s=>`<svg width="${s}" height="${s}" viewBox="0 0 100 100"><g ${G}><circle cx="38" cy="42" r="9" fill="#116E78"/><path d="M31 49 Q38 62 45 49"/><circle cx="62" cy="42" r="9" fill="#116E78"/><path d="M55 49 Q62 62 69 49"/></g></svg>`,
+  bangle:s=>`<svg width="${s}" height="${s}" viewBox="0 0 100 100"><g stroke="#C9A24A" stroke-width="2.4" fill="none"><circle cx="50" cy="46" r="26"/><circle cx="50" cy="54" r="22" opacity=".6"/></g></svg>`,
+  ring:s=>`<svg width="${s}" height="${s}" viewBox="0 0 100 100"><g stroke="#C9A24A" stroke-width="2.4" fill="none"><circle cx="50" cy="58" r="22"/><path d="M40 38 L50 26 L60 38 L50 46 Z" fill="#D14B6A"/></g></svg>`,
+  tikka:s=>`<svg width="${s}" height="${s}" viewBox="0 0 100 100"><g ${G}><line x1="50" y1="30" x2="50" y2="48"/><path d="M42 30 a8 5 0 0 1 16 0"/><circle cx="50" cy="58" r="10" fill="#116E78"/><path d="M50 68 l-6 13 h12 z" fill="#D14B6A"/></g></svg>`
+};
+
+let prev='home';
+function go(id){
+  const cur=document.querySelector('.screen.active');
+  if(cur && cur.id!==id) prev=cur.id;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
+  const sc=document.querySelector('#'+id+' .scroll'); if(sc) sc.scrollTo(0,0);
+}
+function back(){ go(prev==='detail'?'home':prev); }
+
+function openItem(name,cat,artKey,inSet,avail){
+  document.getElementById('d-name').textContent=name;
+  document.getElementById('d-cat').textContent=cat;
+  document.getElementById('heroart').innerHTML=art[artKey](220);
+  const p=document.getElementById('d-avail');
+  p.textContent=avail; p.className='pill'+(avail==='On loan'?' loan':'');
+  document.getElementById('d-setbanner').style.display=inSet?'flex':'none';
+  go('detail');
+}
+
+const items=[
+  ['Kemp Choker','Necklace','necklace','Gold &middot; Maroon',true,'Available'],
+  ['Jhumka Pair','Earrings','earring','Gold &middot; Red',true,'Available'],
+  ['Bangle Set 2.6','Bangles','bangle','Gold &middot; Green',false,'On loan'],
+  ['Ruby Ring','Ring','ring','Gold &middot; Maroon',false,'Available'],
+  ['Maang Tikka','Tikka','tikka','Gold &middot; Maroon',true,'Available'],
+  ['Temple Anklet','Anklet','bangle','Silver',false,'Available'],
+];
+const cats=['All','Anklets','Bangles','Earrings','Necklaces','Rings','Tikkas'];
+document.getElementById('homechips').innerHTML=cats.map((c,i)=>
+  `<div class="chip${i===0?' active':''}" onclick="pickChip(this)">${c}</div>`).join('');
+function pickChip(el){document.querySelectorAll('#homechips .chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');}
+
+function cardHTML(it,i){
+  const name=it[0],cat=it[1],k=it[2],meta=it[3],set=it[4],avail=it[5];
+  return `<div class="card" style="animation-delay:${i*60}ms"
+            onclick="openItem('${name}','${cat}','${k}',${set},'${avail}')">
+    <div class="thumb">${set?`<div class="setbadge">&#9939; SET</div>`:''}${art[k](96)}</div>
+    <div class="cardbody"><div class="name">${name}</div><div class="meta">${meta}</div>
+      <div class="avail ${avail==='On loan'?'loan':'ok'}">${avail}</div></div></div>`;
+}
+document.getElementById('homegrid').innerHTML=items.map(cardHTML).join('');
+
+const setItems=[
+  ['Kemp Choker','Necklace','necklace','Gold &middot; Maroon',false,'Available'],
+  ['Jhumka Pair','Earrings','earring','Gold &middot; Red',false,'Available'],
+  ['Maang Tikka','Tikka','tikka','Gold &middot; Maroon',false,'On loan'],
+];
+document.getElementById('setgrid').innerHTML =
+  setItems.map(cardHTML).join('') +
+  `<div class="addtile" onclick="toast('Pick a piece to add')"><span class="plus">+</span>Add a piece<br>to this set</div>`;
+
+function chips(title,opts,defIdx){
+  return `<div class="label">${title}</div><div class="pillrow">`+
+    opts.map((o,i)=>`<div class="opt${i===(defIdx||0)?' sel':''}" onclick="pickOne(this)">${o}</div>`).join('')+`</div>`;
+}
+function pickOne(el){[].forEach.call(el.parentNode.children,c=>c.classList.remove('sel'));el.classList.add('sel');}
+function pickSw(el){[].forEach.call(el.parentNode.children,c=>c.classList.remove('sel'));el.classList.add('sel');}
+
+function renderFields(){
+  const cat=document.getElementById('category').value;
+  const attrs=CATEGORY_ATTRIBUTES[cat]; let h='';
+  attrs.forEach(a=>{
+    if(a==='necklaceType') h+=chips('NECKLACE TYPE',NECKLACE_TYPES,0);
+    if(a==='size')         h+=chips('SIZE',BANGLE_SIZES,2);
+    if(a==='metal')        h+=chips('METAL',METALS,0);
+    if(a==='colour'){
+      h+='<div class="label">COLOUR</div><div class="swatches">'+
+        COLOURS.map((c,i)=>`<div class="sw${i===1?' sel':''}" title="${c[0]}" onclick="pickSw(this)" style="background:${c[1]}"></div>`).join('')+'</div>';
+    }
+    if(a==='set'){
+      h+=`<div class="label">SET</div><div class="toggle"><span class="lab">Part of a set</span>
+          <div class="sw-track set" onclick="this.classList.toggle('on')"><div class="sw-knob"></div></div></div>`;
+    }
+  });
+  document.getElementById('fields').innerHTML=h;
+}
+function toggleAvail(){
+  const t=document.getElementById('availtrack');t.classList.toggle('on');
+  document.getElementById('availlab').textContent=t.classList.contains('on')?'Available':'On loan';
+}
+function addPhoto(){
+  const wrap=document.getElementById('photos');
+  const d=document.createElement('div');d.className='photo';d.innerHTML='&#128141;';
+  wrap.insertBefore(d,wrap.querySelector('.add'));
+}
+renderFields();
+
+let tt;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show')},1600);}
+</script>
+</body>
+</html>

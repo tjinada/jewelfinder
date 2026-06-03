@@ -1,0 +1,77 @@
+<svg viewBox="0 0 390 844" xmlns="http://www.w3.org/2000/svg" font-family="'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <linearGradient id="tile5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBF3E6"/><stop offset="1" stop-color="#F1E4CE"/></linearGradient>
+    <linearGradient id="setband" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7A1F2B"/><stop offset="1" stop-color="#5E1620"/></linearGradient>
+  </defs>
+  <rect width="390" height="844" fill="#FBF6EE"/>
+
+  <!-- status bar -->
+  <text x="28" y="30" font-size="13" font-weight="600" fill="#2B2420">9:41</text>
+  <g fill="#2B2420"><rect x="320" y="18" width="16" height="10" rx="2"/><rect x="340" y="16" width="22" height="11" rx="3" fill="none" stroke="#2B2420" stroke-width="1.4"/><rect x="363" y="19" width="2" height="5" rx="1"/></g>
+
+  <!-- back -->
+  <circle cx="36" cy="74" r="18" fill="#FFFFFF" stroke="#EEE3D2"/><path d="M40 66 l-8 8 l8 8" fill="none" stroke="#7A1F2B" stroke-width="2"/>
+
+  <!-- set banner -->
+  <rect x="24" y="104" width="342" height="118" rx="20" fill="url(#setband)"/>
+  <rect x="24" y="104" width="342" height="118" rx="20" fill="none" stroke="#B8902F" stroke-width="1.5"/>
+  <g transform="translate(52,150)"><circle cx="0" cy="0" r="11" fill="none" stroke="#E4CD8A" stroke-width="2.4"/><circle cx="15" cy="0" r="11" fill="none" stroke="#E4CD8A" stroke-width="2.4"/></g>
+  <text x="92" y="148" font-size="11.5" font-weight="700" fill="#E4CD8A" letter-spacing="1.5">MATCHING SET</text>
+  <text x="92" y="174" font-family="Georgia, serif" font-size="22" fill="#FBF6EE">Bridal Maroon Set</text>
+  <text x="52" y="204" font-size="13" fill="#E4CD8A">Owned by Priya R. · 3 pieces · Gold · Maroon</text>
+
+  <!-- piece 1: necklace -->
+  <g>
+    <rect x="24" y="244" width="164" height="208" rx="16" fill="#FFFFFF" stroke="#EEE3D2"/>
+    <rect x="32" y="252" width="148" height="132" rx="11" fill="url(#tile5)"/>
+    <g stroke="#B8902F" stroke-width="2.2" fill="none" stroke-linecap="round"><path d="M74 300 Q106 352 138 300"/><circle cx="106" cy="344" r="9" fill="#7A1F2B" stroke="#B8902F"/></g>
+    <text x="32" y="408" font-family="Georgia, serif" font-size="15" fill="#2B2420">Kemp Choker</text>
+    <text x="32" y="426" font-size="11.5" fill="#9A8C7E">Necklace</text>
+    <circle cx="36" cy="440" r="4" fill="#3F7D5B"/><text x="46" y="444" font-size="11" font-weight="600" fill="#3F7D5B">Available</text>
+  </g>
+
+  <!-- piece 2: earrings -->
+  <g>
+    <rect x="202" y="244" width="164" height="208" rx="16" fill="#FFFFFF" stroke="#EEE3D2"/>
+    <rect x="210" y="252" width="148" height="132" rx="11" fill="url(#tile5)"/>
+    <g stroke="#B8902F" stroke-width="2" fill="none" stroke-linecap="round">
+      <circle cx="262" cy="300" r="11" fill="#7A1F2B"/><path d="M253 308 Q262 324 271 308"/>
+      <circle cx="306" cy="300" r="11" fill="#7A1F2B"/><path d="M297 308 Q306 324 315 308"/>
+    </g>
+    <text x="210" y="408" font-family="Georgia, serif" font-size="15" fill="#2B2420">Jhumka Pair</text>
+    <text x="210" y="426" font-size="11.5" fill="#9A8C7E">Earrings</text>
+    <circle cx="214" cy="440" r="4" fill="#3F7D5B"/><text x="224" y="444" font-size="11" font-weight="600" fill="#3F7D5B">Available</text>
+  </g>
+
+  <!-- piece 3: tikka (on loan) -->
+  <g>
+    <rect x="24" y="464" width="164" height="208" rx="16" fill="#FFFFFF" stroke="#EEE3D2"/>
+    <rect x="32" y="472" width="148" height="132" rx="11" fill="url(#tile5)"/>
+    <g stroke="#B8902F" stroke-width="2" fill="none" stroke-linecap="round">
+      <line x1="106" y1="500" x2="106" y2="524"/><path d="M96 500 a10 6 0 0 1 20 0"/>
+      <circle cx="106" cy="540" r="12" fill="#7A1F2B"/><path d="M106 552 l-7 16 h14 z" fill="#C0392B" stroke="#B8902F"/>
+    </g>
+    <text x="32" y="628" font-family="Georgia, serif" font-size="15" fill="#2B2420">Maang Tikka</text>
+    <text x="32" y="646" font-size="11.5" fill="#9A8C7E">Tikka</text>
+    <circle cx="36" cy="660" r="4" fill="#B5743A"/><text x="46" y="664" font-size="11" font-weight="600" fill="#B5743A">On loan</text>
+  </g>
+
+  <!-- add-to-set hint card -->
+  <g>
+    <rect x="202" y="464" width="164" height="208" rx="16" fill="#FBF1DE" stroke="#E3CB97" stroke-dasharray="6 6"/>
+    <g stroke="#B8902F" stroke-width="2"><line x1="284" y1="552" x2="284" y2="576"/><line x1="272" y1="564" x2="296" y2="564"/></g>
+    <text x="284" y="606" font-size="12.5" font-weight="700" fill="#8A6D2E" text-anchor="middle">Add a piece</text>
+    <text x="284" y="624" font-size="11" fill="#A98C4E" text-anchor="middle">to this set</text>
+  </g>
+
+  <!-- bottom nav -->
+  <rect x="0" y="761" width="390" height="83" fill="#FFFFFF"/>
+  <line x1="0" y1="761" x2="390" y2="761" stroke="#EEE3D2"/>
+  <g stroke-width="1.8" fill="none">
+    <path d="M34 790 l14 -11 l14 11" stroke="#A99B8C"/><rect x="40" y="788" width="16" height="12" rx="2" stroke="#A99B8C"/><text x="48" y="822" font-size="10" fill="#A99B8C" text-anchor="middle">Home</text>
+    <circle cx="112" cy="785" r="7" stroke="#A99B8C"/><line x1="117" y1="790" x2="122" y2="795" stroke="#A99B8C"/><text x="115" y="822" font-size="10" fill="#A99B8C" text-anchor="middle">Search</text>
+    <circle cx="195" cy="788" r="22" fill="#7A1F2B" stroke="none"/><line x1="195" y1="780" x2="195" y2="796" stroke="#E4CD8A"/><line x1="187" y1="788" x2="203" y2="788" stroke="#E4CD8A"/>
+    <path d="M268 779 h20 a3 3 0 0 1 3 3 v10 a3 3 0 0 1 -3 3 h-13 l-7 6 v-6 a3 3 0 0 1 -3 -3 v-10 a3 3 0 0 1 3 -3 z" stroke="#A99B8C"/><text x="280" y="822" font-size="10" fill="#A99B8C" text-anchor="middle">Messages</text>
+    <circle cx="350" cy="782" r="6" stroke="#A99B8C"/><path d="M340 798 a10 9 0 0 1 20 0" stroke="#A99B8C"/><text x="350" y="822" font-size="10" fill="#A99B8C" text-anchor="middle">Profile</text>
+  </g>
+</svg>

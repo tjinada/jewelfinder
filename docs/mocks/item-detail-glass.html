@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Item Detail — Glass vs Flat</title>
+<style>
+  :root{
+    --bg:#F4F0E6; --card:#fff; --line:#E5E0D2;
+    --primary:#116E78; --primary-d:#0C525A; --accent:#D14B6A;
+    --gold:#C9A24A; --gold-l:#F2E6C8; --ink:#1E2A2C; --muted:#889092;
+    --green:#2E8B6E; --amber:#C57F33;
+    --serif:Georgia,'Times New Roman',serif;
+    --sans:'Helvetica Neue',Arial,system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:#16211F;font-family:var(--sans);color:var(--ink);
+       display:flex;flex-direction:column;align-items:center;gap:18px;padding:22px;min-height:100vh}
+  .seg{display:inline-flex;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);
+       border-radius:999px;padding:4px;gap:4px}
+  .seg button{border:none;background:none;color:#C9D3D1;font:inherit;font-size:13px;font-weight:700;
+              padding:8px 22px;border-radius:999px;cursor:pointer;transition:.18s;letter-spacing:.3px}
+  .seg button.on{background:var(--gold);color:#22301d}
+  .caption{color:#8FA09D;font-size:12px;max-width:360px;text-align:center;line-height:1.5}
+  .phone{width:390px;height:780px;background:var(--bg);border-radius:42px;overflow:hidden;position:relative;
+         border:10px solid #121a19;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+  .statusbar{height:40px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;font-size:13px;font-weight:600;position:relative;z-index:5}
+  .battery{width:22px;height:11px;border:1.4px solid var(--ink);border-radius:3px;position:relative}
+  .battery:after{content:"";position:absolute;right:-4px;top:3px;width:2px;height:5px;background:var(--ink);border-radius:1px}
+  .scroll{position:absolute;inset:40px 0 0;overflow-y:auto}
+  .scroll::-webkit-scrollbar{display:none}
+  .hero{height:360px;position:relative;display:flex;align-items:center;justify-content:center;
+        background:
+          radial-gradient(circle at 24% 28%, rgba(17,110,120,.30), transparent 46%),
+          radial-gradient(circle at 80% 24%, rgba(209,75,106,.28), transparent 42%),
+          radial-gradient(circle at 62% 82%, rgba(201,162,74,.36), transparent 52%),
+          linear-gradient(#F4ECDA,#E6D7B9);}
+  .glassable{transition:background .25s, box-shadow .25s, border-color .25s, backdrop-filter .25s}
+  #root.glass .glassable{
+    background:rgba(255,255,255,.16);
+    -webkit-backdrop-filter:blur(16px) saturate(170%);
+    backdrop-filter:blur(16px) saturate(170%);
+    border:1px solid rgba(255,255,255,.55);
+    box-shadow:0 8px 28px rgba(13,40,40,.16), inset 0 1px 0 rgba(255,255,255,.7);
+  }
+  #root.flat .glassable{
+    background:#fff;
+    -webkit-backdrop-filter:none;backdrop-filter:none;
+    border:1px solid var(--line);
+    box-shadow:0 4px 16px rgba(0,0,0,.07);
+  }
+  .floatbtn{position:absolute;top:14px;width:44px;height:44px;border-radius:50%;display:flex;
+            align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:var(--primary)}
+  .floatbtn.fav{color:var(--accent)}
+  .hpill{position:absolute;left:18px;bottom:18px;padding:9px 14px;border-radius:16px;font-size:13px;
+         font-weight:700;color:var(--green);display:inline-flex;align-items:center;gap:8px}
+  .hpill:before{content:"";width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(46,139,110,.18)}
+  .pad{padding:18px 24px 0}
+  .name{font-family:var(--serif);font-size:27px}
+  .cat{color:var(--muted);font-size:14px;margin-top:2px}
+  .owner{display:flex;align-items:center;gap:12px;padding:16px 0;border-top:1px solid var(--line);margin-top:16px}
+  .ava{width:34px;height:34px;border-radius:50%;background:var(--primary);color:var(--gold-l);display:flex;align-items:center;justify-content:center;font-weight:700}
+  .attrs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:16px 0}
+  .attr{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}
+  .attr .k{font-size:12px;color:var(--muted)} .attr .v{font-size:14px;font-weight:700;margin-top:5px}
+  .setbanner{background:linear-gradient(135deg,var(--primary),var(--primary-d));border:1.5px solid var(--gold);
+             border-radius:16px;padding:16px;display:flex;align-items:center;gap:12px;color:#fff;margin-bottom:18px}
+  .setbanner .t{font-weight:700} .setbanner .s{color:var(--gold-l);font-size:12.5px;margin-top:2px}
+  .setbanner .arrow{margin-left:auto;color:var(--gold-l);font-weight:700;font-size:13px}
+  .filler{padding:0 24px 24px;color:var(--muted);font-size:13.5px;line-height:1.7}
+  .actionbar{position:absolute;left:0;right:0;bottom:0;padding:16px 20px calc(16px + env(safe-area-inset-bottom));
+             display:flex;align-items:center;gap:12px}
+  .price{font-family:var(--serif);font-size:15px;color:var(--ink)}
+  .price small{display:block;font-family:var(--sans);font-size:11px;color:var(--muted);font-weight:600}
+  .cta{flex:1;border:none;border-radius:14px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;
+       background:var(--gold);color:#3A2A10}
+</style>
+</head>
+<body>
+  <div class="seg" id="seg">
+    <button class="on" onclick="setMode('glass')">Glass</button>
+    <button onclick="setMode('flat')">Flat</button>
+  </div>
+  <div class="caption">Toggle to compare. The frosted chrome (back/favourite, availability pill, bottom bar) blurs the photo and the content scrolling beneath it — the flat version uses solid white cards.</div>
+
+  <div class="phone" id="root">
+    <div class="statusbar"><span>9:41</span><span class="battery"></span></div>
+    <div class="scroll">
+      <div class="hero">
+        <button class="floatbtn glassable" style="left:14px">&#8249;</button>
+        <button class="floatbtn fav glassable" style="right:14px">&#9825;</button>
+        <svg width="230" height="230" viewBox="0 0 100 100">
+          <g stroke="#B8860B" stroke-width="2.4" fill="none" stroke-linecap="round">
+            <path d="M22 36 Q50 84 78 36"/>
+            <circle cx="22" cy="36" r="3.4" fill="#C9A24A"/><circle cx="78" cy="36" r="3.4" fill="#C9A24A"/>
+            <circle cx="36" cy="58" r="3" fill="#D14B6A" stroke="none"/><circle cx="50" cy="64" r="3" fill="#D14B6A" stroke="none"/><circle cx="64" cy="58" r="3" fill="#D14B6A" stroke="none"/>
+            <circle cx="50" cy="74" r="9" fill="#116E78"/>
+            <path d="M50 83 l-5 11 h10 z" fill="#116E78"/>
+          </g>
+        </svg>
+        <span class="hpill glassable">Available</span>
+      </div>
+
+      <div class="pad">
+        <div class="name">Kemp Choker</div>
+        <div class="cat">Necklace</div>
+        <div class="owner"><div class="ava">P</div>
+          <div><div style="font-size:12px;color:var(--muted)">Owned by</div><div style="font-weight:700">Priya R.</div></div></div>
+        <div class="attrs">
+          <div class="attr"><div class="k">Metal</div><div class="v">Gold</div></div>
+          <div class="attr"><div class="k">Colour</div><div class="v">Maroon</div></div>
+          <div class="attr"><div class="k">Type</div><div class="v">Choker</div></div>
+        </div>
+        <div class="setbanner">
+          <span>&#9939;</span>
+          <div><div class="t">Part of a set</div><div class="s">Bridal Maroon Set &middot; 3 pieces</div></div>
+          <span class="arrow">View set &rsaquo;</span>
+        </div>
+      </div>
+      <div class="filler">
+        Hand-set kemp stones in a temple-style choker. Worn twice, professionally cleaned.
+        Pairs with the matching jhumkas and maang tikka in the same set. Scroll a little —
+        notice how the bottom bar frosts the text passing underneath it in glass mode.
+        Available for borrowing within the community; message Priya to arrange dates and pickup.
+        Care notes: store flat, keep away from moisture, original box included.
+      </div>
+      <div style="height:96px"></div>
+    </div>
+
+    <div class="actionbar glassable">
+      <div class="price">Free to borrow<small>community lending</small></div>
+      <button class="cta">&#9993; Ask about availability</button>
+    </div>
+  </div>
+
+<script>
+function setMode(m){
+  const root=document.getElementById('root');
+  root.classList.remove('glass','flat');root.classList.add(m);
+  document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.textContent.toLowerCase()===m));
+}
+setMode('glass');
+</script>
+</body>
+</html>

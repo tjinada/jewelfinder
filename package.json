@@ -1,0 +1,24 @@
+{
+  "name": "jewel-finder",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "pnpm --filter @jewel/shared build && concurrently \"pnpm dev:shared\" \"pnpm dev:backend\" \"pnpm dev:frontend\"",
+    "dev:shared": "pnpm --filter @jewel/shared dev",
+    "dev:frontend": "pnpm --filter @jewel/frontend dev",
+    "dev:backend": "pnpm --filter @jewel/backend dev",
+    "build": "pnpm --filter @jewel/shared build && pnpm --filter @jewel/backend build && pnpm --filter @jewel/frontend build",
+    "lint": "pnpm -r lint",
+    "clean": "pnpm -r clean && rimraf node_modules"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@10.11.0"
+}

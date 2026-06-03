@@ -1,0 +1,55 @@
+# =============================================================================
+# Docker Ignore - Jewel Finder
+# =============================================================================
+
+# Dependencies (installed fresh in container)
+node_modules
+**/node_modules
+
+# Build outputs (built in container)
+dist
+**/dist
+dev-dist
+**/dev-dist
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Uploaded media
+media
+**/media
+
+# Testing
+coverage
+.nyc_output
+
+# Documentation (not needed in container)
+docs
+*.md
+!README.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+.eslintcache
+.turbo

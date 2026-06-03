@@ -1,0 +1,67 @@
+<svg viewBox="0 0 390 844" xmlns="http://www.w3.org/2000/svg" font-family="'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <linearGradient id="tile3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FBF3E6"/><stop offset="1" stop-color="#F1E4CE"/></linearGradient>
+  </defs>
+  <rect width="390" height="844" fill="#FBF6EE"/>
+
+  <!-- status bar -->
+  <text x="28" y="30" font-size="13" font-weight="600" fill="#2B2420">9:41</text>
+  <g fill="#2B2420"><rect x="320" y="18" width="16" height="10" rx="2"/><rect x="340" y="16" width="22" height="11" rx="3" fill="none" stroke="#2B2420" stroke-width="1.4"/><rect x="363" y="19" width="2" height="5" rx="1"/></g>
+
+  <!-- header with close -->
+  <text x="24" y="80" font-family="Georgia, serif" font-size="24" fill="#7A1F2B">Add jewelry</text>
+  <g stroke="#6B5E52" stroke-width="1.8"><line x1="350" y1="66" x2="364" y2="80"/><line x1="364" y1="66" x2="350" y2="80"/></g>
+
+  <!-- photos -->
+  <text x="24" y="116" font-size="12" font-weight="700" fill="#9A8C7E" letter-spacing="1">PHOTOS</text>
+  <g>
+    <rect x="24" y="128" width="96" height="96" rx="14" fill="url(#tile3)" stroke="#EEE3D2"/>
+    <g stroke="#B8902F" stroke-width="2" fill="none" stroke-linecap="round"><path d="M52 176 Q72 206 92 176"/><circle cx="72" cy="200" r="6" fill="#7A1F2B" stroke="#B8902F"/></g>
+    <rect x="128" y="128" width="96" height="96" rx="14" fill="url(#tile3)" stroke="#EEE3D2"/>
+    <g stroke="#B8902F" stroke-width="2" fill="none"><circle cx="176" cy="176" r="20"/></g>
+    <!-- add tile -->
+    <rect x="232" y="128" width="96" height="96" rx="14" fill="#FFFFFF" stroke="#D8B765" stroke-dasharray="5 5"/>
+    <g stroke="#B8902F" stroke-width="2"><line x1="280" y1="166" x2="280" y2="186"/><line x1="270" y1="176" x2="290" y2="176"/></g>
+    <text x="280" y="208" font-size="10.5" font-weight="600" fill="#B8902F" text-anchor="middle">Add photo</text>
+  </g>
+
+  <!-- category -->
+  <text x="24" y="262" font-size="12" font-weight="700" fill="#9A8C7E" letter-spacing="1">CATEGORY</text>
+  <rect x="24" y="272" width="342" height="48" rx="14" fill="#FFFFFF" stroke="#E6D8C2"/>
+  <text x="40" y="301" font-size="15" font-weight="600" fill="#2B2420">Necklace</text>
+  <path d="M340 293 l8 8 l8 -8" fill="none" stroke="#9A8C7E" stroke-width="1.8"/>
+
+  <!-- dynamic fields note -->
+  <rect x="24" y="334" width="342" height="26" rx="8" fill="#F4E9D4"/>
+  <text x="34" y="351" font-size="11.5" fill="#8A6D2E">Fields below adjust to the chosen category</text>
+
+  <!-- necklace type -->
+  <text x="24" y="388" font-size="12" font-weight="700" fill="#9A8C7E" letter-spacing="1">NECKLACE TYPE</text>
+  <g font-size="13" font-weight="600">
+    <rect x="24" y="398" width="100" height="40" rx="12" fill="#7A1F2B"/><text x="74" y="423" fill="#FBF6EE" text-anchor="middle">Choker</text>
+    <rect x="132" y="398" width="100" height="40" rx="12" fill="#FFFFFF" stroke="#E6D8C2"/><text x="182" y="423" fill="#6B5E52" text-anchor="middle">Long</text>
+  </g>
+
+  <!-- metal + colour row -->
+  <text x="24" y="470" font-size="12" font-weight="700" fill="#9A8C7E" letter-spacing="1">METAL</text>
+  <rect x="24" y="480" width="164" height="44" rx="12" fill="#FFFFFF" stroke="#E6D8C2"/><text x="40" y="507" font-size="14" font-weight="600" fill="#2B2420">Gold</text><path d="M168 500 l6 6 l6 -6" fill="none" stroke="#9A8C7E" stroke-width="1.6"/>
+  <text x="202" y="470" font-size="12" font-weight="700" fill="#9A8C7E" letter-spacing="1">COLOUR</text>
+  <rect x="202" y="480" width="164" height="44" rx="12" fill="#FFFFFF" stroke="#E6D8C2"/><circle cx="220" cy="502" r="8" fill="#7A1F2B"/><text x="236" y="507" font-size="14" font-weight="600" fill="#2B2420">Maroon</text>
+
+  <!-- set assignment -->
+  <text x="24" y="556" font-size="12" font-weight="700" fill="#9A8C7E" letter-spacing="1">SET</text>
+  <rect x="24" y="566" width="342" height="48" rx="14" fill="#FFFFFF" stroke="#E6D8C2"/>
+  <g><circle cx="44" cy="584" r="4" fill="none" stroke="#B8902F" stroke-width="1.4"/><circle cx="50" cy="584" r="4" fill="none" stroke="#B8902F" stroke-width="1.4"/></g>
+  <text x="64" y="595" font-size="14" font-weight="600" fill="#2B2420">Part of “Bridal Maroon Set”</text>
+  <text x="356" y="595" font-size="13" font-weight="600" fill="#7A1F2B" text-anchor="end">Change</text>
+
+  <!-- availability -->
+  <rect x="24" y="626" width="342" height="48" rx="14" fill="#FFFFFF" stroke="#E6D8C2"/>
+  <circle cx="44" cy="650" r="5" fill="#3F7D5B"/>
+  <text x="60" y="655" font-size="14" font-weight="600" fill="#2B2420">Available</text>
+  <rect x="320" y="639" width="36" height="22" rx="11" fill="#3F7D5B"/><circle cx="345" cy="650" r="8" fill="#FBF6EE"/>
+
+  <!-- save -->
+  <rect x="24" y="700" width="342" height="54" rx="16" fill="#7A1F2B"/>
+  <text x="195" y="734" font-size="16" font-weight="700" fill="#E4CD8A" text-anchor="middle" letter-spacing="0.5">Save jewelry</text>
+</svg>
