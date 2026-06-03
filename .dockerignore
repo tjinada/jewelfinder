@@ -33,9 +33,10 @@ logs
 npm-debug.log*
 pnpm-debug.log*
 
-# Uploaded media
-media
-**/media
+# Uploaded media (the runtime uploads dirs only — NOT the source module
+# at packages/backend/src/modules/media). Leading slash anchors to repo root.
+/media
+/packages/backend/media
 
 # Testing
 coverage

@@ -19,9 +19,10 @@ logs
 npm-debug.log*
 pnpm-debug.log*
 
-# Uploaded media (local dev)
-media
-**/media
+# Uploaded media (local dev) — runtime uploads dirs only, NOT the source
+# module at packages/backend/src/modules/media. Leading slash anchors to root.
+/media
+/packages/backend/media
 
 # IDE / OS
 .vscode
