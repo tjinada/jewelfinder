@@ -148,19 +148,28 @@ export function ItemDetailPage() {
             {isOwner ? (
               <>
                 <h2 className="mb-3 text-xs font-bold uppercase tracking-wide text-muted">Manage</h2>
-                <div className="flex flex-wrap gap-3">
-                  <Button onClick={toggleAvailability} disabled={setAvailability.isPending} variant="gold">
+                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                  <Button
+                    onClick={toggleAvailability}
+                    disabled={setAvailability.isPending}
+                    variant="gold"
+                    className="w-full sm:w-auto"
+                  >
                     <RefreshCw className="h-4 w-4" />
                     {item.availability === 'available' ? 'Mark on loan' : 'Mark available'}
                   </Button>
-                  <Button variant="ghost" onClick={() => navigate(`/item/${item._id}/edit`)}>
+                  <Button
+                    variant="ghost"
+                    onClick={() => navigate(`/item/${item._id}/edit`)}
+                    className="w-full sm:w-auto"
+                  >
                     <Pencil className="h-4 w-4" /> Edit
                   </Button>
                   <Button
                     variant="ghost"
                     onClick={onDelete}
                     disabled={del.isPending}
-                    className="border-accent/40 text-accent hover:bg-accent/10"
+                    className="w-full border-accent/40 text-accent hover:bg-accent/10 sm:w-auto"
                   >
                     <Trash2 className="h-4 w-4" /> Delete
                   </Button>
