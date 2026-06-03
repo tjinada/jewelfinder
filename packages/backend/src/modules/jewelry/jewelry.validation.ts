@@ -14,7 +14,7 @@ import {
 const ATTRIBUTE_KEYS = ['metal', 'colour', 'size', 'necklaceType'] as const;
 
 const baseItem = z.object({
-  name: z.string().trim().max(60).optional(),
+  name: z.string().trim().min(1, 'Name is required').max(60),
   category: CategorySchema,
   images: z.array(z.string()).min(1, 'At least one photo is required').max(8),
   availability: AvailabilitySchema.optional(),

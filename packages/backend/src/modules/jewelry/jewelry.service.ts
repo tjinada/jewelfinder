@@ -10,7 +10,7 @@ const ATTRIBUTE_KEYS = ['metal', 'colour', 'size', 'necklaceType'] as const;
 function normalizeForCategory(input: JewelryBody) {
   const allowed = CATEGORY_ATTRIBUTES[input.category as Category];
   const out: Record<string, unknown> = {
-    name: input.name?.trim() || undefined,
+    name: input.name.trim(),
     category: input.category,
     images: input.images,
     availability: input.availability ?? 'available',

@@ -104,11 +104,12 @@ export function JewelryFormPage() {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
+    if (!name.trim()) return setError('Please enter a name.');
     if (!category) return setError('Please choose a category.');
     if (images.length === 0) return setError('Please add at least one photo.');
 
     const payload: JewelryInput = {
-      name: name.trim() || undefined,
+      name: name.trim(),
       category,
       images,
       availability,
@@ -179,11 +180,12 @@ export function JewelryFormPage() {
             </div>
           </Field>
 
-          {/* Name (optional) */}
-          <Field label="Name (optional)">
+          {/* Name */}
+          <Field label="Name">
             <input
               type="text"
               maxLength={60}
+              required
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Kemp Choker"

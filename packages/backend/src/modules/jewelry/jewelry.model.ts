@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
 export interface IJewelry {
   owner: Types.ObjectId;
-  name?: string;
+  name: string;
   category: string;
   images: string[];
   availability: 'available' | 'onLoan';
@@ -21,7 +21,7 @@ type IJewelryModel = Model<IJewelryDocument>;
 const JewelrySchema = new Schema<IJewelryDocument, IJewelryModel>(
   {
     owner: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-    name: { type: String, trim: true, maxlength: 60 },
+    name: { type: String, required: true, trim: true, maxlength: 60 },
     category: { type: String, required: true, index: true },
     images: { type: [String], default: [] },
     availability: {

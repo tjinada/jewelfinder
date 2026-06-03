@@ -49,11 +49,12 @@ MEDIA_DIR=                       # filesystem path for uploaded images
   glass chrome, availability toggle.
 - *Done when:* a user can add a piece with photos and see it on its detail screen.
 
-## Phase 3 — Browse, search & home grid
+## Phase 3 — Browse, search & home grid ✅
 
 - `GET /api/jewelry` filtering by the query params in `API-SPEC.md`.
 - Home grid (available items, glass header + bottom nav); search page with category-driven
-  filters and the glass filter sheet.
+  filters and the glass filter sheet (`?q=` in the URL, debounced; name is now required so
+  text search always matches).
 - *Done when:* the home grid and category filters work end to end.
 
 ## Phase 4 — Sets
