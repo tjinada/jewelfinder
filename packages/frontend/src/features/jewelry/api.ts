@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, type ApiResponse } from '@/lib/api';
-import type { JewelryItem, Availability } from '@jewel/shared';
+import type { JewelryItem, Availability, Visibility } from '@jewel/shared';
 
 export interface JewelryFilters {
   category?: string;
@@ -22,6 +22,8 @@ export interface JewelryInput {
   size?: string;
   necklaceType?: string;
   set?: string | null;
+  visibility?: Visibility;
+  sharedGroups?: string[];
 }
 
 export interface StoredImage {

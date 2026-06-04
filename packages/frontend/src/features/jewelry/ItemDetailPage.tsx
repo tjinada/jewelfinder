@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Pencil, Trash2, Loader2, RefreshCw, Link2, CalendarDays } from 'lucide-react';
-import { CATEGORY_LABELS, METAL_LABELS, NECKLACE_TYPE_LABELS, COLOURS } from '@jewel/shared';
+import { ArrowLeft, Pencil, Trash2, Loader2, RefreshCw, Link2, CalendarDays, Eye } from 'lucide-react';
+import { CATEGORY_LABELS, METAL_LABELS, NECKLACE_TYPE_LABELS, COLOURS, VISIBILITY_LABELS } from '@jewel/shared';
 import { MainLayout } from '@/components/layout';
 import { Button, AvailabilityPill, GlassSurface } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
@@ -120,6 +120,13 @@ export function ItemDetailPage() {
           <h1 className="font-display text-2xl text-ink md:text-3xl">{itemTitle(item)}</h1>
           {item.ownerName && (
             <p className="mt-1 text-sm text-muted">Shared by {item.ownerName}</p>
+          )}
+          {isOwner && (
+            <p className="mt-1 flex items-center gap-1.5 text-sm text-muted">
+              <Eye className="h-4 w-4" /> Visible to: {VISIBILITY_LABELS[item.visibility]}
+              {item.visibility === 'groups' &&
+                ` · ${item.sharedGroups.length} ${item.sharedGroups.length === 1 ? 'circle' : 'circles'}`}
+            </p>
           )}
 
           {item.set && (

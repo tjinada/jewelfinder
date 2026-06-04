@@ -1,6 +1,6 @@
 import { type ReactNode, type FormEvent, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Search, Plus, LogOut, Settings } from 'lucide-react';
+import { Search, Plus, LogOut, Settings, Users } from 'lucide-react';
 import { GlassSurface } from '@/components/ui';
 import { BottomNav } from './BottomNav';
 import { useAuthStore } from '@/stores/authStore';
@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 const navLinks = [
   { to: '/', label: 'Home', end: true },
   { to: '/search', label: 'Search', end: false },
+  { to: '/circles', label: 'Circles', end: false },
   { to: '/messages', label: 'Messages', end: false },
   { to: '/requests', label: 'Requests', end: false },
 ] as const;
@@ -130,6 +131,15 @@ export function MainLayout({ children }: { children: ReactNode }) {
                       <p className="truncate text-xs text-muted">{user?.email}</p>
                     </div>
                     <div className="my-1 border-t border-line/70" />
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        navigate('/circles');
+                      }}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-ink/5"
+                    >
+                      <Users className="h-4 w-4" /> Circles
+                    </button>
                     <button
                       onClick={() => {
                         setMenuOpen(false);

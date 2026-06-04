@@ -11,6 +11,7 @@ import { HomePage } from '@/features/home';
 import { JewelryFormPage, ItemDetailPage } from '@/features/jewelry';
 import { SearchPage } from '@/features/search';
 import { SetViewPage } from '@/features/sets';
+import { CirclesPage, CircleViewPage } from '@/features/circles';
 import { ConversationListPage, ThreadPage } from '@/features/messaging';
 import { RequestsPage } from '@/features/bookings';
 import { SettingsPage } from '@/features/notifications';
@@ -45,6 +46,8 @@ export default function App() {
                 <Route path="/item/:id" element={<ItemDetailPage />} />
                 <Route path="/item/:id/edit" element={<JewelryFormPage />} />
                 <Route path="/set/:id" element={<SetViewPage />} />
+                <Route path="/circles" element={<CirclesPage />} />
+                <Route path="/circles/:id" element={<CircleViewPage />} />
                 <Route path="/messages" element={<ConversationListPage />} />
                 <Route path="/messages/:id" element={<ThreadPage />} />
                 <Route path="/requests" element={<RequestsPage />} />

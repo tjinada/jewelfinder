@@ -27,6 +27,7 @@ import {
 } from './api';
 import { getErrorMessage } from '@/features/auth';
 import { SetSelect, type SetSelection, useCreateSet } from '@/features/sets';
+import { VisibilitySelect, type VisibilitySelection } from '@/features/circles';
 
 const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wide text-muted';
 const selectClass =
@@ -61,6 +62,7 @@ export function JewelryFormPage() {
   const [size, setSize] = useState<string | undefined>();
   const [necklaceType, setNecklaceType] = useState<string | undefined>();
   const [setSel, setSetSel] = useState<SetSelection>({ mode: 'none' });
+  const [vis, setVis] = useState<VisibilitySelection>({ visibility: 'private', sharedGroups: [] });
   const [error, setError] = useState('');
 
   // Prefill in edit mode
@@ -75,6 +77,7 @@ export function JewelryFormPage() {
       setSize(existing.size);
       setNecklaceType(existing.necklaceType);
       setSetSel(existing.set ? { mode: 'existing', id: existing.set } : { mode: 'none' });
+      setVis({ visibility: existing.visibility, sharedGroups: existing.sharedGroups });
     }
   }, [existing]);
 
@@ -114,6 +117,9 @@ export function JewelryFormPage() {
     if (setSel.mode === 'new' && !setSel.name.trim()) {
       return setError('Please name the new set, or choose “Not part of a set”.');
     }
+    if (vis.visibility === 'groups' && vis.sharedGroups.length === 0) {
+      return setError('Pick at least one circle, or choose a different visibility.');
+    }
 
     try {
       let setId: string | null = null;
@@ -129,6 +135,8 @@ export function JewelryFormPage() {
         images,
         availability,
         set: setId,
+        visibility: vis.visibility,
+        sharedGroups: vis.visibility === 'groups' ? vis.sharedGroups : undefined,
         metal: applicable.includes('metal') ? metal : undefined,
         colour: applicable.includes('colour') ? colour : undefined,
         size: applicable.includes('size') ? size : undefined,
@@ -299,6 +307,11 @@ export function JewelryFormPage() {
           {/* Set membership — available for any category */}
           <Field label="Set">
             <SetSelect value={setSel} onChange={setSetSel} />
+          </Field>
+
+          {/* Visibility — who can see this item */}
+          <Field label="Visibility">
+            <VisibilitySelect value={vis} onChange={setVis} />
           </Field>
 
           {/* Availability */}
