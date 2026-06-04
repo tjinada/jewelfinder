@@ -1,6 +1,10 @@
-/** Compact clock time, e.g. "3:42 PM". */
+/** Compact clock time, e.g. "3:42 PM". Forced to 12-hour so it's consistent across devices. */
 export function formatTime(value: string | Date): string {
-  return new Date(value).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  return new Date(value).toLocaleTimeString([], {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
 }
 
 /** Relative-ish label for the inbox: time today, weekday this week, else a short date. */
