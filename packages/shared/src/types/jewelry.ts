@@ -37,9 +37,6 @@ export const JewelryItemSchema = JewelryAttributesSchema.extend({
   set: z.string().nullable().optional(),
   createdAt: z.string().or(z.date()),
   updatedAt: z.string().or(z.date()),
-  // Populated only on the single-item fetch:
-  watching: z.boolean().optional(), // is the current viewer watching for availability?
-  watchersCount: z.number().optional(), // how many people are waiting (shown to the owner)
 });
 export type JewelryItem = z.infer<typeof JewelryItemSchema>;
 

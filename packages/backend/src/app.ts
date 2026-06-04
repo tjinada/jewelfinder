@@ -14,6 +14,7 @@ import { authRoutes } from './modules/auth/index.js';
 import { jewelryRoutes } from './modules/jewelry/index.js';
 import { setRoutes } from './modules/sets/index.js';
 import { conversationRoutes } from './modules/conversations/index.js';
+import { bookingRoutes } from './modules/bookings/index.js';
 import { notificationRoutes, initWebPush } from './modules/notifications/index.js';
 import { mediaRoutes, ensureMediaDirs } from './modules/media/index.js';
 
@@ -63,6 +64,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/jewelry', jewelryRoutes);
 app.use('/api/sets', setRoutes);
 app.use('/api/conversations', conversationRoutes);
+app.use('/api/bookings', bookingRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/media', mediaRoutes);
 

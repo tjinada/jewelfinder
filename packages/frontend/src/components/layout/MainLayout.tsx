@@ -6,12 +6,14 @@ import { BottomNav } from './BottomNav';
 import { useAuthStore } from '@/stores/authStore';
 import { useLogout } from '@/features/auth/useAuth';
 import { useUnreadCount } from '@/features/messaging/api';
+import { useIncomingPendingCount } from '@/features/bookings/api';
 import { cn } from '@/lib/utils';
 
 const navLinks = [
   { to: '/', label: 'Home', end: true },
   { to: '/search', label: 'Search', end: false },
   { to: '/messages', label: 'Messages', end: false },
+  { to: '/requests', label: 'Requests', end: false },
 ] as const;
 
 /**
@@ -24,6 +26,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
   const user = useAuthStore((s) => s.user);
   const logout = useLogout();
   const unread = useUnreadCount();
+  const pending = useIncomingPendingCount();
   const [q, setQ] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -66,18 +69,21 @@ export function MainLayout({ children }: { children: ReactNode }) {
           </NavLink>
 
           <nav className="hidden items-center gap-1 md:flex">
-            {navLinks.map((l) => (
-              <NavLink key={l.to} to={l.to} end={l.end} className={deskLink}>
-                <span className="relative">
-                  {l.label}
-                  {l.to === '/messages' && unread > 0 && (
-                    <span className="absolute -right-3 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-white">
-                      {unread > 9 ? '9+' : unread}
-                    </span>
-                  )}
-                </span>
-              </NavLink>
-            ))}
+            {navLinks.map((l) => {
+              const badge = l.to === '/messages' ? unread : l.to === '/requests' ? pending : 0;
+              return (
+                <NavLink key={l.to} to={l.to} end={l.end} className={deskLink}>
+                  <span className="relative">
+                    {l.label}
+                    {badge > 0 && (
+                      <span className="absolute -right-3 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-white">
+                        {badge > 9 ? '9+' : badge}
+                      </span>
+                    )}
+                  </span>
+                </NavLink>
+              );
+            })}
           </nav>
 
           <div className="flex items-center gap-2 md:gap-3">

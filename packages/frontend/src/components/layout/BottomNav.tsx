@@ -1,7 +1,8 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, Search, Plus, MessageCircle, User } from 'lucide-react';
+import { Home, Search, Plus, MessageCircle, CalendarClock } from 'lucide-react';
 import { GlassSurface } from '@/components/ui';
 import { useUnreadCount } from '@/features/messaging/api';
+import { useIncomingPendingCount } from '@/features/bookings/api';
 import { cn } from '@/lib/utils';
 
 const items = [
@@ -11,13 +12,17 @@ const items = [
 
 const right = [
   { to: '/messages', label: 'Messages', icon: MessageCircle },
-  { to: '/profile', label: 'Profile', icon: User },
+  { to: '/requests', label: 'Requests', icon: CalendarClock },
 ] as const;
 
 /** Floating frosted bottom navigation (glass chrome). */
 export function BottomNav() {
   const navigate = useNavigate();
   const unread = useUnreadCount();
+  const pending = useIncomingPendingCount();
+
+  const badgeFor = (to: string) =>
+    to === '/messages' ? unread : to === '/requests' ? pending : 0;
 
   const link = ({ isActive }: { isActive: boolean }) =>
     cn(
@@ -45,19 +50,22 @@ export function BottomNav() {
         <Plus className="h-6 w-6" />
       </button>
 
-      {right.map(({ to, label, icon: Icon }) => (
-        <NavLink key={to} to={to} className={link}>
-          <span className="relative">
-            <Icon className="h-5 w-5" />
-            {to === '/messages' && unread > 0 && (
-              <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-white">
-                {unread > 9 ? '9+' : unread}
-              </span>
-            )}
-          </span>
-          {label}
-        </NavLink>
-      ))}
+      {right.map(({ to, label, icon: Icon }) => {
+        const badge = badgeFor(to);
+        return (
+          <NavLink key={to} to={to} className={link}>
+            <span className="relative">
+              <Icon className="h-5 w-5" />
+              {badge > 0 && (
+                <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-white">
+                  {badge > 9 ? '9+' : badge}
+                </span>
+              )}
+            </span>
+            {label}
+          </NavLink>
+        );
+      })}
     </GlassSurface>
   );
 }

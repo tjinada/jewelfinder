@@ -9,11 +9,6 @@ export const conversationController = {
     sendSuccess(res, conversations);
   }),
 
-  start: asyncHandler(async (req: Request, res: Response) => {
-    const result = await conversationService.start(req.userId!, req.body.userId, req.body.item);
-    sendSuccess(res, result);
-  }),
-
   messages: asyncHandler(async (req: Request, res: Response) => {
     const thread = await conversationService.getThread(req.userId!, req.params.id);
     sendSuccess(res, thread);

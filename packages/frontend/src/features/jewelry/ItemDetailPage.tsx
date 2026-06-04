@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Pencil, Trash2, Loader2, MessageCircle, RefreshCw, Link2, Bell, BellOff } from 'lucide-react';
+import { ArrowLeft, Pencil, Trash2, Loader2, RefreshCw, Link2, CalendarDays } from 'lucide-react';
 import { CATEGORY_LABELS, METAL_LABELS, NECKLACE_TYPE_LABELS, COLOURS } from '@jewel/shared';
 import { MainLayout } from '@/components/layout';
 import { Button, AvailabilityPill, GlassSurface } from '@/components/ui';
@@ -8,9 +8,8 @@ import { useAuthStore } from '@/stores/authStore';
 import { fullImageUrl, thumbImageUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
 import { itemTitle } from './format';
-import { useJewelryItem, useDeleteJewelry, useSetAvailability, useWatchItem, useUnwatchItem } from './api';
-import { useStartConversation } from '@/features/messaging/api';
-import { PushNotificationPrompt } from '@/features/notifications';
+import { useJewelryItem, useDeleteJewelry, useSetAvailability } from './api';
+import { LoanRequestModal } from '@/features/bookings';
 
 const colourLabel = (id?: string) => COLOURS.find((c) => c.id === id)?.label;
 
@@ -22,11 +21,10 @@ export function ItemDetailPage() {
   const { data: item, isLoading, isError } = useJewelryItem(id);
   const del = useDeleteJewelry();
   const setAvailability = useSetAvailability(id ?? '');
-  const start = useStartConversation();
-  const watch = useWatchItem(id ?? '');
-  const unwatch = useUnwatchItem(id ?? '');
 
   const [active, setActive] = useState(0);
+  const [requestOpen, setRequestOpen] = useState(false);
+  const [requested, setRequested] = useState(false);
 
   if (isLoading) {
     return (
@@ -70,14 +68,6 @@ export function ItemDetailPage() {
     await del.mutateAsync(item._id);
     navigate('/', { replace: true });
   };
-
-  const onMessage = async () => {
-    const convo = await start.mutateAsync({ userId: item.owner, item: item._id });
-    navigate(`/messages/${convo._id}`);
-  };
-
-  const onWatch = () => watch.mutate();
-  const onUnwatch = () => unwatch.mutate();
 
   return (
     <MainLayout>
@@ -160,13 +150,6 @@ export function ItemDetailPage() {
           <div className="mt-8 border-t border-line pt-6">
             {isOwner ? (
               <>
-                {item.watchersCount ? (
-                  <p className="mb-4 flex items-center gap-2 rounded-xl bg-gold-light/50 px-3 py-2.5 text-sm font-semibold text-ink/80">
-                    <Bell className="h-4 w-4 flex-none text-gold" />
-                    {item.watchersCount} {item.watchersCount === 1 ? 'person is' : 'people are'} waiting
-                    for this to become available
-                  </p>
-                ) : null}
                 <h2 className="mb-3 text-xs font-bold uppercase tracking-wide text-muted">Manage</h2>
                 <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                   <Button
@@ -176,7 +159,7 @@ export function ItemDetailPage() {
                     className="w-full sm:w-auto"
                   >
                     <RefreshCw className="h-4 w-4" />
-                    {item.availability === 'available' ? 'Mark on loan' : 'Mark available'}
+                    {item.availability === 'available' ? 'Pause loan requests' : 'List for loan'}
                   </Button>
                   <Button
                     variant="ghost"
@@ -197,41 +180,44 @@ export function ItemDetailPage() {
               </>
             ) : (
               <div>
-                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                  {item.availability === 'onLoan' &&
-                    (item.watching ? (
-                      <Button
-                        variant="ghost"
-                        onClick={onUnwatch}
-                        disabled={unwatch.isPending}
-                        className="w-full border-primary/40 text-primary hover:bg-primary/10 sm:w-auto"
-                      >
-                        <BellOff className="h-4 w-4" /> Stop notifying me
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="gold"
-                        onClick={onWatch}
-                        disabled={watch.isPending}
-                        className="w-full sm:w-auto"
-                      >
-                        <Bell className="h-4 w-4" /> Notify me when available
-                      </Button>
-                    ))}
-                  <Button onClick={onMessage} disabled={start.isPending} className="w-full sm:w-auto">
-                    <MessageCircle className="h-4 w-4" /> Message owner
-                  </Button>
-                </div>
-                {item.watching && (
-                  <div className="mt-3">
-                    <PushNotificationPrompt />
-                  </div>
+                {item.availability === 'available' ? (
+                  requested ? (
+                    <div className="rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-primary">
+                      Request sent — you’ll hear back once the owner responds.{' '}
+                      <Link to="/requests" className="font-semibold underline">
+                        View your requests
+                      </Link>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="gold"
+                      onClick={() => setRequestOpen(true)}
+                      className="w-full sm:w-auto"
+                    >
+                      <CalendarDays className="h-4 w-4" /> Request to loan
+                    </Button>
+                  )
+                ) : (
+                  <p className="text-sm text-muted">This piece isn’t available for loan right now.</p>
                 )}
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {!isOwner && (
+        <LoanRequestModal
+          open={requestOpen}
+          itemId={item._id}
+          itemName={itemTitle(item)}
+          onClose={() => setRequestOpen(false)}
+          onDone={() => {
+            setRequestOpen(false);
+            setRequested(true);
+          }}
+        />
+      )}
     </MainLayout>
   );
 }

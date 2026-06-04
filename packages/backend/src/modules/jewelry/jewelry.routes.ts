@@ -30,7 +30,5 @@ router.patch(
   validateBody(availabilityBody),
   jewelryController.setAvailability,
 );
-router.post('/:id/watch', validateParams(idParam), jewelryController.watch);
-router.delete('/:id/watch', validateParams(idParam), jewelryController.unwatch);
 
 export default router;

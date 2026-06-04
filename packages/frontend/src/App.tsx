@@ -12,6 +12,7 @@ import { JewelryFormPage, ItemDetailPage } from '@/features/jewelry';
 import { SearchPage } from '@/features/search';
 import { SetViewPage } from '@/features/sets';
 import { ConversationListPage, ThreadPage } from '@/features/messaging';
+import { RequestsPage } from '@/features/bookings';
 
 /** Marks loading complete when there's no token to validate. */
 function AuthInitializer({ children }: { children: ReactNode }) {
@@ -45,7 +46,7 @@ export default function App() {
                 <Route path="/set/:id" element={<SetViewPage />} />
                 <Route path="/messages" element={<ConversationListPage />} />
                 <Route path="/messages/:id" element={<ThreadPage />} />
-                {/* profile — added in later phases */}
+                <Route path="/requests" element={<RequestsPage />} />
               </Route>
 
               <Route path="*" element={<Navigate to="/" replace />} />

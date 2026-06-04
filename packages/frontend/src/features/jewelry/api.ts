@@ -106,23 +106,3 @@ export function useSetAvailability(id: string) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['jewelry'] }),
   });
 }
-
-export function useWatchItem(id: string) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async () => {
-      await api.post(`/jewelry/${id}/watch`);
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['jewelry', 'item', id] }),
-  });
-}
-
-export function useUnwatchItem(id: string) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async () => {
-      await api.delete(`/jewelry/${id}/watch`);
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['jewelry', 'item', id] }),
-  });
-}
