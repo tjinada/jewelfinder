@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { Link2 } from 'lucide-react';
 import type { JewelryItem } from '@jewel/shared';
 import { Card, AvailabilityPill } from '@/components/ui';
 import { thumbImageUrl } from '@/lib/media';
@@ -28,8 +27,8 @@ export function JewelryCard({ item }: { item: JewelryItem }) {
             )}
           </div>
           {item.set && (
-            <span className="absolute left-2 top-2 flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-extrabold uppercase tracking-wide text-gold-light shadow-md ring-1 ring-white/40">
-              <Link2 className="h-3.5 w-3.5" /> Set
+            <span className="absolute right-2 top-2 rounded-full bg-primary px-3 py-1.5 text-xs font-extrabold uppercase tracking-wide text-gold-light shadow-md ring-1 ring-white/40">
+              Set
             </span>
           )}
         </div>

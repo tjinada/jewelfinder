@@ -281,27 +281,18 @@ export function JewelryFormPage() {
 
           {applicable.includes('colour') && (
             <Field label="Colour">
-              <div className="flex flex-wrap gap-2.5">
+              <select
+                value={colour ?? ''}
+                onChange={(e) => setColour(e.target.value || undefined)}
+                className={selectClass}
+              >
+                <option value="">Not set</option>
                 {COLOURS.map((c) => (
-                  <button
-                    type="button"
-                    key={c.id}
-                    title={c.label}
-                    aria-label={c.label}
-                    onClick={() => setColour(colour === c.id ? undefined : c.id)}
-                    className={cn(
-                      'h-9 w-9 rounded-full border-2 transition-transform active:scale-95',
-                      colour === c.id ? 'border-primary ring-2 ring-primary/30' : 'border-line',
-                    )}
-                    style={{
-                      background:
-                        c.hex === 'multi'
-                          ? 'conic-gradient(from 0deg, #C0392B, #E4C24A, #3F7D5B, #2E6DB4, #7E5AA0, #C0392B)'
-                          : c.hex,
-                    }}
-                  />
+                  <option key={c.id} value={c.id}>
+                    {c.label}
+                  </option>
                 ))}
-              </div>
+              </select>
             </Field>
           )}
 
@@ -339,7 +330,7 @@ export function JewelryFormPage() {
 
           <div className="flex gap-3 pt-1">
             <Button type="submit" disabled={saving} className="flex-1">
-              {saving ? 'Saving…' : editing ? 'Save changes' : 'Add to collection'}
+              {saving ? 'Saving…' : editing ? 'Save changes' : 'Post'}
             </Button>
             <Button type="button" variant="ghost" onClick={() => navigate(-1)}>
               Cancel

@@ -14,7 +14,6 @@ import {
   type Availability,
 } from '@jewel/shared';
 import { Chip, Button } from '@/components/ui';
-import { cn } from '@/lib/utils';
 import { ATTRIBUTE_FILTER_KEYS, countActiveFilters, type SearchFilters } from './filters';
 
 interface FilterSheetProps {
@@ -180,27 +179,15 @@ export function FilterSheet({ open, value, onChange, onClear, onClose }: FilterS
             {shownAttrs.includes('colour') && (
               <div className="mb-6">
                 <span className={labelClass}>Colour</span>
-                <div className="flex flex-wrap gap-2.5">
+                <div className="flex flex-wrap gap-2">
                   {COLOURS.map((c) => (
-                    <button
-                      type="button"
+                    <Chip
                       key={c.id}
-                      title={c.label}
-                      aria-label={c.label}
+                      active={value.colour === c.id}
                       onClick={() => set({ colour: value.colour === c.id ? undefined : c.id })}
-                      className={cn(
-                        'h-9 w-9 rounded-full border-2 transition-transform active:scale-95',
-                        value.colour === c.id
-                          ? 'border-primary ring-2 ring-primary/30'
-                          : 'border-line',
-                      )}
-                      style={{
-                        background:
-                          c.hex === 'multi'
-                            ? 'conic-gradient(from 0deg, #C0392B, #E4C24A, #3F7D5B, #2E6DB4, #7E5AA0, #C0392B)'
-                            : c.hex,
-                      }}
-                    />
+                    >
+                      {c.label}
+                    </Chip>
                   ))}
                 </div>
               </div>
