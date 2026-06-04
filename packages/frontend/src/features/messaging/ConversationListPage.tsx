@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Loader2, MessageCircle } from 'lucide-react';
 import { MainLayout } from '@/components/layout';
+import { thumbImageUrl } from '@/lib/media';
 import { useConversations } from './api';
 import { formatWhen } from './format';
 
@@ -21,11 +22,12 @@ export function ConversationListPage() {
         <div className="mx-auto max-w-2xl divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
           {conversations.map((c) => {
             const name = c.other?.displayName ?? 'Unknown';
-            const preview = c.lastMessage
+            const title = c.item?.name ?? name;
+            const thumb = c.item?.thumb ? thumbImageUrl(c.item.thumb) : null;
+            const lastBody = c.lastMessage
               ? `${c.lastMessage.fromMe ? 'You: ' : ''}${c.lastMessage.body}`
-              : c.item
-                ? `About ${c.item.name}`
-                : 'New conversation';
+              : 'New conversation';
+            const subtitle = `${name} · ${lastBody}`;
             const unread = c.unreadCount > 0;
 
             return (
@@ -34,20 +36,28 @@ export function ConversationListPage() {
                 to={`/messages/${c._id}`}
                 className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-cream/60"
               >
-                <div className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-primary font-bold text-gold-light">
-                  {name.charAt(0).toUpperCase()}
-                </div>
+                {thumb ? (
+                  <img
+                    src={thumb}
+                    alt=""
+                    className="h-11 w-11 flex-none rounded-lg object-cover"
+                  />
+                ) : (
+                  <div className="flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-primary font-bold text-gold-light">
+                    {name.charAt(0).toUpperCase()}
+                  </div>
+                )}
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-2">
                     <span className={`truncate ${unread ? 'font-bold text-ink' : 'font-semibold text-ink'}`}>
-                      {name}
+                      {title}
                     </span>
                     <span className="flex-none text-xs text-muted">{formatWhen(c.lastMessageAt)}</span>
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <span className={`truncate text-sm ${unread ? 'text-ink/80' : 'text-muted'}`}>
-                      {preview}
+                      {subtitle}
                     </span>
                     {unread && (
                       <span className="flex h-5 min-w-5 flex-none items-center justify-center rounded-full bg-accent px-1.5 text-[11px] font-bold text-white">
@@ -64,7 +74,7 @@ export function ConversationListPage() {
         <div className="flex flex-col items-center gap-3 py-20 text-center">
           <MessageCircle className="h-10 w-10 text-muted/60" />
           <p className="text-muted">
-            No conversations yet. Open a piece you like and message its owner to start chatting.
+            No conversations yet. When an owner accepts your loan request, a chat opens here.
           </p>
         </div>
       )}

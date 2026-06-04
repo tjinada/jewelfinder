@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
-// ---- Conversation (one per pair of people) ----------------------------------
+// ---- Conversation (one per accepted booking) --------------------------------
 export interface IConversation {
   participants: Types.ObjectId[];
   item: Types.ObjectId | null;
@@ -14,7 +14,7 @@ type IConversationModel = Model<IConversationDocument>;
 const ConversationSchema = new Schema<IConversationDocument, IConversationModel>(
   {
     participants: [{ type: Schema.Types.ObjectId, ref: 'User', required: true, index: true }],
-    // The piece that started the conversation, kept for context.
+    // The piece this loan thread is about.
     item: { type: Schema.Types.ObjectId, ref: 'Jewelry', default: null },
     lastMessageAt: { type: Date, default: Date.now, index: true },
   },

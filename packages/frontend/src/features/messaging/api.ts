@@ -61,15 +61,6 @@ export function useThread(id?: string) {
   });
 }
 
-export function useStartConversation() {
-  return useMutation({
-    mutationFn: async (input: { userId: string; item?: string }) => {
-      const { data } = await api.post<ApiResponse<{ _id: string }>>('/conversations', input);
-      return data.data;
-    },
-  });
-}
-
 export function useSendMessage(id: string) {
   const qc = useQueryClient();
   const meId = useAuthStore.getState().user?.id ?? '';

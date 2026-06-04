@@ -4,6 +4,5 @@ export {
   useConversations,
   useUnreadCount,
   useThread,
-  useStartConversation,
   useSendMessage,
 } from './api';

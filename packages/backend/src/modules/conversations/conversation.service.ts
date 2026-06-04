@@ -63,22 +63,17 @@ async function loadParticipantConversation(userId: string, id: string) {
 }
 
 export const conversationService = {
-  /** Start a conversation with another user, reusing the existing one for the pair. */
-  async start(userId: string, otherUserId: string, itemId?: string): Promise<{ _id: string }> {
+  /** Create a fresh conversation for an accepted booking (one thread per booking). */
+  async start(userId: string, otherUserId: string, itemId: string): Promise<{ _id: string }> {
     if (otherUserId === userId) throw new AppError('You cannot message yourself', 400);
     const other = await User.findById(otherUserId).select('_id');
     if (!other) throw new AppError('User not found', 404);
 
-    let convo = await Conversation.findOne({
-      participants: { $all: [userId, otherUserId], $size: 2 },
+    const convo = await Conversation.create({
+      participants: [userId, otherUserId],
+      item: itemId,
+      lastMessageAt: new Date(),
     });
-    if (!convo) {
-      convo = await Conversation.create({
-        participants: [userId, otherUserId],
-        item: itemId ?? null,
-        lastMessageAt: new Date(),
-      });
-    }
     return { _id: String(convo._id) };
   },
 
