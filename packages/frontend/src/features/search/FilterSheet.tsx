@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import {
   CATEGORIES,
@@ -52,7 +53,7 @@ export function FilterSheet({ open, value, onChange, onClear, onClose }: FilterS
 
   const active = countActiveFilters(value);
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {open && (
         <>
@@ -63,7 +64,7 @@ export function FilterSheet({ open, value, onChange, onClear, onClose }: FilterS
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-50 cursor-default bg-ink/40 backdrop-blur-sm"
+            className="fixed inset-0 z-[60] cursor-default bg-ink/40 backdrop-blur-sm"
           />
 
           <motion.div
@@ -71,7 +72,7 @@ export function FilterSheet({ open, value, onChange, onClear, onClose }: FilterS
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 320 }}
-            className="fixed inset-x-0 bottom-0 z-50 mx-auto max-h-[85vh] max-w-lg overflow-y-auto rounded-t-3xl border-t border-white/60 bg-cream/95 p-5 backdrop-blur-2xl safe-bottom"
+            className="fixed inset-x-0 bottom-0 z-[60] mx-auto max-h-[85vh] max-w-lg overflow-y-auto rounded-t-3xl border-t border-white/60 bg-cream/95 p-5 backdrop-blur-2xl safe-bottom"
           >
             <div className="mb-4 flex items-center justify-between">
               <h2 className="font-display text-xl text-ink">Filters</h2>
@@ -199,6 +200,7 @@ export function FilterSheet({ open, value, onChange, onClear, onClose }: FilterS
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }
