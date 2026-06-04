@@ -10,7 +10,7 @@ export const setController = {
   }),
 
   get: asyncHandler(async (req: Request, res: Response) => {
-    const set = await setService.getWithItems(req.params.id);
+    const set = await setService.getWithItems(req.userId!, req.params.id);
     sendSuccess(res, set);
   }),
 

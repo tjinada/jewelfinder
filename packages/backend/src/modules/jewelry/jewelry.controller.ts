@@ -6,12 +6,12 @@ import type { ListJewelryQuery } from './jewelry.validation.js';
 
 export const jewelryController = {
   list: asyncHandler(async (req: Request, res: Response) => {
-    const items = await jewelryService.list(req.query as ListJewelryQuery);
+    const items = await jewelryService.list(req.userId!, req.query as ListJewelryQuery);
     sendSuccess(res, items);
   }),
 
   get: asyncHandler(async (req: Request, res: Response) => {
-    const item = await jewelryService.getById(req.params.id);
+    const item = await jewelryService.getById(req.userId!, req.params.id);
     sendSuccess(res, item);
   }),
 

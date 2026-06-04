@@ -7,6 +7,8 @@ export interface IJewelry {
   images: string[];
   availability: 'available' | 'onLoan';
   setId: Types.ObjectId | null;
+  visibility: 'private' | 'public' | 'groups';
+  sharedGroups: Types.ObjectId[];
   metal?: string;
   colour?: string;
   size?: string;
@@ -33,6 +35,15 @@ const JewelrySchema = new Schema<IJewelryDocument, IJewelryModel>(
     // Set membership lands in Phase 4; nullable until then.
     // (DB field is `setId` — `set` is a reserved Mongoose Document method.)
     setId: { type: Schema.Types.ObjectId, ref: 'Set', default: null, index: true },
+    // Visibility: 'private' (owner only), 'public' (everyone), or 'groups'
+    // (members of the circles in `sharedGroups`). New items default to private;
+    // existing items are backfilled to public by a one-time migration.
+    visibility: {
+      type: String,
+      enum: ['private', 'public', 'groups'],
+      default: 'private',
+    },
+    sharedGroups: { type: [Schema.Types.ObjectId], ref: 'Group', default: [] },
     // Optional per-category attributes (which apply is enforced in validation).
     metal: String,
     colour: String,
@@ -41,5 +52,9 @@ const JewelrySchema = new Schema<IJewelryDocument, IJewelryModel>(
   },
   { timestamps: true },
 );
+
+// Supports the `groups` branch of the visibility read filter
+// ({ visibility: 'groups', sharedGroups: { $in: [...] } }).
+JewelrySchema.index({ visibility: 1, sharedGroups: 1 });
 
 export const Jewelry = mongoose.model<IJewelryDocument, IJewelryModel>('Jewelry', JewelrySchema);

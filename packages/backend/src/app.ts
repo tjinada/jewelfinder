@@ -13,6 +13,7 @@ import { sendSuccess } from './utils/response.js';
 import { authRoutes } from './modules/auth/index.js';
 import { jewelryRoutes } from './modules/jewelry/index.js';
 import { setRoutes } from './modules/sets/index.js';
+import { groupRoutes } from './modules/groups/index.js';
 import { conversationRoutes } from './modules/conversations/index.js';
 import { bookingRoutes } from './modules/bookings/index.js';
 import { notificationRoutes, initWebPush } from './modules/notifications/index.js';
@@ -63,6 +64,7 @@ app.get('/api/health/db', async (_req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/jewelry', jewelryRoutes);
 app.use('/api/sets', setRoutes);
+app.use('/api/groups', groupRoutes);
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/notifications', notificationRoutes);

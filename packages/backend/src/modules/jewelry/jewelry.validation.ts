@@ -6,6 +6,7 @@ import {
   BangleSizeSchema,
   NecklaceTypeSchema,
   AvailabilitySchema,
+  VisibilitySchema,
   CATEGORY_ATTRIBUTES,
   type Category,
 } from '@jewel/shared';
@@ -19,6 +20,8 @@ const baseItem = z.object({
   images: z.array(z.string()).min(1, 'At least one photo is required').max(8),
   availability: AvailabilitySchema.optional(),
   set: z.string().nullable().optional(),
+  visibility: VisibilitySchema.optional(),
+  sharedGroups: z.array(z.string().regex(/^[a-f\d]{24}$/i, 'Invalid circle id')).optional(),
   metal: MetalSchema.optional(),
   colour: ColourSchema.optional(),
   size: BangleSizeSchema.optional(),
@@ -43,8 +46,37 @@ function enforceApplicableAttributes(val: z.infer<typeof baseItem>, ctx: z.Refin
   }
 }
 
-export const createJewelryBody = baseItem.superRefine(enforceApplicableAttributes);
-export const updateJewelryBody = baseItem.superRefine(enforceApplicableAttributes);
+/**
+ * `sharedGroups` is meaningful only when visibility is 'groups', and in that
+ * case at least one circle must be chosen. (That the owner actually belongs to
+ * those circles is a DB check, enforced in the service.)
+ */
+function enforceVisibility(val: z.infer<typeof baseItem>, ctx: z.RefinementCtx) {
+  const shared = val.sharedGroups ?? [];
+  if (val.visibility === 'groups') {
+    if (shared.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['sharedGroups'],
+        message: 'Select at least one circle',
+      });
+    }
+  } else if (shared.length > 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['sharedGroups'],
+      message: 'sharedGroups only applies when visibility is "groups"',
+    });
+  }
+}
+
+function enforceRules(val: z.infer<typeof baseItem>, ctx: z.RefinementCtx) {
+  enforceApplicableAttributes(val, ctx);
+  enforceVisibility(val, ctx);
+}
+
+export const createJewelryBody = baseItem.superRefine(enforceRules);
+export const updateJewelryBody = baseItem.superRefine(enforceRules);
 
 export const listJewelryQuery = z.object({
   category: CategorySchema.optional(),

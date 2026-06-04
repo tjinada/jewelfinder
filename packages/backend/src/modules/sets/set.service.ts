@@ -21,11 +21,11 @@ export const setService = {
     return docs.map(toClient);
   },
 
-  /** A set plus its member items (viewable by any signed-in user). */
-  async getWithItems(id: string): Promise<JewelrySetWithItems> {
+  /** A set plus its member items (only those the viewer may see). */
+  async getWithItems(viewerId: string, id: string): Promise<JewelrySetWithItems> {
     const set = await JewelrySet.findById(id);
     if (!set) throw new AppError('Set not found', 404);
-    const items = await jewelryService.list({ set: id });
+    const items = await jewelryService.list(viewerId, { set: id });
     return { ...toClient(set), items };
   },
 
