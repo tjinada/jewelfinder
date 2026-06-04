@@ -48,7 +48,9 @@ export async function subscribeToPush(): Promise<boolean> {
     existing ??
     (await reg.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(key),
+      // Cast: a Uint8Array is a valid BufferSource. Newer TS DOM libs type the
+      // buffer as ArrayBufferLike, which the API's ArrayBuffer-backed overload rejects.
+      applicationServerKey: urlBase64ToUint8Array(key) as BufferSource,
     }));
 
   const json = sub.toJSON() as {
