@@ -6,6 +6,7 @@ export interface AuthUser {
   email: string;
   displayName: string;
   createdAt: string | Date;
+  isAdmin?: boolean;
   preferences?: {
     notifications: { messages: boolean };
     theme: 'light' | 'dark' | 'system';

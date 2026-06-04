@@ -16,6 +16,7 @@ export interface IUser {
     notifications: { messages: boolean };
     theme: 'light' | 'dark' | 'system';
   };
+  isAdmin: boolean;
 }
 
 export interface IUserDocument extends IUser, Document {
@@ -72,6 +73,10 @@ const UserSchema = new Schema<IUserDocument, IUserModel>({
       enum: ['light', 'dark', 'system'],
       default: 'system',
     },
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false,
   },
 });
 

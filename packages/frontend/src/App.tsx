@@ -13,6 +13,7 @@ import { SearchPage } from '@/features/search';
 import { SetViewPage } from '@/features/sets';
 import { ConversationListPage, ThreadPage } from '@/features/messaging';
 import { RequestsPage } from '@/features/bookings';
+import { SettingsPage } from '@/features/notifications';
 
 /** Marks loading complete when there's no token to validate. */
 function AuthInitializer({ children }: { children: ReactNode }) {
@@ -47,6 +48,7 @@ export default function App() {
                 <Route path="/messages" element={<ConversationListPage />} />
                 <Route path="/messages/:id" element={<ThreadPage />} />
                 <Route path="/requests" element={<RequestsPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
               </Route>
 
               <Route path="*" element={<Navigate to="/" replace />} />

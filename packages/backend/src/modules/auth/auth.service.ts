@@ -9,6 +9,7 @@ export interface PublicUser {
   displayName: string;
   createdAt: Date;
   preferences: IUserDocument['preferences'];
+  isAdmin: boolean;
 }
 
 export interface AuthResponse {
@@ -23,6 +24,7 @@ function toPublicUser(user: IUserDocument): PublicUser {
     displayName: user.displayName,
     createdAt: user.createdAt,
     preferences: user.preferences,
+    isAdmin: !!user.isAdmin,
   };
 }
 

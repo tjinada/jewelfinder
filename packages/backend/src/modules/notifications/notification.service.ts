@@ -31,6 +31,31 @@ export interface PushPayload {
   data?: Record<string, unknown>;
 }
 
+export interface TestPushResult {
+  endpoint: string; // host only, for privacy
+  ok: boolean;
+  statusCode?: number;
+  error?: string;
+}
+
+export interface AdminNotificationRow {
+  id: string;
+  displayName: string;
+  email: string;
+  deviceCount: number;
+  messagesEnabled: boolean;
+  lastSeen: Date | null;
+}
+
+/** Just the host of a push endpoint — enough to tell devices apart without leaking the token. */
+function endpointHost(endpoint: string): string {
+  try {
+    return new URL(endpoint).host;
+  } catch {
+    return 'unknown';
+  }
+}
+
 export const notificationService = {
   isConfigured: (): boolean => configured,
 
@@ -85,5 +110,70 @@ export const notificationService = {
       user.pushSubscriptions = user.pushSubscriptions.filter((s) => !dead.includes(s.endpoint));
       await user.save();
     }
+  },
+
+  /** Current push status for one user (drives the settings screen). */
+  async statusFor(
+    userId: string,
+  ): Promise<{ configured: boolean; publicKey: string | null; deviceCount: number }> {
+    const user = await User.findById(userId).select('pushSubscriptions');
+    return {
+      configured,
+      publicKey: config.vapidPublicKey || null,
+      deviceCount: user?.pushSubscriptions.length ?? 0,
+    };
+  },
+
+  /** Send a test push to the user's own devices and report per-device results.
+   *  Ignores the message preference (explicit user action) and never prunes. */
+  async sendTest(userId: string): Promise<{ configured: boolean; results: TestPushResult[] }> {
+    if (!configured) return { configured: false, results: [] };
+    const user = await User.findById(userId);
+    if (!user) return { configured: true, results: [] };
+
+    const body = JSON.stringify({
+      title: 'Test notification',
+      body: 'Push notifications are working on this device 🎉',
+      icon: '/icons/icon.svg',
+      badge: '/icons/icon.svg',
+      tag: 'jewel-test',
+      data: { url: '/settings' },
+    });
+
+    const results = await Promise.all(
+      user.pushSubscriptions.map(async (sub): Promise<TestPushResult> => {
+        try {
+          await webpush.sendNotification(
+            { endpoint: sub.endpoint, keys: sub.keys } as PushSubscription,
+            body,
+          );
+          return { endpoint: endpointHost(sub.endpoint), ok: true, statusCode: 201 };
+        } catch (err) {
+          const e = err as { statusCode?: number; body?: string; message?: string };
+          return {
+            endpoint: endpointHost(sub.endpoint),
+            ok: false,
+            statusCode: e.statusCode,
+            error: (e.body || e.message || 'Send failed').toString().slice(0, 200),
+          };
+        }
+      }),
+    );
+    return { configured: true, results };
+  },
+
+  /** Admin overview: who has notifications registered and who doesn't. */
+  async adminOverview(): Promise<AdminNotificationRow[]> {
+    const users = await User.find()
+      .select('displayName email pushSubscriptions preferences lastSeen')
+      .sort({ displayName: 1 });
+    return users.map((u) => ({
+      id: String(u._id),
+      displayName: u.displayName,
+      email: u.email,
+      deviceCount: u.pushSubscriptions.length,
+      messagesEnabled: u.preferences?.notifications?.messages ?? true,
+      lastSeen: u.lastSeen,
+    }));
   },
 };

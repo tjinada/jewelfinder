@@ -1,2 +1,10 @@
 export { PushNotificationPrompt } from './PushNotificationPrompt';
-export { isPushSupported, pushPermission, subscribeToPush } from './push';
+export { SettingsPage } from './SettingsPage';
+export {
+  isPushSupported,
+  pushPermission,
+  subscribeToPush,
+  disablePush,
+  loadPushDiagnostics,
+  sendTestNotification,
+} from './push';

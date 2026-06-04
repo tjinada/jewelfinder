@@ -23,4 +23,16 @@ export const notificationController = {
     await notificationService.unsubscribe(req.userId!, req.body.endpoint);
     sendNoContent(res);
   }),
+
+  status: asyncHandler(async (req: Request, res: Response) => {
+    sendSuccess(res, await notificationService.statusFor(req.userId!));
+  }),
+
+  test: asyncHandler(async (req: Request, res: Response) => {
+    sendSuccess(res, await notificationService.sendTest(req.userId!));
+  }),
+
+  adminOverview: asyncHandler(async (_req: Request, res: Response) => {
+    sendSuccess(res, await notificationService.adminOverview());
+  }),
 };

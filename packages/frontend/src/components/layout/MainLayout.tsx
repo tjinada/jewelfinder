@@ -1,6 +1,6 @@
 import { type ReactNode, type FormEvent, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Search, Plus, LogOut } from 'lucide-react';
+import { Search, Plus, LogOut, Settings } from 'lucide-react';
 import { GlassSurface } from '@/components/ui';
 import { BottomNav } from './BottomNav';
 import { useAuthStore } from '@/stores/authStore';
@@ -130,6 +130,15 @@ export function MainLayout({ children }: { children: ReactNode }) {
                       <p className="truncate text-xs text-muted">{user?.email}</p>
                     </div>
                     <div className="my-1 border-t border-line/70" />
+                    <button
+                      onClick={() => {
+                        setMenuOpen(false);
+                        navigate('/settings');
+                      }}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-ink/5"
+                    >
+                      <Settings className="h-4 w-4" /> Settings
+                    </button>
                     <button
                       onClick={handleLogout}
                       className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-accent hover:bg-accent/10"

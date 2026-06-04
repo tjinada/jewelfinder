@@ -65,6 +65,14 @@ export const authenticate = async (
   }
 };
 
+export const requireAdmin = (req: Request, _res: Response, next: NextFunction): void => {
+  if (!req.user?.isAdmin) {
+    next(new AppError('Admin access required', 403));
+    return;
+  }
+  next();
+};
+
 // Optional auth — attaches user if a valid token is present, never throws.
 export const optionalAuth = async (
   req: Request,
