@@ -1,4 +1,5 @@
-import * as webpush from 'web-push';
+import webpush from 'web-push';
+import type { PushSubscription } from 'web-push';
 import { config } from '../../config/index.js';
 import { User } from '../users/user.model.js';
 
@@ -70,7 +71,7 @@ export const notificationService = {
       user.pushSubscriptions.map(async (sub) => {
         try {
           await webpush.sendNotification(
-            { endpoint: sub.endpoint, keys: sub.keys } as webpush.PushSubscription,
+            { endpoint: sub.endpoint, keys: sub.keys } as PushSubscription,
             body,
           );
         } catch (err) {
