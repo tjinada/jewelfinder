@@ -1,7 +1,9 @@
 import { Jewelry, IJewelryDocument } from './jewelry.model.js';
+import { Watch } from './watch.model.js';
 import { AppError } from '../../middleware/error.middleware.js';
 import { removeImage } from '../media/media.service.js';
 import { JewelrySet } from '../sets/set.model.js';
+import { notificationService } from '../notifications/notification.service.js';
 import { CATEGORY_ATTRIBUTES, type Category, type JewelryItem } from '@jewel/shared';
 import type { JewelryBody, ListJewelryQuery } from './jewelry.validation.js';
 
@@ -52,6 +54,23 @@ function toClient(doc: IJewelryDocument): JewelryItem {
   };
 }
 
+/** Notify everyone watching an item that it's available, then clear the watches (one-shot). */
+async function notifyWatchers(itemId: string, itemName: string): Promise<void> {
+  const watches = await Watch.find({ item: itemId });
+  if (!watches.length) return;
+  await Promise.all(
+    watches.map((w) =>
+      notificationService.notifyUser(String(w.user), {
+        title: 'Now available',
+        body: `${itemName} is now available`,
+        tag: `available-${itemId}`,
+        data: { url: `/item/${itemId}` },
+      }),
+    ),
+  );
+  await Watch.deleteMany({ item: itemId });
+}
+
 export const jewelryService = {
   async list(filters: ListJewelryQuery): Promise<JewelryItem[]> {
     const query: Record<string, unknown> = {};
@@ -65,10 +84,18 @@ export const jewelryService = {
     return docs.map(toClient);
   },
 
-  async getById(id: string): Promise<JewelryItem> {
+  async getById(id: string, viewerId?: string): Promise<JewelryItem> {
     const doc = await Jewelry.findById(id).populate('owner', 'displayName');
     if (!doc) throw new AppError('Item not found', 404);
-    return toClient(doc);
+    const item = toClient(doc);
+    if (viewerId) {
+      if (item.owner === viewerId) {
+        item.watchersCount = await Watch.countDocuments({ item: id });
+      } else {
+        item.watching = !!(await Watch.exists({ item: id, user: viewerId }));
+      }
+    }
+    return item;
   },
 
   async create(ownerId: string, input: JewelryBody): Promise<JewelryItem> {
@@ -100,6 +127,7 @@ export const jewelryService = {
 
     const images = [...doc.images];
     await doc.deleteOne();
+    await Watch.deleteMany({ item: id });
     await Promise.allSettled(images.map((f) => removeImage(f)));
   },
 
@@ -112,9 +140,32 @@ export const jewelryService = {
     if (!doc) throw new AppError('Item not found', 404);
     if (String(doc.owner) !== ownerId) throw new AppError('You can only change your own items', 403);
 
+    const becameAvailable = doc.availability === 'onLoan' && availability === 'available';
     doc.availability = availability;
     await doc.save();
     await doc.populate('owner', 'displayName');
+
+    if (becameAvailable) {
+      // Fire-and-forget: notifying watchers must not block the response.
+      void notifyWatchers(id, doc.name);
+    }
     return toClient(doc);
+  },
+
+  /** Start watching an on-loan item (idempotent). */
+  async addWatch(userId: string, itemId: string): Promise<void> {
+    const doc = await Jewelry.findById(itemId);
+    if (!doc) throw new AppError('Item not found', 404);
+    if (String(doc.owner) === userId) throw new AppError('You own this item', 400);
+    if (doc.availability === 'available') throw new AppError('This item is already available', 400);
+    await Watch.updateOne(
+      { item: itemId, user: userId },
+      { $setOnInsert: { item: itemId, user: userId } },
+      { upsert: true },
+    );
+  },
+
+  async removeWatch(userId: string, itemId: string): Promise<void> {
+    await Watch.deleteOne({ item: itemId, user: userId });
   },
 };

@@ -11,7 +11,7 @@ export const jewelryController = {
   }),
 
   get: asyncHandler(async (req: Request, res: Response) => {
-    const item = await jewelryService.getById(req.params.id);
+    const item = await jewelryService.getById(req.params.id, req.userId);
     sendSuccess(res, item);
   }),
 
@@ -33,5 +33,15 @@ export const jewelryController = {
   setAvailability: asyncHandler(async (req: Request, res: Response) => {
     const item = await jewelryService.setAvailability(req.userId!, req.params.id, req.body.availability);
     sendSuccess(res, item);
+  }),
+
+  watch: asyncHandler(async (req: Request, res: Response) => {
+    await jewelryService.addWatch(req.userId!, req.params.id);
+    sendNoContent(res);
+  }),
+
+  unwatch: asyncHandler(async (req: Request, res: Response) => {
+    await jewelryService.removeWatch(req.userId!, req.params.id);
+    sendNoContent(res);
   }),
 };

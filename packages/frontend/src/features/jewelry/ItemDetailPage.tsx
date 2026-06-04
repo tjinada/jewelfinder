@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Pencil, Trash2, Loader2, MessageCircle, RefreshCw, Link2 } from 'lucide-react';
+import { ArrowLeft, Pencil, Trash2, Loader2, MessageCircle, RefreshCw, Link2, Bell, BellOff } from 'lucide-react';
 import { CATEGORY_LABELS, METAL_LABELS, NECKLACE_TYPE_LABELS, COLOURS } from '@jewel/shared';
 import { MainLayout } from '@/components/layout';
 import { Button, AvailabilityPill, GlassSurface } from '@/components/ui';
@@ -8,8 +8,9 @@ import { useAuthStore } from '@/stores/authStore';
 import { fullImageUrl, thumbImageUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
 import { itemTitle } from './format';
-import { useJewelryItem, useDeleteJewelry, useSetAvailability } from './api';
+import { useJewelryItem, useDeleteJewelry, useSetAvailability, useWatchItem, useUnwatchItem } from './api';
 import { useStartConversation } from '@/features/messaging/api';
+import { PushNotificationPrompt } from '@/features/notifications';
 
 const colourLabel = (id?: string) => COLOURS.find((c) => c.id === id)?.label;
 
@@ -22,6 +23,8 @@ export function ItemDetailPage() {
   const del = useDeleteJewelry();
   const setAvailability = useSetAvailability(id ?? '');
   const start = useStartConversation();
+  const watch = useWatchItem(id ?? '');
+  const unwatch = useUnwatchItem(id ?? '');
 
   const [active, setActive] = useState(0);
 
@@ -72,6 +75,9 @@ export function ItemDetailPage() {
     const convo = await start.mutateAsync({ userId: item.owner, item: item._id });
     navigate(`/messages/${convo._id}`);
   };
+
+  const onWatch = () => watch.mutate();
+  const onUnwatch = () => unwatch.mutate();
 
   return (
     <MainLayout>
@@ -154,6 +160,13 @@ export function ItemDetailPage() {
           <div className="mt-8 border-t border-line pt-6">
             {isOwner ? (
               <>
+                {item.watchersCount ? (
+                  <p className="mb-4 flex items-center gap-2 rounded-xl bg-gold-light/50 px-3 py-2.5 text-sm font-semibold text-ink/80">
+                    <Bell className="h-4 w-4 flex-none text-gold" />
+                    {item.watchersCount} {item.watchersCount === 1 ? 'person is' : 'people are'} waiting
+                    for this to become available
+                  </p>
+                ) : null}
                 <h2 className="mb-3 text-xs font-bold uppercase tracking-wide text-muted">Manage</h2>
                 <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                   <Button
@@ -183,9 +196,38 @@ export function ItemDetailPage() {
                 </div>
               </>
             ) : (
-              <Button onClick={onMessage} disabled={start.isPending} className="w-full sm:w-auto">
-                <MessageCircle className="h-4 w-4" /> Message owner
-              </Button>
+              <div>
+                <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                  {item.availability === 'onLoan' &&
+                    (item.watching ? (
+                      <Button
+                        variant="ghost"
+                        onClick={onUnwatch}
+                        disabled={unwatch.isPending}
+                        className="w-full border-primary/40 text-primary hover:bg-primary/10 sm:w-auto"
+                      >
+                        <BellOff className="h-4 w-4" /> Stop notifying me
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="gold"
+                        onClick={onWatch}
+                        disabled={watch.isPending}
+                        className="w-full sm:w-auto"
+                      >
+                        <Bell className="h-4 w-4" /> Notify me when available
+                      </Button>
+                    ))}
+                  <Button onClick={onMessage} disabled={start.isPending} className="w-full sm:w-auto">
+                    <MessageCircle className="h-4 w-4" /> Message owner
+                  </Button>
+                </div>
+                {item.watching && (
+                  <div className="mt-3">
+                    <PushNotificationPrompt />
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
