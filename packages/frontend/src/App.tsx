@@ -11,6 +11,7 @@ import { HomePage } from '@/features/home';
 import { JewelryFormPage, ItemDetailPage } from '@/features/jewelry';
 import { SearchPage } from '@/features/search';
 import { SetViewPage } from '@/features/sets';
+import { ConversationListPage, ThreadPage } from '@/features/messaging';
 
 /** Marks loading complete when there's no token to validate. */
 function AuthInitializer({ children }: { children: ReactNode }) {
@@ -42,7 +43,9 @@ export default function App() {
                 <Route path="/item/:id" element={<ItemDetailPage />} />
                 <Route path="/item/:id/edit" element={<JewelryFormPage />} />
                 <Route path="/set/:id" element={<SetViewPage />} />
-                {/* messages, profile — added in later phases */}
+                <Route path="/messages" element={<ConversationListPage />} />
+                <Route path="/messages/:id" element={<ThreadPage />} />
+                {/* profile — added in later phases */}
               </Route>
 
               <Route path="*" element={<Navigate to="/" replace />} />

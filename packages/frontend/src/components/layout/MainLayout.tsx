@@ -5,6 +5,7 @@ import { GlassSurface } from '@/components/ui';
 import { BottomNav } from './BottomNav';
 import { useAuthStore } from '@/stores/authStore';
 import { useLogout } from '@/features/auth/useAuth';
+import { useUnreadCount } from '@/features/messaging/api';
 import { cn } from '@/lib/utils';
 
 const navLinks = [
@@ -22,6 +23,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const logout = useLogout();
+  const unread = useUnreadCount();
   const [q, setQ] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -66,7 +68,14 @@ export function MainLayout({ children }: { children: ReactNode }) {
           <nav className="hidden items-center gap-1 md:flex">
             {navLinks.map((l) => (
               <NavLink key={l.to} to={l.to} end={l.end} className={deskLink}>
-                {l.label}
+                <span className="relative">
+                  {l.label}
+                  {l.to === '/messages' && unread > 0 && (
+                    <span className="absolute -right-3 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-white">
+                      {unread > 9 ? '9+' : unread}
+                    </span>
+                  )}
+                </span>
               </NavLink>
             ))}
           </nav>

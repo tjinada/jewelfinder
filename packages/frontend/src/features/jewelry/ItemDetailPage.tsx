@@ -9,6 +9,7 @@ import { fullImageUrl, thumbImageUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
 import { itemTitle } from './format';
 import { useJewelryItem, useDeleteJewelry, useSetAvailability } from './api';
+import { useStartConversation } from '@/features/messaging/api';
 
 const colourLabel = (id?: string) => COLOURS.find((c) => c.id === id)?.label;
 
@@ -20,6 +21,7 @@ export function ItemDetailPage() {
   const { data: item, isLoading, isError } = useJewelryItem(id);
   const del = useDeleteJewelry();
   const setAvailability = useSetAvailability(id ?? '');
+  const start = useStartConversation();
 
   const [active, setActive] = useState(0);
 
@@ -64,6 +66,11 @@ export function ItemDetailPage() {
     if (!window.confirm('Delete this item? This cannot be undone.')) return;
     await del.mutateAsync(item._id);
     navigate('/', { replace: true });
+  };
+
+  const onMessage = async () => {
+    const convo = await start.mutateAsync({ userId: item.owner, item: item._id });
+    navigate(`/messages/${convo._id}`);
   };
 
   return (
@@ -176,8 +183,8 @@ export function ItemDetailPage() {
                 </div>
               </>
             ) : (
-              <Button disabled className="w-full sm:w-auto">
-                <MessageCircle className="h-4 w-4" /> Message owner (coming soon)
+              <Button onClick={onMessage} disabled={start.isPending} className="w-full sm:w-auto">
+                <MessageCircle className="h-4 w-4" /> Message owner
               </Button>
             )}
           </div>

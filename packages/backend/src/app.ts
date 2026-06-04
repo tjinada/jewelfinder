@@ -13,6 +13,8 @@ import { sendSuccess } from './utils/response.js';
 import { authRoutes } from './modules/auth/index.js';
 import { jewelryRoutes } from './modules/jewelry/index.js';
 import { setRoutes } from './modules/sets/index.js';
+import { conversationRoutes } from './modules/conversations/index.js';
+import { notificationRoutes, initWebPush } from './modules/notifications/index.js';
 import { mediaRoutes, ensureMediaDirs } from './modules/media/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -60,6 +62,8 @@ app.get('/api/health/db', async (_req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/jewelry', jewelryRoutes);
 app.use('/api/sets', setRoutes);
+app.use('/api/conversations', conversationRoutes);
+app.use('/api/notifications', notificationRoutes);
 app.use('/api/media', mediaRoutes);
 
 // Serve the built frontend in production
@@ -83,6 +87,7 @@ const start = async () => {
   try {
     await connectDatabase();
     await ensureMediaDirs();
+    initWebPush();
     app.listen(config.port, () => {
       console.log('');
       console.log('💎 Jewel Finder - Backend');

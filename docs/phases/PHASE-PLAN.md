@@ -67,11 +67,15 @@ MEDIA_DIR=                       # filesystem path for uploaded images
   names required like item names.
 - *Done when:* an item in a set shows the badge and links to its siblings.
 
-## Phase 5 — Messaging + push
+## Phase 5 — Messaging + push ✅
 
-- `conversations` / `messages` models + module.
-- "Ask about availability" flow; conversation list + thread UI.
-- `notifications` module (web-push, reused from v3); push on new message.
+- `conversations` / `messages` models + module (one conversation per pair; originating item
+  kept for context; participant-scoped; `readBy` for unread counts).
+- "Message owner" flow on item detail; inbox (`/messages`) with previews + unread counts;
+  full-screen thread (`/messages/:id`) with glass bubbles, optimistic send, ~10s polling.
+- `notifications` module (web-push): subscribe/unsubscribe + `notifyUser`, pushes on new
+  message; contextual permission prompt; unread badge on the Messages nav. Blank VAPID keys
+  = push no-ops (messaging still works).
 - *Done when:* two users can message about an item and the recipient gets a push.
 
 ## Phase 6 — PWA polish

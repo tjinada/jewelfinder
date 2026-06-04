@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { Home, Search, Plus, MessageCircle, User } from 'lucide-react';
 import { GlassSurface } from '@/components/ui';
+import { useUnreadCount } from '@/features/messaging/api';
 import { cn } from '@/lib/utils';
 
 const items = [
@@ -16,6 +17,7 @@ const right = [
 /** Floating frosted bottom navigation (glass chrome). */
 export function BottomNav() {
   const navigate = useNavigate();
+  const unread = useUnreadCount();
 
   const link = ({ isActive }: { isActive: boolean }) =>
     cn(
@@ -45,7 +47,14 @@ export function BottomNav() {
 
       {right.map(({ to, label, icon: Icon }) => (
         <NavLink key={to} to={to} className={link}>
-          <Icon className="h-5 w-5" />
+          <span className="relative">
+            <Icon className="h-5 w-5" />
+            {to === '/messages' && unread > 0 && (
+              <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[9px] font-bold text-white">
+                {unread > 9 ? '9+' : unread}
+              </span>
+            )}
+          </span>
           {label}
         </NavLink>
       ))}
