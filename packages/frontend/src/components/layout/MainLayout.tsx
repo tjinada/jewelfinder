@@ -1,6 +1,7 @@
 import { type ReactNode, type FormEvent, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Search, Plus, LogOut, Settings, Users } from 'lucide-react';
+import { Search, Plus, LogOut, Settings } from 'lucide-react';
+import { Hanger } from '@/components/icons/Hanger';
 import { GlassSurface } from '@/components/ui';
 import { BottomNav } from './BottomNav';
 import { useAuthStore } from '@/stores/authStore';
@@ -137,7 +138,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
                       }}
                       className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-ink/5"
                     >
-                      <Users className="h-4 w-4" /> Closets
+                      <Hanger className="h-4 w-4" /> Closets
                     </button>
                     <button
                       onClick={() => {

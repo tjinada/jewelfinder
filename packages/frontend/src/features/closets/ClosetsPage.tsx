@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Shirt, Plus, Loader2, User, X } from 'lucide-react';
+import { Plus, Loader2, User, X } from 'lucide-react';
+import { Hanger } from '@/components/icons/Hanger';
 import { MainLayout } from '@/components/layout';
 import { Button } from '@/components/ui';
 import { getErrorMessage } from '@/features/auth';
@@ -42,7 +43,7 @@ export function ClosetsPage() {
       <div className="mx-auto max-w-2xl">
         <div className="mb-5">
           <p className="flex items-center gap-1.5 text-sm font-semibold text-primary">
-            <Shirt className="h-4 w-4" /> Closets
+            <Hanger className="h-4 w-4" /> Closets
           </p>
           <h1 className="font-display text-2xl text-ink md:text-3xl">Your closets</h1>
           <p className="mt-1 text-sm text-muted">
@@ -129,7 +130,7 @@ export function ClosetsPage() {
                   className={tileBase}
                   style={{ backgroundColor: color.bg }}
                 >
-                  <Shirt className="h-5 w-5" style={{ color: color.text }} />
+                  <Hanger className="h-5 w-5" style={{ color: color.text }} />
                   <div>
                     <p className="truncate font-semibold" style={{ color: color.text }}>
                       {c.name}

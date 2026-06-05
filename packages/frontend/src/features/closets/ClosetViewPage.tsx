@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Shirt, Loader2, UserPlus, X, Pencil, Check, Trash2, LogOut } from 'lucide-react';
+import { Loader2, UserPlus, X, Pencil, Check, Trash2, LogOut } from 'lucide-react';
+import { Hanger } from '@/components/icons/Hanger';
 import { MainLayout } from '@/components/layout';
 import { Button } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
@@ -109,7 +110,7 @@ export function ClosetViewPage() {
         {/* Header */}
         <div className="mb-6">
           <p className="flex items-center gap-1.5 text-sm font-semibold text-primary">
-            <Shirt className="h-4 w-4" /> Closet
+            <Hanger className="h-4 w-4" /> Closet
           </p>
 
           {editingName ? (
