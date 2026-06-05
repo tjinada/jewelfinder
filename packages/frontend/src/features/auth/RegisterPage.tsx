@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui';
+import { Button, LocationInput } from '@/components/ui';
 import { useRegister, getErrorMessage } from './useAuth';
 import { AuthShell, inputClass, labelClass } from './AuthShell';
 
@@ -56,17 +56,7 @@ export function RegisterPage() {
 
         <div>
           <label className={labelClass} htmlFor="location">Location</label>
-          <input
-            id="location"
-            type="text"
-            autoComplete="address-level2"
-            required
-            maxLength={120}
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            className={inputClass}
-            placeholder="City or area (e.g. Brampton, ON)"
-          />
+          <LocationInput id="location" required value={location} onChange={setLocation} />
         </div>
 
         <div>

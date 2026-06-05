@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Bell, BellOff, Loader2, RefreshCw, Send, ShieldCheck, Check, X, MapPin } from 'lucide-react';
 import { MainLayout } from '@/components/layout';
-import { Button } from '@/components/ui';
+import { Button, LocationInput } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
 import { useUpdateProfile, getErrorMessage } from '@/features/auth';
 import { cn } from '@/lib/utils';
@@ -67,17 +67,14 @@ function ProfileCard() {
         Location
       </label>
       <div className="flex gap-2">
-        <input
+        <LocationInput
           id="profile-location"
-          type="text"
-          maxLength={120}
+          className="flex-1"
           value={location}
-          onChange={(e) => {
-            setLocation(e.target.value);
+          onChange={(v) => {
+            setLocation(v);
             setSaved(false);
           }}
-          placeholder="City or area (e.g. Brampton, ON)"
-          className="flex-1 rounded-xl border border-line bg-surface px-4 py-2.5 text-sm text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
         />
         <Button onClick={onSave} disabled={update.isPending || !dirty}>
           {update.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}

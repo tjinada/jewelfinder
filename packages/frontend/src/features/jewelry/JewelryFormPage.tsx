@@ -15,7 +15,7 @@ import {
   type Availability,
 } from '@jewel/shared';
 import { MainLayout } from '@/components/layout';
-import { Button } from '@/components/ui';
+import { Button, LocationInput } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { thumbImageUrl } from '@/lib/media';
 import {
@@ -311,14 +311,7 @@ export function JewelryFormPage() {
 
           {/* Location — defaults to your profile location, editable per item */}
           <Field label="Location">
-            <input
-              type="text"
-              maxLength={120}
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="City or area (e.g. Brampton, ON)"
-              className={selectClass}
-            />
+            <LocationInput value={location} onChange={setLocation} />
           </Field>
 
           {/* Set membership — available for any category */}
