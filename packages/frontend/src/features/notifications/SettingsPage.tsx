@@ -351,7 +351,7 @@ export function SettingsPage() {
   return (
     <MainLayout>
       <div className="mx-auto max-w-2xl">
-        <h1 className="mb-4 font-display text-2xl font-bold text-ink md:text-3xl">Settings</h1>
+        <h1 className="mb-4 font-display text-2xl text-ink md:text-3xl">Settings</h1>
         <div className="flex flex-col gap-4">
           <ProfileCard />
           <NotificationsCard />

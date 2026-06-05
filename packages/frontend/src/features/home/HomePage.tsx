@@ -92,7 +92,7 @@ export function HomePage() {
   return (
     <MainLayout>
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-bold text-ink md:text-3xl">Browse</h1>
+        <h1 className="font-display text-2xl text-ink md:text-3xl">Browse</h1>
 
         {/* Scope: narrow to public, your own, or a specific closet */}
         <select

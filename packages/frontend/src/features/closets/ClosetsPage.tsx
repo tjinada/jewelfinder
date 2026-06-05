@@ -45,7 +45,7 @@ export function ClosetsPage() {
           <p className="flex items-center gap-1.5 text-sm font-semibold text-primary">
             <Hanger className="h-4 w-4" /> Closets
           </p>
-          <h1 className="font-display text-2xl font-bold text-ink md:text-3xl">Your closets</h1>
+          <h1 className="font-display text-2xl text-ink md:text-3xl">Your closets</h1>
           <p className="mt-1 text-sm text-muted">
             Your own pieces, plus any closets you share with a group.
           </p>

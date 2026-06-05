@@ -18,7 +18,7 @@ export function AuthShell({ children }: AuthShellProps) {
       <GlassSurface className="relative z-10 w-full max-w-sm rounded-3xl p-7">
         <div className="mb-6 flex flex-col items-center text-center">
           <img src="/icons/icon-512.png" alt="" className="mb-3 h-14 w-14 rounded-2xl" />
-          <h1 className="font-playfair text-3xl font-normal text-primary">The Clasp</h1>
+          <h1 className="font-playfair text-3xl font-bold text-primary">The Clasp</h1>
           <p className="mt-2 text-sm font-light text-muted">
             Borrow Theirs. Lend Yours.
           </p>

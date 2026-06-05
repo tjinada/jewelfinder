@@ -113,7 +113,7 @@ export function ClosetViewPage() {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <h1 className="font-display text-2xl font-bold text-ink md:text-3xl">{closet.name}</h1>
+              <h1 className="font-display text-2xl text-ink md:text-3xl">{closet.name}</h1>
               {isOwner && (
                 <button
                   onClick={() => {

@@ -127,7 +127,7 @@ export function RequestsPage() {
 
   return (
     <MainLayout>
-      <h1 className="mb-4 font-display text-2xl font-bold text-ink md:text-3xl">Loan requests</h1>
+      <h1 className="mb-4 font-display text-2xl text-ink md:text-3xl">Loan requests</h1>
 
       <div className="mx-auto mb-5 flex max-w-2xl gap-2 rounded-2xl border border-line bg-surface p-1.5">
         <button onClick={() => setTab('incoming')} className={tabClass('incoming')}>
