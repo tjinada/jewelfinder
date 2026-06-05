@@ -121,8 +121,8 @@ export function ClosetsPage() {
             </Link>
 
             {/* Shared closets */}
-            {closets?.map((c) => {
-              const color = closetColor(c._id);
+            {closets?.map((c, i) => {
+              const color = closetColor(i);
               return (
                 <Link
                   key={c._id}
