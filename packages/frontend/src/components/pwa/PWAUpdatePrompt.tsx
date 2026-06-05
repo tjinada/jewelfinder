@@ -51,7 +51,7 @@ export function PWAUpdatePrompt() {
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="mb-1 text-sm font-semibold">Update available</h3>
-            <p className="mb-3 text-xs text-ink/70">A new version of Jewel Finder is ready.</p>
+            <p className="mb-3 text-xs text-ink/70">A new version of Clasp is ready.</p>
             <div className="flex gap-2">
               <button
                 onClick={handleUpdate}

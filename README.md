@@ -1,4 +1,6 @@
-# Jewel Finder
+# Clasp
+
+_Borrow hers, Lend yours_
 
 A shared-community PWA for cataloguing and lending jewelry. Users photograph their
 jewelry, optionally group pieces into matching **sets**, mark items **available** or

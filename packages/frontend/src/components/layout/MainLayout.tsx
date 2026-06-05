@@ -66,7 +66,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 md:h-16">
           <NavLink to="/" className="flex items-center gap-2">
             <img src="/icons/icon.svg" alt="" className="h-8 w-8 rounded-lg" />
-            <span className="font-display text-xl text-primary">Jewel Finder</span>
+            <span className="font-display text-xl text-primary">Clasp</span>
           </NavLink>
 
           <nav className="hidden items-center gap-1 md:flex">

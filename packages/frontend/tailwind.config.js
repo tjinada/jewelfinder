@@ -5,15 +5,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Ivory & Peacock palette (see docs/DESIGN.md)
+        // Ivory & Emerald palette (see docs/DESIGN.md)
         cream: '#F4F0E6',
         surface: '#FFFFFF',
         line: '#E5E0D2',
         ink: '#1E2A2C',
         muted: '#889092',
         primary: {
-          DEFAULT: '#116E78',
-          dark: '#0C525A',
+          DEFAULT: '#1A3A2E',
+          dark: '#122920',
         },
         accent: '#D14B6A',
         gold: {

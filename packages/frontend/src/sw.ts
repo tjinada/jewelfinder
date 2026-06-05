@@ -54,7 +54,7 @@ self.addEventListener('push', (event: PushEvent) => {
     try {
       notification = event.data.json();
     } catch {
-      notification = { title: 'Jewel Finder', body: event.data.text() };
+      notification = { title: 'Clasp', body: event.data.text() };
     }
   }
 
@@ -63,11 +63,11 @@ self.addEventListener('push', (event: PushEvent) => {
     icon: notification.icon || '/icons/icon.svg',
     badge: notification.badge || '/icons/icon.svg',
     data: notification.data || {},
-    tag: notification.tag || 'jewel-finder',
+    tag: notification.tag || 'clasp',
   };
 
   event.waitUntil(
-    self.registration.showNotification(notification.title || 'Jewel Finder', options as NotificationOptions),
+    self.registration.showNotification(notification.title || 'Clasp', options as NotificationOptions),
   );
 });
 
