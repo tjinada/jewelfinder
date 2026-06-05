@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Loader2, UserPlus, X, Pencil, Check, Trash2, LogOut } from 'lucide-react';
+import { Loader2, X, Pencil, Check, ChevronRight } from 'lucide-react';
 import { Hanger } from '@/components/icons/Hanger';
 import { MainLayout } from '@/components/layout';
 import { Button } from '@/components/ui';
@@ -8,14 +8,9 @@ import { useAuthStore } from '@/stores/authStore';
 import { getErrorMessage } from '@/features/auth';
 import { useJewelryList } from '@/features/jewelry/api';
 import { JewelryCard } from '@/features/jewelry/JewelryCard';
-import {
-  useCloset,
-  useAddMember,
-  useRemoveMember,
-  useRenameCloset,
-  useDisbandCloset,
-  useLeaveCloset,
-} from './api';
+import { cn } from '@/lib/utils';
+import { useCloset, useRenameCloset, useDisbandCloset, useLeaveCloset } from './api';
+import { MembersSheet } from './MembersSheet';
 
 export function ClosetViewPage() {
   const { id } = useParams<{ id: string }>();
@@ -24,16 +19,14 @@ export function ClosetViewPage() {
 
   const { data: closet, isLoading, isError } = useCloset(id);
   const { data: items, isLoading: itemsLoading } = useJewelryList({ scope: id });
-  const addMember = useAddMember(id ?? '');
-  const removeMember = useRemoveMember(id ?? '');
   const rename = useRenameCloset(id ?? '');
   const disband = useDisbandCloset();
   const leave = useLeaveCloset();
 
-  const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
+  const [membersOpen, setMembersOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -60,32 +53,11 @@ export function ClosetViewPage() {
 
   const { isOwner } = closet;
 
-  const onAdd = async (e: FormEvent) => {
-    e.preventDefault();
-    setError('');
-    if (!email.trim()) return setError('Enter an email address.');
-    try {
-      await addMember.mutateAsync(email.trim());
-      setEmail('');
-    } catch (err) {
-      setError(getErrorMessage(err));
-    }
-  };
-
   const onRename = async () => {
     if (!nameDraft.trim()) return;
     try {
       await rename.mutateAsync(nameDraft.trim());
       setEditingName(false);
-    } catch (err) {
-      setError(getErrorMessage(err));
-    }
-  };
-
-  const onRemove = async (memberId: string, displayName: string) => {
-    if (!window.confirm(`Remove ${displayName} from this closet?`)) return;
-    try {
-      await removeMember.mutateAsync(memberId);
     } catch (err) {
       setError(getErrorMessage(err));
     }
@@ -104,11 +76,21 @@ export function ClosetViewPage() {
     navigate('/closets', { replace: true });
   };
 
+  // Condensed member summary: up to four faces, then a "+N" bubble.
+  const shownMembers = closet.members.slice(0, 4);
+  const extraCount = closet.memberCount - shownMembers.length;
+  const owner = closet.members.find((m) => m._id === closet.owner);
+  const ownerLine = isOwner
+    ? 'You own this closet'
+    : owner
+      ? `Owner · ${owner.displayName}`
+      : 'Shared closet';
+
   return (
     <MainLayout>
       <div className="mx-auto max-w-2xl">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-5">
           <p className="flex items-center gap-1.5 text-sm font-semibold text-primary">
             <Hanger className="h-4 w-4" /> Closet
           </p>
@@ -153,76 +135,49 @@ export function ClosetViewPage() {
           </p>
         </div>
 
-        {/* Add member (owner only) */}
-        {isOwner && (
-          <form onSubmit={onAdd} className="mb-5 flex gap-2">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Add member by email"
-              className="flex-1 rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-            <Button type="submit" disabled={addMember.isPending}>
-              {addMember.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <UserPlus className="h-4 w-4" />
-              )}
-              Add
-            </Button>
-          </form>
-        )}
-
         {error && (
           <p className="mb-4 rounded-lg bg-[#F4E7D5] px-3 py-2 text-sm text-onloan">{error}</p>
         )}
 
-        {/* Members */}
-        <ul className="space-y-2">
-          {closet.members.map((m) => {
-            const isClosetOwner = m._id === closet.owner;
-            const isMe = m._id === userId;
-            return (
-              <li
+        {/* Member summary — opens the members sheet */}
+        <button
+          onClick={() => setMembersOpen(true)}
+          className="mb-8 flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-left transition-colors hover:bg-cream/60"
+        >
+          <div className="flex flex-none">
+            {shownMembers.map((m, i) => (
+              <span
                 key={m._id}
-                className="flex items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-bold text-gold-light">
-                    {m.displayName.charAt(0).toUpperCase()}
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-ink">
-                      {m.displayName}
-                      {isMe && ' (you)'}
-                      {isClosetOwner && (
-                        <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary">
-                          Owner
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-xs text-muted">{m.email}</p>
-                  </div>
-                </div>
-
-                {isOwner && !isClosetOwner && (
-                  <button
-                    onClick={() => onRemove(m._id, m.displayName)}
-                    disabled={removeMember.isPending}
-                    aria-label={`Remove ${m.displayName}`}
-                    className="text-muted hover:text-accent"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
+                className={cn(
+                  'flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-gold-light ring-2 ring-surface',
+                  i > 0 && '-ml-2.5',
                 )}
-              </li>
-            );
-          })}
-        </ul>
+              >
+                {m.displayName.charAt(0).toUpperCase()}
+              </span>
+            ))}
+            {extraCount > 0 && (
+              <span className="-ml-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-line text-[11px] font-bold text-ink ring-2 ring-surface">
+                +{extraCount}
+              </span>
+            )}
+          </div>
+
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-ink">
+              {closet.memberCount} {closet.memberCount === 1 ? 'member' : 'members'}
+            </p>
+            <p className="truncate text-xs text-muted">{ownerLine}</p>
+          </div>
+
+          <span className="ml-auto flex flex-none items-center gap-1 text-sm font-semibold text-primary">
+            {isOwner ? 'Manage' : 'View'}
+            <ChevronRight className="h-4 w-4" />
+          </span>
+        </button>
 
         {/* Items shared into this closet */}
-        <div className="mt-8">
+        <div>
           <h2 className="mb-3 font-display text-xl text-ink">Items in this closet</h2>
           {itemsLoading ? (
             <div className="flex justify-center py-10">
@@ -240,30 +195,18 @@ export function ClosetViewPage() {
             </p>
           )}
         </div>
-
-        {/* Footer action: leave (member) or disband (owner) */}
-        <div className="mt-8 border-t border-line pt-6">
-          {isOwner ? (
-            <Button
-              variant="ghost"
-              onClick={onDisband}
-              disabled={disband.isPending}
-              className="border-accent/40 text-accent hover:bg-accent/10"
-            >
-              <Trash2 className="h-4 w-4" /> Disband closet
-            </Button>
-          ) : (
-            <Button
-              variant="ghost"
-              onClick={onLeave}
-              disabled={leave.isPending}
-              className="border-accent/40 text-accent hover:bg-accent/10"
-            >
-              <LogOut className="h-4 w-4" /> Leave closet
-            </Button>
-          )}
-        </div>
       </div>
+
+      <MembersSheet
+        open={membersOpen}
+        onClose={() => setMembersOpen(false)}
+        closet={closet}
+        currentUserId={userId}
+        onDisband={onDisband}
+        onLeave={onLeave}
+        disbanding={disband.isPending}
+        leaving={leave.isPending}
+      />
     </MainLayout>
   );
 }
