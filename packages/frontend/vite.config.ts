@@ -28,7 +28,7 @@ export default defineConfig({
       manifest: {
         name: 'The Clasp',
         short_name: 'The Clasp',
-        description: 'Borrow theirs. Lend yours',
+        description: 'Borrow Theirs. Lend Yours.',
         theme_color: '#1A3A2E',
         background_color: '#F5ECD7',
         display: 'standalone',

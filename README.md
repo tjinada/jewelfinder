@@ -1,6 +1,6 @@
 # The Clasp
 
-_Borrow theirs, Lend yours_
+_Borrow Theirs. Lend Yours._
 
 A shared-community PWA for cataloguing and lending jewelry. Users photograph their
 jewelry, optionally group pieces into matching **sets**, mark items **available** or

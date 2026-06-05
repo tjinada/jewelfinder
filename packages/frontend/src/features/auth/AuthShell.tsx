@@ -20,7 +20,7 @@ export function AuthShell({ children }: AuthShellProps) {
           <img src="/icons/icon-512.png" alt="" className="mb-3 h-14 w-14 rounded-2xl" />
           <h1 className="font-playfair text-2xl font-semibold text-primary">The Clasp</h1>
           <p className="mt-1 font-montserrat text-[11px] font-semibold uppercase tracking-[0.2em] text-muted">
-            Borrow theirs. Lend yours
+            Borrow Theirs. Lend Yours.
           </p>
         </div>
         {children}
