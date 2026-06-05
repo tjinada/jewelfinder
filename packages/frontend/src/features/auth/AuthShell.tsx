@@ -2,13 +2,11 @@ import type { ReactNode } from 'react';
 import { GlassSurface } from '@/components/ui';
 
 interface AuthShellProps {
-  title: string;
-  subtitle: string;
   children: ReactNode;
 }
 
 /** Centered glass card on the ivory canvas with ambient blooms (auth pages). */
-export function AuthShell({ title, subtitle, children }: AuthShellProps) {
+export function AuthShell({ children }: AuthShellProps) {
   return (
     <div className="relative flex min-h-[100dvh] items-center justify-center px-4 py-10">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
@@ -20,12 +18,10 @@ export function AuthShell({ title, subtitle, children }: AuthShellProps) {
       <GlassSurface className="relative z-10 w-full max-w-sm rounded-3xl p-7">
         <div className="mb-6 flex flex-col items-center text-center">
           <img src="/icons/icon.svg" alt="" className="mb-3 h-14 w-14 rounded-2xl" />
-          <p className="font-display text-2xl text-primary">Clasp</p>
+          <h1 className="font-display text-2xl text-primary">Clasp</h1>
           <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted">
             Borrow hers, Lend yours
           </p>
-          <h1 className="mt-5 font-display text-lg text-ink">{title}</h1>
-          <p className="mt-1 text-sm text-ink/70">{subtitle}</p>
         </div>
         {children}
       </GlassSurface>

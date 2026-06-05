@@ -24,7 +24,7 @@ export function RegisterPage() {
   };
 
   return (
-    <AuthShell title="Create your account" subtitle="Start sharing your jewelry collection">
+    <AuthShell>
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className={labelClass} htmlFor="displayName">Display name</label>
