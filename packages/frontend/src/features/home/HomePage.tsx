@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search, SlidersHorizontal, Loader2, X, Plus } from 'lucide-react';
-import { CATEGORY_LABELS, METAL_LABELS, NECKLACE_TYPE_LABELS, COLOURS } from '@jewel/shared';
+import { CATEGORY_LABELS, METAL_LABELS, NECKLACE_TYPE_LABELS, COLOURS, type JewelryItem } from '@jewel/shared';
 import { MainLayout } from '@/components/layout';
 import { Button } from '@/components/ui';
 import { useJewelryList } from '@/features/jewelry/api';
@@ -21,6 +21,23 @@ export function HomePage() {
   const [filters, setFilters] = useState<SearchFilters>({});
   const [sheetOpen, setSheetOpen] = useState(false);
   const { data: closets } = useMyClosets();
+
+  const closetNameById = useMemo(
+    () => new Map((closets ?? []).map((c) => [c._id, c.name])),
+    [closets],
+  );
+
+  // Card label: only closets the viewer belongs to resolve to a name, and the
+  // "+N" count is taken from those resolved names — so an item also shared to a
+  // closet the viewer isn't in never reveals that closet's name or existence.
+  const closetLabelFor = (item: JewelryItem): string | undefined => {
+    if (item.visibility !== 'groups') return undefined;
+    const names = item.sharedGroups
+      .map((id) => closetNameById.get(id))
+      .filter((n): n is string => !!n);
+    if (names.length === 0) return 'Shared closet';
+    return names.length === 1 ? names[0] : `${names[0]} +${names.length - 1}`;
+  };
 
   const debouncedQ = useDebounce(text.trim(), 300);
 
@@ -153,7 +170,7 @@ export function HomePage() {
       ) : items && items.length > 0 ? (
         <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {items.map((item) => (
-            <JewelryCard key={item._id} item={item} />
+            <JewelryCard key={item._id} item={item} closetLabel={closetLabelFor(item)} />
           ))}
         </div>
       ) : narrowed ? (

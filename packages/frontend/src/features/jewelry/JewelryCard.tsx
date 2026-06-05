@@ -5,7 +5,7 @@ import { Card } from '@/components/ui';
 import { thumbImageUrl } from '@/lib/media';
 import { itemTitle, itemSubtitle } from './format';
 
-export function JewelryCard({ item }: { item: JewelryItem }) {
+export function JewelryCard({ item, closetLabel }: { item: JewelryItem; closetLabel?: string }) {
   const img = thumbImageUrl(item.images[0]);
   const subtitle = itemSubtitle(item);
 
@@ -32,7 +32,7 @@ export function JewelryCard({ item }: { item: JewelryItem }) {
               Set
             </span>
           )}
-          {item.visibility === 'groups' && (
+          {item.visibility === 'groups' && !closetLabel && (
             <span
               className="absolute left-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-ink/60 text-white shadow-md ring-1 ring-white/30"
               title="Shared to a closet"
@@ -49,6 +49,12 @@ export function JewelryCard({ item }: { item: JewelryItem }) {
             <div className="mt-1 flex items-center gap-1 text-xs text-muted">
               <MapPin className="h-3.5 w-3.5 flex-none" />
               <span className="truncate">{item.location}</span>
+            </div>
+          )}
+          {closetLabel && (
+            <div className="mt-1 flex items-center gap-1 text-xs text-muted">
+              <Users className="h-3.5 w-3.5 flex-none" />
+              <span className="truncate">{closetLabel}</span>
             </div>
           )}
         </div>
