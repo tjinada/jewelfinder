@@ -26,8 +26,8 @@ export default defineConfig({
       strategies: 'injectManifest',
       includeAssets: ['icons/icon-512.png', 'icons/icon-maskable-512.png'],
       manifest: {
-        name: 'Clasp',
-        short_name: 'Clasp',
+        name: 'The Clasp',
+        short_name: 'The Clasp',
         description: 'Borrow theirs, Lend yours',
         theme_color: '#1A3A2E',
         background_color: '#F5ECD7',

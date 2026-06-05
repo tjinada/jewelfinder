@@ -1,4 +1,4 @@
-# Clasp
+# The Clasp
 
 _Borrow theirs, Lend yours_
 

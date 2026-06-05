@@ -54,7 +54,7 @@ self.addEventListener('push', (event: PushEvent) => {
     try {
       notification = event.data.json();
     } catch {
-      notification = { title: 'Clasp', body: event.data.text() };
+      notification = { title: 'The Clasp', body: event.data.text() };
     }
   }
 
@@ -67,7 +67,7 @@ self.addEventListener('push', (event: PushEvent) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification(notification.title || 'Clasp', options as NotificationOptions),
+    self.registration.showNotification(notification.title || 'The Clasp', options as NotificationOptions),
   );
 });
 
