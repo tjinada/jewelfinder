@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Pencil, Trash2, Loader2, RefreshCw, Link2, CalendarDays, Eye, MapPin } from 'lucide-react';
 import { CATEGORY_LABELS, METAL_LABELS, NECKLACE_TYPE_LABELS, COLOURS, VISIBILITY_LABELS } from '@jewel/shared';
 import { MainLayout } from '@/components/layout';
-import { Button, GlassSurface } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
 import { fullImageUrl, thumbImageUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
@@ -82,15 +82,14 @@ export function ItemDetailPage() {
             )}
           </div>
 
-          {/* On-photo glass controls */}
-          <GlassSurface
-            as="button"
+          {/* On-photo back control — fixed emerald disc so it stays readable over any photo */}
+          <button
             onClick={() => navigate(-1)}
             aria-label="Back"
-            className="absolute left-3 top-3 flex h-10 w-10 items-center justify-center rounded-full text-ink"
+            className="absolute left-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary/85 text-cream ring-1 ring-white/25 backdrop-blur-md transition-colors hover:bg-primary"
           >
             <ArrowLeft className="h-5 w-5" />
-          </GlassSurface>
+          </button>
         </div>
 
         {/* Thumbnail strip */}
