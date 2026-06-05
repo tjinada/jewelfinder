@@ -28,7 +28,7 @@ export default defineConfig({
       manifest: {
         name: 'Clasp',
         short_name: 'Clasp',
-        description: 'Borrow hers, Lend yours',
+        description: 'Borrow theirs, Lend yours',
         theme_color: '#1A3A2E',
         background_color: '#F4F0E6',
         display: 'standalone',
