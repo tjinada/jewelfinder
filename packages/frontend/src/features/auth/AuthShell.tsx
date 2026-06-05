@@ -17,7 +17,7 @@ export function AuthShell({ children }: AuthShellProps) {
 
       <GlassSurface className="relative z-10 w-full max-w-sm rounded-3xl p-7">
         <div className="mb-6 flex flex-col items-center text-center">
-          <img src="/icons/icon.svg" alt="" className="mb-3 h-14 w-14 rounded-2xl" />
+          <img src="/icons/icon-512.png" alt="" className="mb-3 h-14 w-14 rounded-2xl" />
           <h1 className="font-display text-2xl text-primary">Clasp</h1>
           <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted">
             Borrow theirs, Lend yours

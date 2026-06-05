@@ -60,8 +60,8 @@ self.addEventListener('push', (event: PushEvent) => {
 
   const options: Record<string, unknown> = {
     body: notification.body || '',
-    icon: notification.icon || '/icons/icon.svg',
-    badge: notification.badge || '/icons/icon.svg',
+    icon: notification.icon || '/icons/icon-512.png',
+    badge: notification.badge || '/icons/icon-512.png',
     data: notification.data || {},
     tag: notification.tag || 'clasp',
   };

@@ -24,7 +24,7 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.ts',
       strategies: 'injectManifest',
-      includeAssets: ['icons/icon.svg'],
+      includeAssets: ['icons/icon-512.png', 'icons/icon-maskable-512.png'],
       manifest: {
         name: 'Clasp',
         short_name: 'Clasp',
@@ -36,8 +36,8 @@ export default defineConfig({
         scope: '/',
         start_url: '/',
         icons: [
-          { src: '/icons/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
-          // TODO: add maskable PNG icons (192/512) before production.
+          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
         categories: ['lifestyle', 'shopping'],
       },
