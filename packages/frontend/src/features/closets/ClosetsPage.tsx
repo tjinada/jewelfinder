@@ -105,7 +105,7 @@ export function ClosetsPage() {
                 <User className="h-5 w-5" style={{ color: MY_CLOSET_COLOR.text }} />
                 <span
                   className="rounded-md px-2 py-0.5 text-[10px] font-bold"
-                  style={{ backgroundColor: '#E1F5EE', color: MY_CLOSET_COLOR.text }}
+                  style={{ backgroundColor: MY_CLOSET_COLOR.text, color: MY_CLOSET_COLOR.bg }}
                 >
                   Yours
                 </span>
