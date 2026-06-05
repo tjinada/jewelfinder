@@ -1,18 +1,20 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Loader2, Send } from 'lucide-react';
 import { GlassSurface } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
 import { thumbImageUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
 import { PushNotificationPrompt } from '@/features/notifications';
-import { useThread, useSendMessage } from './api';
+import { useThread, useSendMessage, type ConversationSummary } from './api';
 import { formatTime } from './format';
 
 export function ThreadPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const meId = useAuthStore((s) => s.user?.id);
+  const qc = useQueryClient();
 
   const { data: thread, isLoading, isError } = useThread(id);
   const send = useSendMessage(id ?? '');
@@ -24,6 +26,17 @@ export function ThreadPage() {
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [thread?.messages.length]);
+
+  // Opening a thread marks its incoming messages read on the server, so reflect
+  // that in the conversations cache right away — clear this conversation's unread
+  // count (instant badge update) and reconcile from the server on return.
+  useEffect(() => {
+    if (!thread?._id) return;
+    qc.setQueryData<ConversationSummary[]>(['conversations'], (old) =>
+      old?.map((c) => (c._id === thread._id ? { ...c, unreadCount: 0 } : c)),
+    );
+    qc.invalidateQueries({ queryKey: ['conversations'] });
+  }, [thread?._id, qc]);
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
