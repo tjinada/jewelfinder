@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Users } from 'lucide-react';
 import type { JewelryItem } from '@jewel/shared';
 import { Card, AvailabilityPill } from '@/components/ui';
 import { thumbImageUrl } from '@/lib/media';
@@ -29,6 +30,15 @@ export function JewelryCard({ item }: { item: JewelryItem }) {
           {item.set && (
             <span className="absolute right-2 top-2 rounded-full bg-primary px-3 py-1.5 text-xs font-extrabold uppercase tracking-wide text-gold-light shadow-md ring-1 ring-white/40">
               Set
+            </span>
+          )}
+          {item.visibility === 'groups' && (
+            <span
+              className="absolute left-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-ink/60 text-white shadow-md ring-1 ring-white/30"
+              title="Shared to a circle"
+              aria-label="Shared to a circle"
+            >
+              <Users className="h-3.5 w-3.5" />
             </span>
           )}
         </div>
