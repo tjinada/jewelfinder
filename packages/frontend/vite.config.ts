@@ -30,7 +30,7 @@ export default defineConfig({
         short_name: 'Clasp',
         description: 'Borrow theirs, Lend yours',
         theme_color: '#1A3A2E',
-        background_color: '#F4F0E6',
+        background_color: '#F5ECD7',
         display: 'standalone',
         orientation: 'portrait-primary',
         scope: '/',

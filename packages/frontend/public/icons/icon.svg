@@ -2,7 +2,7 @@
   <rect width="512" height="512" rx="112" fill="#1A3A2E"/>
   <g fill="none" stroke-linecap="round">
     <!-- outer ring: yellow gold -->
-    <path d="M392.7 156.6 A169 169 0 1 0 392.7 355.4" stroke="#C9A24A" stroke-width="41"/>
+    <path d="M392.7 156.6 A169 169 0 1 0 392.7 355.4" stroke="#D4AF6B" stroke-width="41"/>
     <!-- inner ring: white gold -->
     <path d="M359.6 180.7 A128 128 0 1 0 359.6 331.3" stroke="#CACED4" stroke-width="41"/>
     <!-- pavé bands -->

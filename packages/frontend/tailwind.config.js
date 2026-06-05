@@ -5,19 +5,20 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Ivory & Emerald palette (see docs/DESIGN.md)
-        cream: '#F4F0E6',
+        // Clasp brand palette (see docs/DESIGN.md)
+        cream: '#F5ECD7', // Ivory — app background
         surface: '#FFFFFF',
         line: '#E5E0D2',
-        ink: '#1E2A2C',
+        ink: '#2A2A2A', // Near Black — body text
         muted: '#889092',
         primary: {
-          DEFAULT: '#1A3A2E',
+          DEFAULT: '#1A3A2E', // Deep Emerald
           dark: '#122920',
         },
-        accent: '#D14B6A',
+        accent: '#8B1A2B', // Ruby Red — alerts, notifications, destructive
         gold: {
-          DEFAULT: '#C9A24A',
+          DEFAULT: '#B8960C', // Antique Gold — CTAs / badges
+          warm: '#D4AF6B', // Warm Gold — decorative / icons
           light: '#F2E6C8',
         },
         available: '#2E8B6E',

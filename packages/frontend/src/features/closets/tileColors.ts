@@ -10,7 +10,7 @@ export interface TileColor {
   sub: string;
 }
 
-export const MY_CLOSET_COLOR: TileColor = { bg: '#1A3A2E', text: '#F2E6C8', sub: '#C9A24A' };
+export const MY_CLOSET_COLOR: TileColor = { bg: '#1A3A2E', text: '#F2E6C8', sub: '#D4AF6B' };
 
 const PALETTE: TileColor[] = [
   { bg: '#C4957A', text: '#2A2A2A', sub: '#5E3B29' }, // dusty rose
