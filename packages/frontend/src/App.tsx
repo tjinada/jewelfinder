@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { useAuthStore } from '@/stores/authStore';
@@ -9,9 +9,8 @@ import { OfflineIndicator, PWAUpdatePrompt } from '@/components/pwa';
 import { LoginPage, RegisterPage } from '@/features/auth';
 import { HomePage } from '@/features/home';
 import { JewelryFormPage, ItemDetailPage } from '@/features/jewelry';
-import { SearchPage } from '@/features/search';
 import { SetViewPage } from '@/features/sets';
-import { CirclesPage, CircleViewPage } from '@/features/circles';
+import { ClosetsPage, ClosetViewPage } from '@/features/closets';
 import { ConversationListPage, ThreadPage } from '@/features/messaging';
 import { RequestsPage } from '@/features/bookings';
 import { SettingsPage } from '@/features/notifications';
@@ -23,6 +22,12 @@ function AuthInitializer({ children }: { children: ReactNode }) {
     if (!token) setLoading(false);
   }, [token, setLoading]);
   return <>{children}</>;
+}
+
+/** Preserve the id when redirecting old /circles/:id links to /closets/:id. */
+function LegacyClosetRedirect() {
+  const { id } = useParams<{ id: string }>();
+  return <Navigate to={`/closets/${id}`} replace />;
 }
 
 export default function App() {
@@ -41,17 +46,21 @@ export default function App() {
               {/* Protected */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/" element={<HomePage />} />
-                <Route path="/search" element={<SearchPage />} />
                 <Route path="/add" element={<JewelryFormPage />} />
                 <Route path="/item/:id" element={<ItemDetailPage />} />
                 <Route path="/item/:id/edit" element={<JewelryFormPage />} />
                 <Route path="/set/:id" element={<SetViewPage />} />
-                <Route path="/circles" element={<CirclesPage />} />
-                <Route path="/circles/:id" element={<CircleViewPage />} />
+                <Route path="/closets" element={<ClosetsPage />} />
+                <Route path="/closets/:id" element={<ClosetViewPage />} />
                 <Route path="/messages" element={<ConversationListPage />} />
                 <Route path="/messages/:id" element={<ThreadPage />} />
                 <Route path="/requests" element={<RequestsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
+
+                {/* Redirects from removed/renamed routes */}
+                <Route path="/search" element={<Navigate to="/" replace />} />
+                <Route path="/circles" element={<Navigate to="/closets" replace />} />
+                <Route path="/circles/:id" element={<LegacyClosetRedirect />} />
               </Route>
 
               <Route path="*" element={<Navigate to="/" replace />} />

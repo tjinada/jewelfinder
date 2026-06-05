@@ -27,7 +27,7 @@ import {
 } from './api';
 import { getErrorMessage } from '@/features/auth';
 import { SetSelect, type SetSelection, useCreateSet } from '@/features/sets';
-import { VisibilitySelect, type VisibilitySelection } from '@/features/circles';
+import { VisibilitySelect, type VisibilitySelection } from '@/features/closets';
 
 const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wide text-muted';
 const selectClass =

@@ -2,10 +2,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, type ApiResponse } from '@/lib/api';
 import type { Group, GroupWithMembers } from '@jewel/shared';
 
-/** Circles the signed-in user belongs to. */
-export function useMyCircles() {
+/** Closets the signed-in user belongs to. */
+export function useMyClosets() {
   return useQuery({
-    queryKey: ['circles', 'mine'],
+    queryKey: ['closets', 'mine'],
     queryFn: async () => {
       const { data } = await api.get<ApiResponse<Group[]>>('/groups');
       return data.data;
@@ -13,10 +13,10 @@ export function useMyCircles() {
   });
 }
 
-/** A circle with its members. */
-export function useCircle(id?: string) {
+/** A closet with its members. */
+export function useCloset(id?: string) {
   return useQuery({
-    queryKey: ['circles', 'item', id],
+    queryKey: ['closets', 'item', id],
     enabled: !!id,
     queryFn: async () => {
       const { data } = await api.get<ApiResponse<GroupWithMembers>>(`/groups/${id}`);
@@ -25,37 +25,37 @@ export function useCircle(id?: string) {
   });
 }
 
-export function useCreateCircle() {
+export function useCreateCloset() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (name: string) => {
       const { data } = await api.post<ApiResponse<Group>>('/groups', { name });
       return data.data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['circles'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['closets'] }),
   });
 }
 
-export function useRenameCircle(id: string) {
+export function useRenameCloset(id: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (name: string) => {
       const { data } = await api.patch<ApiResponse<Group>>(`/groups/${id}`, { name });
       return data.data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['circles'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['closets'] }),
   });
 }
 
-/** Owner disbands the circle. Items shared to it lose that reference, so refresh jewelry too. */
-export function useDisbandCircle() {
+/** Owner disbands the closet. Items shared to it lose that reference, so refresh jewelry too. */
+export function useDisbandCloset() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
       await api.delete(`/groups/${id}`);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['circles'] });
+      qc.invalidateQueries({ queryKey: ['closets'] });
       qc.invalidateQueries({ queryKey: ['jewelry'] });
     },
   });
@@ -70,11 +70,11 @@ export function useAddMember(id: string) {
       });
       return data.data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['circles'] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['closets'] }),
   });
 }
 
-/** Removing a member prunes their items' sharing for this circle, so refresh jewelry too. */
+/** Removing a member prunes their items' sharing for this closet, so refresh jewelry too. */
 export function useRemoveMember(id: string) {
   const qc = useQueryClient();
   return useMutation({
@@ -85,20 +85,20 @@ export function useRemoveMember(id: string) {
       return data.data;
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['circles'] });
+      qc.invalidateQueries({ queryKey: ['closets'] });
       qc.invalidateQueries({ queryKey: ['jewelry'] });
     },
   });
 }
 
-export function useLeaveCircle() {
+export function useLeaveCloset() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
       await api.post(`/groups/${id}/leave`);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['circles'] });
+      qc.invalidateQueries({ queryKey: ['closets'] });
       qc.invalidateQueries({ queryKey: ['jewelry'] });
     },
   });

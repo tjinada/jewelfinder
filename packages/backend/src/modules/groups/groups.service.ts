@@ -8,25 +8,30 @@ import type { Group as GroupDTO, GroupWithMembers } from '@jewel/shared';
 // "Closet" is the user-facing name; the model/collection/field stay `Group`/`sharedGroups`.
 type PopulatedMember = { _id: unknown; displayName: string; email: string };
 
-function toGroup(doc: IGroupDocument, viewerId: string): GroupDTO {
+function toGroup(doc: IGroupDocument, viewerId: string, itemCount: number): GroupDTO {
   return {
     _id: String(doc._id),
     owner: String(doc.owner),
     name: doc.name,
     memberCount: doc.members.length,
+    itemCount,
     isOwner: String(doc.owner) === viewerId,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   };
 }
 
-function toGroupWithMembers(doc: IGroupDocument, viewerId: string): GroupWithMembers {
+function toGroupWithMembers(
+  doc: IGroupDocument,
+  viewerId: string,
+  itemCount: number,
+): GroupWithMembers {
   const members = (doc.members as unknown as PopulatedMember[]).map((m) => ({
     _id: String(m._id),
     displayName: m.displayName,
     email: m.email,
   }));
-  return { ...toGroup(doc, viewerId), memberCount: members.length, members };
+  return { ...toGroup(doc, viewerId, itemCount), memberCount: members.length, members };
 }
 
 /** Owner-only guard, shared by the management methods. */
@@ -43,11 +48,24 @@ async function pruneGroupFromItems(groupId: string, ownerId?: string): Promise<v
   await Jewelry.updateMany(filter, { $pull: { sharedGroups: groupId } });
 }
 
+/** How many items are shared into each closet, counting every contributor. */
+async function countItemsByGroup(groupIds: unknown[]): Promise<Map<string, number>> {
+  if (groupIds.length === 0) return new Map();
+  const rows = await Jewelry.aggregate<{ _id: unknown; count: number }>([
+    { $match: { sharedGroups: { $in: groupIds } } },
+    { $unwind: '$sharedGroups' },
+    { $match: { sharedGroups: { $in: groupIds } } },
+    { $group: { _id: '$sharedGroups', count: { $sum: 1 } } },
+  ]);
+  return new Map(rows.map((r) => [String(r._id), r.count]));
+}
+
 export const groupService = {
   /** Closets the user belongs to. */
   async listMine(userId: string): Promise<GroupDTO[]> {
     const docs = await Group.find({ members: userId }).sort({ name: 1 });
-    return docs.map((d) => toGroup(d, userId));
+    const counts = await countItemsByGroup(docs.map((d) => d._id));
+    return docs.map((d) => toGroup(d, userId, counts.get(String(d._id)) ?? 0));
   },
 
   /** A closet with its members (members only). */
@@ -58,12 +76,13 @@ export const groupService = {
       (m) => String(m._id) === userId,
     );
     if (!isMember) throw new AppError('This is not your closet', 403);
-    return toGroupWithMembers(doc, userId);
+    const itemCount = await Jewelry.countDocuments({ sharedGroups: id });
+    return toGroupWithMembers(doc, userId, itemCount);
   },
 
   async create(ownerId: string, name: string): Promise<GroupDTO> {
     const doc = await Group.create({ owner: ownerId, name: name.trim(), members: [ownerId] });
-    return toGroup(doc, ownerId);
+    return toGroup(doc, ownerId, 0);
   },
 
   async rename(ownerId: string, id: string, name: string): Promise<GroupDTO> {
@@ -72,7 +91,8 @@ export const groupService = {
     assertOwner(doc, ownerId);
     doc.name = name.trim();
     await doc.save();
-    return toGroup(doc, ownerId);
+    const itemCount = await Jewelry.countDocuments({ sharedGroups: id });
+    return toGroup(doc, ownerId, itemCount);
   },
 
   /** Owner adds a member by email. Idempotent if they're already in. */
@@ -95,7 +115,7 @@ export const groupService = {
         title: 'Added to a closet',
         body: `${owner?.displayName ?? 'Someone'} added you to the closet "${doc.name}"`,
         tag: `closet-${id}`,
-        data: { url: `/circles/${id}` },
+        data: { url: `/closets/${id}` },
       });
     }
 

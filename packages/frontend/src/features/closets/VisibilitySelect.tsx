@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { VISIBILITY_LABELS, type Visibility } from '@jewel/shared';
 import { cn } from '@/lib/utils';
-import { useMyCircles } from './api';
+import { useMyClosets } from './api';
 
 export interface VisibilitySelection {
   visibility: Visibility;
@@ -22,7 +22,7 @@ interface VisibilitySelectProps {
 
 /** Pick who can see an item: only you, chosen closets, or everyone. */
 export function VisibilitySelect({ value, onChange }: VisibilitySelectProps) {
-  const { data: circles } = useMyCircles();
+  const { data: circles } = useMyClosets();
   const list = circles ?? [];
 
   const setVisibility = (visibility: Visibility) => {
@@ -68,7 +68,7 @@ export function VisibilitySelect({ value, onChange }: VisibilitySelectProps) {
           {list.length === 0 ? (
             <p className="text-sm text-muted">
               You’re not in any closets yet.{' '}
-              <Link to="/circles" className="font-semibold text-primary underline">
+              <Link to="/closets" className="font-semibold text-primary underline">
                 Create one
               </Link>{' '}
               to share with a group.

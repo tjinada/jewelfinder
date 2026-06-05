@@ -14,6 +14,7 @@ export const GroupSchema = z.object({
   owner: z.string(),
   name: z.string().min(1).max(60),
   memberCount: z.number().int().nonnegative(),
+  itemCount: z.number().int().nonnegative(),
   isOwner: z.boolean(),
   createdAt: z.string().or(z.date()),
   updatedAt: z.string().or(z.date()),

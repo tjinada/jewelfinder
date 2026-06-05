@@ -1,30 +1,33 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Users, Loader2, UserPlus, X, Pencil, Check, Trash2, LogOut } from 'lucide-react';
+import { Shirt, Loader2, UserPlus, X, Pencil, Check, Trash2, LogOut } from 'lucide-react';
 import { MainLayout } from '@/components/layout';
 import { Button } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
 import { getErrorMessage } from '@/features/auth';
+import { useJewelryList } from '@/features/jewelry/api';
+import { JewelryCard } from '@/features/jewelry/JewelryCard';
 import {
-  useCircle,
+  useCloset,
   useAddMember,
   useRemoveMember,
-  useRenameCircle,
-  useDisbandCircle,
-  useLeaveCircle,
+  useRenameCloset,
+  useDisbandCloset,
+  useLeaveCloset,
 } from './api';
 
-export function CircleViewPage() {
+export function ClosetViewPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const userId = useAuthStore((s) => s.user?.id);
 
-  const { data: circle, isLoading, isError } = useCircle(id);
+  const { data: closet, isLoading, isError } = useCloset(id);
+  const { data: items, isLoading: itemsLoading } = useJewelryList({ scope: id });
   const addMember = useAddMember(id ?? '');
   const removeMember = useRemoveMember(id ?? '');
-  const rename = useRenameCircle(id ?? '');
-  const disband = useDisbandCircle();
-  const leave = useLeaveCircle();
+  const rename = useRenameCloset(id ?? '');
+  const disband = useDisbandCloset();
+  const leave = useLeaveCloset();
 
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
@@ -41,12 +44,12 @@ export function CircleViewPage() {
     );
   }
 
-  if (isError || !circle) {
+  if (isError || !closet) {
     return (
       <MainLayout>
         <div className="py-20 text-center">
           <p className="text-muted">This closet couldn’t be found.</p>
-          <Button className="mt-4" onClick={() => navigate('/circles')}>
+          <Button className="mt-4" onClick={() => navigate('/closets')}>
             Back to closets
           </Button>
         </div>
@@ -54,7 +57,7 @@ export function CircleViewPage() {
     );
   }
 
-  const { isOwner } = circle;
+  const { isOwner } = closet;
 
   const onAdd = async (e: FormEvent) => {
     e.preventDefault();
@@ -90,14 +93,14 @@ export function CircleViewPage() {
   const onDisband = async () => {
     if (!window.confirm('Disband this closet? Items shared only to it will no longer be visible to its members.'))
       return;
-    await disband.mutateAsync(circle._id);
-    navigate('/circles', { replace: true });
+    await disband.mutateAsync(closet._id);
+    navigate('/closets', { replace: true });
   };
 
   const onLeave = async () => {
     if (!window.confirm('Leave this closet?')) return;
-    await leave.mutateAsync(circle._id);
-    navigate('/circles', { replace: true });
+    await leave.mutateAsync(closet._id);
+    navigate('/closets', { replace: true });
   };
 
   return (
@@ -106,7 +109,7 @@ export function CircleViewPage() {
         {/* Header */}
         <div className="mb-6">
           <p className="flex items-center gap-1.5 text-sm font-semibold text-primary">
-            <Users className="h-4 w-4" /> Closet
+            <Shirt className="h-4 w-4" /> Closet
           </p>
 
           {editingName ? (
@@ -127,11 +130,11 @@ export function CircleViewPage() {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <h1 className="font-display text-2xl text-ink md:text-3xl">{circle.name}</h1>
+              <h1 className="font-display text-2xl text-ink md:text-3xl">{closet.name}</h1>
               {isOwner && (
                 <button
                   onClick={() => {
-                    setNameDraft(circle.name);
+                    setNameDraft(closet.name);
                     setEditingName(true);
                   }}
                   aria-label="Rename closet"
@@ -144,7 +147,8 @@ export function CircleViewPage() {
           )}
 
           <p className="mt-1 text-sm text-muted">
-            {circle.memberCount} {circle.memberCount === 1 ? 'member' : 'members'}
+            {closet.memberCount} {closet.memberCount === 1 ? 'member' : 'members'} ·{' '}
+            {closet.itemCount} {closet.itemCount === 1 ? 'item' : 'items'}
           </p>
         </div>
 
@@ -175,8 +179,8 @@ export function CircleViewPage() {
 
         {/* Members */}
         <ul className="space-y-2">
-          {circle.members.map((m) => {
-            const isCircleOwner = m._id === circle.owner;
+          {closet.members.map((m) => {
+            const isClosetOwner = m._id === closet.owner;
             const isMe = m._id === userId;
             return (
               <li
@@ -191,7 +195,7 @@ export function CircleViewPage() {
                     <p className="text-sm font-semibold text-ink">
                       {m.displayName}
                       {isMe && ' (you)'}
-                      {isCircleOwner && (
+                      {isClosetOwner && (
                         <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase text-primary">
                           Owner
                         </span>
@@ -201,7 +205,7 @@ export function CircleViewPage() {
                   </div>
                 </div>
 
-                {isOwner && !isCircleOwner && (
+                {isOwner && !isClosetOwner && (
                   <button
                     onClick={() => onRemove(m._id, m.displayName)}
                     disabled={removeMember.isPending}
@@ -215,6 +219,26 @@ export function CircleViewPage() {
             );
           })}
         </ul>
+
+        {/* Items shared into this closet */}
+        <div className="mt-8">
+          <h2 className="mb-3 font-display text-xl text-ink">Items in this closet</h2>
+          {itemsLoading ? (
+            <div className="flex justify-center py-10">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : items && items.length > 0 ? (
+            <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3">
+              {items.map((item) => (
+                <JewelryCard key={item._id} item={item} />
+              ))}
+            </div>
+          ) : (
+            <p className="py-10 text-center text-sm text-muted">
+              No items have been shared into this closet yet.
+            </p>
+          )}
+        </div>
 
         {/* Footer action: leave (member) or disband (owner) */}
         <div className="mt-8 border-t border-line pt-6">

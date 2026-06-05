@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, Search, Plus, MessageCircle, CalendarClock } from 'lucide-react';
+import { Home, Shirt, Plus, MessageCircle, CalendarClock } from 'lucide-react';
 import { GlassSurface } from '@/components/ui';
 import { useUnreadCount } from '@/features/messaging/api';
 import { useIncomingPendingCount } from '@/features/bookings/api';
@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 
 const items = [
   { to: '/', label: 'Home', icon: Home, end: true },
-  { to: '/search', label: 'Search', icon: Search, end: false },
+  { to: '/closets', label: 'Closets', icon: Shirt, end: false },
 ] as const;
 
 const right = [
