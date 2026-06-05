@@ -27,6 +27,8 @@ export default {
       fontFamily: {
         sans: ['"Helvetica Neue"', 'Arial', 'system-ui', 'sans-serif'],
         display: ['Georgia', '"Times New Roman"', 'serif'],
+        playfair: ['"Playfair Display"', 'Georgia', 'serif'],
+        montserrat: ['Montserrat', '"Helvetica Neue"', 'Arial', 'sans-serif'],
       },
       backgroundImage: {
         tile: 'linear-gradient(#F0ECDD, #E3DBC4)',
