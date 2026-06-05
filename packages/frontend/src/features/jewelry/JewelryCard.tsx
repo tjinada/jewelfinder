@@ -28,7 +28,7 @@ export function JewelryCard({ item, closetLabel }: { item: JewelryItem; closetLa
             )}
           </div>
           {item.set && (
-            <span className="absolute right-2 top-2 rounded-full bg-primary px-3 py-1.5 text-xs font-extrabold uppercase tracking-wide text-gold-light shadow-md ring-1 ring-white/40">
+            <span className="absolute right-2 top-2 rounded-full bg-primary px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-gold-light shadow-md ring-1 ring-white/40">
               Set
             </span>
           )}
@@ -43,7 +43,7 @@ export function JewelryCard({ item, closetLabel }: { item: JewelryItem; closetLa
           )}
         </div>
         <div className="px-3 pb-3.5">
-          <div className="truncate font-display text-base">{itemTitle(item)}</div>
+          <div className="truncate text-[15px] font-semibold">{itemTitle(item)}</div>
           {subtitle && <div className="my-1 truncate text-xs text-muted">{subtitle}</div>}
           {item.location && (
             <div className="mt-1 flex items-center gap-1 text-xs text-muted">

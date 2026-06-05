@@ -28,7 +28,7 @@ export function SetViewPage() {
     return (
       <MainLayout>
         <div className="py-20 text-center">
-          <p className="text-muted">This set couldn’t be found.</p>
+          <p className="font-display italic text-muted">This set couldn’t be found.</p>
           <Button className="mt-4" onClick={() => navigate('/')}>
             Back to home
           </Button>
@@ -53,7 +53,7 @@ export function SetViewPage() {
           <p className="flex items-center gap-1.5 text-sm font-semibold text-primary">
             <Link2 className="h-4 w-4" /> Set
           </p>
-          <h1 className="font-display text-2xl text-ink md:text-3xl">{set.name}</h1>
+          <h1 className="font-display text-2xl font-bold text-ink md:text-3xl">{set.name}</h1>
           <p className="mt-1 text-sm text-muted">
             {set.items.length} {set.items.length === 1 ? 'piece' : 'pieces'}
           </p>
@@ -78,7 +78,7 @@ export function SetViewPage() {
           ))}
         </div>
       ) : (
-        <p className="py-20 text-center text-muted">This set has no items yet.</p>
+        <p className="py-20 text-center font-display italic text-muted">This set has no items yet.</p>
       )}
     </MainLayout>
   );

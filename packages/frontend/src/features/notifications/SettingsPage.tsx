@@ -57,7 +57,7 @@ function ProfileCard() {
     <div className="rounded-2xl border border-line bg-surface p-5">
       <div className="mb-3 flex items-center gap-2">
         <MapPin className="h-5 w-5 text-primary" />
-        <h2 className="font-display text-lg text-ink">Profile</h2>
+        <h2 className="font-display text-lg font-bold text-ink">Profile</h2>
       </div>
 
       <label
@@ -176,7 +176,7 @@ function NotificationsCard() {
     <div className="rounded-2xl border border-line bg-surface p-5">
       <div className="mb-3 flex items-center gap-2">
         <Bell className="h-5 w-5 text-primary" />
-        <h2 className="font-display text-lg text-ink">Notifications</h2>
+        <h2 className="font-display text-lg font-bold text-ink">Notifications</h2>
       </div>
 
       <div className="mb-4">
@@ -301,7 +301,7 @@ function AdminCard() {
     <div className="rounded-2xl border border-line bg-surface p-5">
       <div className="mb-3 flex items-center gap-2">
         <ShieldCheck className="h-5 w-5 text-primary" />
-        <h2 className="font-display text-lg text-ink">Who has notifications on</h2>
+        <h2 className="font-display text-lg font-bold text-ink">Who has notifications on</h2>
       </div>
 
       {overview.isLoading ? (
@@ -309,7 +309,7 @@ function AdminCard() {
           <Loader2 className="h-5 w-5 animate-spin text-primary" />
         </div>
       ) : overview.isError ? (
-        <p className="py-6 text-center text-sm text-muted">Couldn’t load the overview.</p>
+        <p className="py-6 text-center font-display text-sm italic text-muted">Couldn’t load the overview.</p>
       ) : (
         <ul className="divide-y divide-line/60">
           {overview.data?.map((u) => (
@@ -351,7 +351,7 @@ export function SettingsPage() {
   return (
     <MainLayout>
       <div className="mx-auto max-w-2xl">
-        <h1 className="mb-4 font-display text-2xl text-ink md:text-3xl">Settings</h1>
+        <h1 className="mb-4 font-display text-2xl font-bold text-ink md:text-3xl">Settings</h1>
         <div className="flex flex-col gap-4">
           <ProfileCard />
           <NotificationsCard />

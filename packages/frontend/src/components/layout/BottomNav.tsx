@@ -27,7 +27,7 @@ export function BottomNav() {
 
   const link = ({ isActive }: { isActive: boolean }) =>
     cn(
-      'flex w-16 flex-col items-center gap-1 text-[10px] font-semibold transition-colors',
+      'flex w-16 flex-col items-center gap-1 text-[10px] font-medium transition-colors',
       isActive ? 'text-primary' : 'text-muted',
     );
 

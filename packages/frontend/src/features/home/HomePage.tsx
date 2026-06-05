@@ -92,7 +92,7 @@ export function HomePage() {
   return (
     <MainLayout>
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h1 className="font-display text-2xl text-ink md:text-3xl">Browse jewelry</h1>
+        <h1 className="font-display text-2xl font-bold text-ink md:text-3xl">Browse</h1>
 
         {/* Scope: narrow to public, your own, or a specific closet */}
         <select
@@ -166,7 +166,7 @@ export function HomePage() {
           <Loader2 className="h-7 w-7 animate-spin text-primary" />
         </div>
       ) : isError ? (
-        <p className="py-20 text-center text-muted">Couldn’t load items. Please try again.</p>
+        <p className="py-20 text-center font-display italic text-muted">Couldn’t load items. Please try again.</p>
       ) : items && items.length > 0 ? (
         <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {items.map((item) => (
@@ -174,10 +174,10 @@ export function HomePage() {
           ))}
         </div>
       ) : narrowed ? (
-        <p className="py-20 text-center text-muted">No jewelry matches your search.</p>
+        <p className="py-20 text-center font-display italic text-muted">No jewelry matches your search.</p>
       ) : (
         <div className="flex flex-col items-center gap-4 py-20 text-center">
-          <p className="text-muted">No jewelry yet. Add your first piece!</p>
+          <p className="text-lg font-display italic text-muted">No jewelry yet. Add your first piece!</p>
           <Link to="/add">
             <Button>
               <Plus className="h-4 w-4" /> Add jewelry

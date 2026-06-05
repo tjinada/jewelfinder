@@ -40,7 +40,7 @@ export function ItemDetailPage() {
     return (
       <MainLayout>
         <div className="py-20 text-center">
-          <p className="text-muted">This item couldn’t be found.</p>
+          <p className="font-display italic text-muted">This item couldn’t be found.</p>
           <Button className="mt-4" onClick={() => navigate('/')}>
             Back to home
           </Button>
@@ -112,7 +112,7 @@ export function ItemDetailPage() {
 
         {/* Details */}
         <div className="mt-6">
-          <h1 className="font-display text-2xl text-ink md:text-3xl">{itemTitle(item)}</h1>
+          <h1 className="font-display text-2xl font-bold text-ink md:text-3xl">{itemTitle(item)}</h1>
           {item.ownerName && (
             <p className="mt-1 text-sm text-muted">Shared by {item.ownerName}</p>
           )}

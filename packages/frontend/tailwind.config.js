@@ -25,8 +25,8 @@ export default {
         onloan: '#C57F33',
       },
       fontFamily: {
-        sans: ['"Helvetica Neue"', 'Arial', 'system-ui', 'sans-serif'],
-        display: ['Georgia', '"Times New Roman"', 'serif'],
+        sans: ['Montserrat', '"Helvetica Neue"', 'Arial', 'system-ui', 'sans-serif'],
+        display: ['"Playfair Display"', 'Georgia', '"Times New Roman"', 'serif'],
         playfair: ['"Playfair Display"', 'Georgia', 'serif'],
         montserrat: ['Montserrat', '"Helvetica Neue"', 'Arial', 'sans-serif'],
       },

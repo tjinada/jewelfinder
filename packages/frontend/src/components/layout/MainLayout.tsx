@@ -45,7 +45,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
 
   const deskLink = ({ isActive }: { isActive: boolean }) =>
     cn(
-      'rounded-xl px-3.5 py-2 text-sm font-semibold transition-colors',
+      'rounded-xl px-3.5 py-2 text-sm font-medium transition-colors',
       isActive ? 'bg-primary/10 text-primary' : 'text-ink/70 hover:bg-ink/5 hover:text-ink',
     );
 
@@ -65,7 +65,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
         <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 md:h-16">
           <NavLink to="/" className="flex items-center gap-2">
             <img src="/icons/icon-512.png" alt="" className="h-8 w-8 rounded-lg" />
-            <span className="font-playfair text-2xl font-semibold text-primary md:text-3xl">The Clasp</span>
+            <span className="font-playfair text-2xl font-normal text-primary md:text-3xl">The Clasp</span>
           </NavLink>
 
           <nav className="hidden items-center gap-1 md:flex">
@@ -101,7 +101,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
 
             <button
               onClick={() => navigate('/add')}
-              className="hidden items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-gold-light md:inline-flex"
+              className="hidden items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-gold-light md:inline-flex"
             >
               <Plus className="h-4 w-4" /> Add
             </button>

@@ -170,7 +170,7 @@ export function JewelryFormPage() {
   return (
     <MainLayout>
       <div className="mx-auto max-w-2xl">
-        <h1 className="mb-5 font-display text-2xl text-ink md:text-3xl">
+        <h1 className="mb-5 font-display text-2xl font-bold text-ink md:text-3xl">
           {editing ? 'Edit item' : 'Add jewelry'}
         </h1>
 

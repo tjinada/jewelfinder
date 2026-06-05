@@ -10,14 +10,14 @@ export function ConversationListPage() {
 
   return (
     <MainLayout>
-      <h1 className="mb-4 font-display text-2xl text-ink md:text-3xl">Messages</h1>
+      <h1 className="mb-4 font-display text-2xl font-bold text-ink md:text-3xl">Messages</h1>
 
       {isLoading ? (
         <div className="flex justify-center py-20">
           <Loader2 className="h-7 w-7 animate-spin text-primary" />
         </div>
       ) : isError ? (
-        <p className="py-20 text-center text-muted">Couldn’t load your messages. Please try again.</p>
+        <p className="py-20 text-center font-display italic text-muted">Couldn’t load your messages. Please try again.</p>
       ) : conversations && conversations.length > 0 ? (
         <div className="mx-auto max-w-2xl divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
           {conversations.map((c) => {
@@ -73,7 +73,7 @@ export function ConversationListPage() {
       ) : (
         <div className="flex flex-col items-center gap-3 py-20 text-center">
           <MessageCircle className="h-10 w-10 text-muted/60" />
-          <p className="text-muted">
+          <p className="text-lg font-display italic text-muted">
             No conversations yet. When an owner accepts your loan request, a chat opens here.
           </p>
         </div>

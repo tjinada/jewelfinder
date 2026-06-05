@@ -42,7 +42,7 @@ export function ClosetViewPage() {
     return (
       <MainLayout>
         <div className="py-20 text-center">
-          <p className="text-muted">This closet couldn’t be found.</p>
+          <p className="font-display italic text-muted">This closet couldn’t be found.</p>
           <Button className="mt-4" onClick={() => navigate('/closets')}>
             Back to closets
           </Button>
@@ -113,7 +113,7 @@ export function ClosetViewPage() {
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <h1 className="font-display text-2xl text-ink md:text-3xl">{closet.name}</h1>
+              <h1 className="font-display text-2xl font-bold text-ink md:text-3xl">{closet.name}</h1>
               {isOwner && (
                 <button
                   onClick={() => {
@@ -178,7 +178,7 @@ export function ClosetViewPage() {
 
         {/* Items shared into this closet */}
         <div>
-          <h2 className="mb-3 font-display text-xl text-ink">Items in this closet</h2>
+          <h2 className="mb-3 font-display text-xl font-bold text-ink">Items in this closet</h2>
           {itemsLoading ? (
             <div className="flex justify-center py-10">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -190,7 +190,7 @@ export function ClosetViewPage() {
               ))}
             </div>
           ) : (
-            <p className="py-10 text-center text-sm text-muted">
+            <p className="py-10 text-center font-display text-sm italic text-muted">
               No items have been shared into this closet yet.
             </p>
           )}
