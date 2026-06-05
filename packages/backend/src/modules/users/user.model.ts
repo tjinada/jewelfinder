@@ -5,6 +5,7 @@ export interface IUser {
   email: string;
   password: string;
   displayName: string;
+  location: string;
   createdAt: Date;
   lastSeen: Date | null;
   pushSubscriptions: Array<{
@@ -45,6 +46,12 @@ const UserSchema = new Schema<IUserDocument, IUserModel>({
     trim: true,
     minlength: 1,
     maxlength: 60,
+  },
+  location: {
+    type: String,
+    trim: true,
+    maxlength: 120,
+    default: '',
   },
   createdAt: {
     type: Date,

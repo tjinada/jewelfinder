@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Users } from 'lucide-react';
+import { Users, MapPin } from 'lucide-react';
 import type { JewelryItem } from '@jewel/shared';
-import { Card, AvailabilityPill } from '@/components/ui';
+import { Card } from '@/components/ui';
 import { thumbImageUrl } from '@/lib/media';
 import { itemTitle, itemSubtitle } from './format';
 
@@ -45,7 +45,12 @@ export function JewelryCard({ item }: { item: JewelryItem }) {
         <div className="px-3 pb-3.5">
           <div className="truncate font-display text-base">{itemTitle(item)}</div>
           {subtitle && <div className="my-1 truncate text-xs text-muted">{subtitle}</div>}
-          <AvailabilityPill availability={item.availability} inline />
+          {item.location && (
+            <div className="mt-1 flex items-center gap-1 text-xs text-muted">
+              <MapPin className="h-3.5 w-3.5 flex-none" />
+              <span className="truncate">{item.location}</span>
+            </div>
+          )}
         </div>
       </Card>
     </Link>

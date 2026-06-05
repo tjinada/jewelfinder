@@ -9,6 +9,7 @@ export interface IJewelry {
   setId: Types.ObjectId | null;
   visibility: 'private' | 'public' | 'groups';
   sharedGroups: Types.ObjectId[];
+  location?: string;
   metal?: string;
   colour?: string;
   size?: string;
@@ -44,6 +45,9 @@ const JewelrySchema = new Schema<IJewelryDocument, IJewelryModel>(
       default: 'private',
     },
     sharedGroups: { type: [Schema.Types.ObjectId], ref: 'Group', default: [] },
+    // Where the item is located. Pre-filled from the owner's profile at post
+    // time, but editable per item; empty falls back to the owner's location.
+    location: { type: String, trim: true, maxlength: 120, default: '' },
     // Optional per-category attributes (which apply is enforced in validation).
     metal: String,
     colour: String,

@@ -45,6 +45,7 @@ function normalizeForCategory(input: JewelryBody) {
     visibility,
     // sharedGroups only travels with 'groups' visibility; cleared otherwise.
     sharedGroups: visibility === 'groups' ? input.sharedGroups ?? [] : [],
+    location: input.location?.trim() ?? '',
   };
   for (const key of ATTRIBUTE_KEYS) {
     out[key] = allowed.includes(key) ? input[key] : undefined;
@@ -53,7 +54,7 @@ function normalizeForCategory(input: JewelryBody) {
 }
 
 function toClient(doc: IJewelryDocument): JewelryItem {
-  const owner = doc.owner as unknown as { _id?: unknown; displayName?: string };
+  const owner = doc.owner as unknown as { _id?: unknown; displayName?: string; location?: string };
   const ownerId = owner && owner._id ? String(owner._id) : String(doc.owner);
   return {
     _id: String(doc._id),
@@ -66,6 +67,9 @@ function toClient(doc: IJewelryDocument): JewelryItem {
     set: doc.setId ? String(doc.setId) : null,
     visibility: doc.visibility as JewelryItem['visibility'],
     sharedGroups: doc.sharedGroups.map(String),
+    // Item's own location, falling back to the owner's current location for
+    // items created before locations existed.
+    location: doc.location || owner?.location || undefined,
     metal: doc.metal as JewelryItem['metal'],
     colour: doc.colour as JewelryItem['colour'],
     size: doc.size as JewelryItem['size'],
@@ -98,12 +102,12 @@ export const jewelryService = {
       else query.sharedGroups = scope; // a circle id
     }
 
-    const docs = await Jewelry.find(query).populate('owner', 'displayName').sort({ createdAt: -1 });
+    const docs = await Jewelry.find(query).populate('owner', 'displayName location').sort({ createdAt: -1 });
     return docs.map(toClient);
   },
 
   async getById(viewerId: string, id: string): Promise<JewelryItem> {
-    const doc = await Jewelry.findById(id).populate('owner', 'displayName');
+    const doc = await Jewelry.findById(id).populate('owner', 'displayName location');
     if (!doc) throw new AppError('Item not found', 404);
 
     const owner = doc.owner as unknown as { _id?: unknown };
@@ -123,7 +127,7 @@ export const jewelryService = {
     await assertOwnedSet(ownerId, input.set);
     await assertSharedGroups(ownerId, input.visibility, input.sharedGroups);
     const doc = await Jewelry.create({ ...normalizeForCategory(input), owner: ownerId });
-    await doc.populate('owner', 'displayName');
+    await doc.populate('owner', 'displayName location');
     return toClient(doc);
   },
 
@@ -139,7 +143,7 @@ export const jewelryService = {
     await doc.save();
 
     await Promise.allSettled(removed.map((f) => removeImage(f)));
-    await doc.populate('owner', 'displayName');
+    await doc.populate('owner', 'displayName location');
     return toClient(doc);
   },
 
@@ -165,7 +169,7 @@ export const jewelryService = {
 
     doc.availability = availability;
     await doc.save();
-    await doc.populate('owner', 'displayName');
+    await doc.populate('owner', 'displayName location');
     return toClient(doc);
   },
 };

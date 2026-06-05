@@ -11,11 +11,12 @@ export function RegisterPage() {
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [location, setLocation] = useState('');
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      await register.mutateAsync({ displayName, email, password });
+      await register.mutateAsync({ displayName, email, password, location });
       navigate('/', { replace: true });
     } catch {
       // error surfaced below
@@ -50,6 +51,21 @@ export function RegisterPage() {
             onChange={(e) => setEmail(e.target.value)}
             className={inputClass}
             placeholder="you@example.com"
+          />
+        </div>
+
+        <div>
+          <label className={labelClass} htmlFor="location">Location</label>
+          <input
+            id="location"
+            type="text"
+            autoComplete="address-level2"
+            required
+            maxLength={120}
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className={inputClass}
+            placeholder="City or area (e.g. Brampton, ON)"
           />
         </div>
 

@@ -29,7 +29,7 @@ export function useRegister() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: { email: string; password: string; displayName: string }) => {
+    mutationFn: async (input: { email: string; password: string; displayName: string; location: string }) => {
       const { data } = await api.post<ApiResponse<AuthResponse>>('/auth/register', input);
       return data.data;
     },
@@ -67,6 +67,19 @@ export function useCurrentUser() {
   }, [query.isLoading, query.isFetching, setLoading]);
 
   return query;
+}
+
+/** Update the signed-in user's profile (currently just location). */
+export function useUpdateProfile() {
+  const setUser = useAuthStore((s) => s.setUser);
+
+  return useMutation({
+    mutationFn: async (input: { location: string }) => {
+      const { data } = await api.patch<ApiResponse<{ user: AuthUser }>>('/auth/me', input);
+      return data.data.user;
+    },
+    onSuccess: (user) => setUser(user),
+  });
 }
 
 export function useLogout() {

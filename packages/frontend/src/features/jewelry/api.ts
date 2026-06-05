@@ -25,6 +25,7 @@ export interface JewelryInput {
   set?: string | null;
   visibility?: Visibility;
   sharedGroups?: string[];
+  location?: string;
 }
 
 export interface StoredImage {

@@ -8,6 +8,11 @@ export const registerSchema = z.object({
       .string()
       .min(1, 'Display name is required')
       .max(60, 'Display name cannot exceed 60 characters'),
+    location: z
+      .string()
+      .trim()
+      .min(1, 'Location is required')
+      .max(120, 'Location cannot exceed 120 characters'),
   }),
 });
 
@@ -18,5 +23,12 @@ export const loginSchema = z.object({
   }),
 });
 
+export const updateMeSchema = z.object({
+  body: z.object({
+    location: z.string().trim().max(120, 'Location cannot exceed 120 characters'),
+  }),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>['body'];
 export type LoginInput = z.infer<typeof loginSchema>['body'];
+export type UpdateMeInput = z.infer<typeof updateMeSchema>['body'];

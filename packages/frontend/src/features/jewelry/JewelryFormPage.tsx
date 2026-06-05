@@ -28,6 +28,7 @@ import {
 import { getErrorMessage } from '@/features/auth';
 import { SetSelect, type SetSelection, useCreateSet } from '@/features/sets';
 import { VisibilitySelect, type VisibilitySelection } from '@/features/closets';
+import { useAuthStore } from '@/stores/authStore';
 
 const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wide text-muted';
 const selectClass =
@@ -46,6 +47,7 @@ export function JewelryFormPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const editing = !!id;
+  const userLocation = useAuthStore((s) => s.user?.location ?? '');
 
   const { data: existing, isLoading: loadingExisting } = useJewelryItem(id);
   const upload = useUploadImages();
@@ -63,6 +65,7 @@ export function JewelryFormPage() {
   const [necklaceType, setNecklaceType] = useState<string | undefined>();
   const [setSel, setSetSel] = useState<SetSelection>({ mode: 'none' });
   const [vis, setVis] = useState<VisibilitySelection>({ visibility: 'private', sharedGroups: [] });
+  const [location, setLocation] = useState(userLocation);
   const [error, setError] = useState('');
 
   // Prefill in edit mode
@@ -78,6 +81,7 @@ export function JewelryFormPage() {
       setNecklaceType(existing.necklaceType);
       setSetSel(existing.set ? { mode: 'existing', id: existing.set } : { mode: 'none' });
       setVis({ visibility: existing.visibility, sharedGroups: existing.sharedGroups });
+      setLocation(existing.location ?? '');
     }
   }, [existing]);
 
@@ -137,6 +141,7 @@ export function JewelryFormPage() {
         set: setId,
         visibility: vis.visibility,
         sharedGroups: vis.visibility === 'groups' ? vis.sharedGroups : undefined,
+        location: location.trim() || undefined,
         metal: applicable.includes('metal') ? metal : undefined,
         colour: applicable.includes('colour') ? colour : undefined,
         size: applicable.includes('size') ? size : undefined,
@@ -303,6 +308,18 @@ export function JewelryFormPage() {
               </select>
             </Field>
           )}
+
+          {/* Location — defaults to your profile location, editable per item */}
+          <Field label="Location">
+            <input
+              type="text"
+              maxLength={120}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="City or area (e.g. Brampton, ON)"
+              className={selectClass}
+            />
+          </Field>
 
           {/* Set membership — available for any category */}
           <Field label="Set">

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Bell, BellOff, Loader2, RefreshCw, Send, ShieldCheck, Check, X } from 'lucide-react';
+import { Bell, BellOff, Loader2, RefreshCw, Send, ShieldCheck, Check, X, MapPin } from 'lucide-react';
 import { MainLayout } from '@/components/layout';
 import { Button } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
+import { useUpdateProfile, getErrorMessage } from '@/features/auth';
 import { cn } from '@/lib/utils';
 import {
   loadPushDiagnostics,
@@ -28,6 +29,68 @@ function StatusRow({ label, value, tone }: { label: string; value: string; tone?
       >
         {value}
       </span>
+    </div>
+  );
+}
+
+function ProfileCard() {
+  const user = useAuthStore((s) => s.user);
+  const update = useUpdateProfile();
+  const [location, setLocation] = useState(user?.location ?? '');
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
+
+  const dirty = location.trim() !== (user?.location ?? '').trim();
+
+  const onSave = async () => {
+    setError('');
+    setSaved(false);
+    try {
+      await update.mutateAsync({ location: location.trim() });
+      setSaved(true);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-line bg-surface p-5">
+      <div className="mb-3 flex items-center gap-2">
+        <MapPin className="h-5 w-5 text-primary" />
+        <h2 className="font-display text-lg text-ink">Profile</h2>
+      </div>
+
+      <label
+        htmlFor="profile-location"
+        className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-muted"
+      >
+        Location
+      </label>
+      <div className="flex gap-2">
+        <input
+          id="profile-location"
+          type="text"
+          maxLength={120}
+          value={location}
+          onChange={(e) => {
+            setLocation(e.target.value);
+            setSaved(false);
+          }}
+          placeholder="City or area (e.g. Brampton, ON)"
+          className="flex-1 rounded-xl border border-line bg-surface px-4 py-2.5 text-sm text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+        />
+        <Button onClick={onSave} disabled={update.isPending || !dirty}>
+          {update.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+          Save
+        </Button>
+      </div>
+
+      <p className="mt-2 text-xs text-muted">
+        Used as the default location when you post an item — you can still change it on each item.
+      </p>
+
+      {error && <p className="mt-2 text-sm text-accent">{error}</p>}
+      {saved && !error && <p className="mt-2 text-sm text-available">Location updated.</p>}
     </div>
   );
 }
@@ -293,6 +356,7 @@ export function SettingsPage() {
       <div className="mx-auto max-w-2xl">
         <h1 className="mb-4 font-display text-2xl text-ink md:text-3xl">Settings</h1>
         <div className="flex flex-col gap-4">
+          <ProfileCard />
           <NotificationsCard />
           {isAdmin && <AdminCard />}
         </div>

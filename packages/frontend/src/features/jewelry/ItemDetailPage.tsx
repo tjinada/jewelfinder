@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Pencil, Trash2, Loader2, RefreshCw, Link2, CalendarDays, Eye } from 'lucide-react';
+import { ArrowLeft, Pencil, Trash2, Loader2, RefreshCw, Link2, CalendarDays, Eye, MapPin } from 'lucide-react';
 import { CATEGORY_LABELS, METAL_LABELS, NECKLACE_TYPE_LABELS, COLOURS, VISIBILITY_LABELS } from '@jewel/shared';
 import { MainLayout } from '@/components/layout';
-import { Button, AvailabilityPill, GlassSurface } from '@/components/ui';
+import { Button, GlassSurface } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
 import { fullImageUrl, thumbImageUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
@@ -91,10 +91,6 @@ export function ItemDetailPage() {
           >
             <ArrowLeft className="h-5 w-5" />
           </GlassSurface>
-
-          <div className="absolute right-3 top-3">
-            <AvailabilityPill availability={item.availability} />
-          </div>
         </div>
 
         {/* Thumbnail strip */}
@@ -120,6 +116,11 @@ export function ItemDetailPage() {
           <h1 className="font-display text-2xl text-ink md:text-3xl">{itemTitle(item)}</h1>
           {item.ownerName && (
             <p className="mt-1 text-sm text-muted">Shared by {item.ownerName}</p>
+          )}
+          {item.location && (
+            <p className="mt-1 flex items-center gap-1.5 text-sm text-muted">
+              <MapPin className="h-4 w-4" /> {item.location}
+            </p>
           )}
           {isOwner && (
             <p className="mt-1 flex items-center gap-1.5 text-sm text-muted">

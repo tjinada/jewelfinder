@@ -1,12 +1,13 @@
 import { User, IUserDocument } from '../users/user.model.js';
 import { AppError } from '../../middleware/error.middleware.js';
 import { generateToken } from '../../middleware/auth.middleware.js';
-import type { RegisterInput, LoginInput } from './auth.validation.js';
+import type { RegisterInput, LoginInput, UpdateMeInput } from './auth.validation.js';
 
 export interface PublicUser {
   id: string;
   email: string;
   displayName: string;
+  location: string;
   createdAt: Date;
   preferences: IUserDocument['preferences'];
   isAdmin: boolean;
@@ -22,6 +23,7 @@ function toPublicUser(user: IUserDocument): PublicUser {
     id: (user._id as { toString(): string }).toString(),
     email: user.email,
     displayName: user.displayName,
+    location: user.location ?? '',
     createdAt: user.createdAt,
     preferences: user.preferences,
     isAdmin: !!user.isAdmin,
@@ -30,7 +32,7 @@ function toPublicUser(user: IUserDocument): PublicUser {
 
 export const authService = {
   async register(input: RegisterInput): Promise<AuthResponse> {
-    const { email, password, displayName } = input;
+    const { email, password, displayName, location } = input;
 
     const existing = await User.findOne({ email: email.toLowerCase() });
     if (existing) {
@@ -41,6 +43,7 @@ export const authService = {
       email: email.toLowerCase(),
       password,
       displayName,
+      location,
     });
 
     return { token: generateToken(user), user: toPublicUser(user) };
@@ -70,6 +73,17 @@ export const authService = {
     if (!user) {
       throw new AppError('User not found', 404);
     }
+    return toPublicUser(user);
+  },
+
+  /** Update the signed-in user's editable profile fields (currently location). */
+  async updateProfile(userId: string, input: UpdateMeInput): Promise<PublicUser> {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new AppError('User not found', 404);
+    }
+    user.location = input.location;
+    await user.save();
     return toPublicUser(user);
   },
 };

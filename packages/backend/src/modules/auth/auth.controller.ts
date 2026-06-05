@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { asyncHandler } from '../../middleware/error.middleware.js';
 import { sendSuccess } from '../../utils/response.js';
 import { authService } from './auth.service.js';
-import type { RegisterInput, LoginInput } from './auth.validation.js';
+import type { RegisterInput, LoginInput, UpdateMeInput } from './auth.validation.js';
 
 export const authController = {
   register: asyncHandler(async (req: Request, res: Response) => {
@@ -22,6 +22,11 @@ export const authController = {
 
   getMe: asyncHandler(async (req: Request, res: Response) => {
     const user = await authService.getUser(req.userId!);
+    sendSuccess(res, { user });
+  }),
+
+  updateMe: asyncHandler(async (req: Request, res: Response) => {
+    const user = await authService.updateProfile(req.userId!, req.body as UpdateMeInput);
     sendSuccess(res, { user });
   }),
 };

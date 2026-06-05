@@ -5,6 +5,7 @@ export interface AuthUser {
   id: string;
   email: string;
   displayName: string;
+  location?: string;
   createdAt: string | Date;
   isAdmin?: boolean;
   preferences?: {
