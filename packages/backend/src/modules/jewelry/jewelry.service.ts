@@ -89,6 +89,15 @@ export const jewelryService = {
     const { $or } = await buildVisibilityFilter(viewerId);
     query.$or = $or;
 
+    // Optional scope selector — narrows WITHIN the visible set, never widens it
+    // (it's ANDed with the visibility filter above).
+    const scope = filters.scope?.trim();
+    if (scope && scope !== 'all') {
+      if (scope === 'public') query.visibility = 'public';
+      else if (scope === 'mine') query.owner = viewerId;
+      else query.sharedGroups = scope; // a circle id
+    }
+
     const docs = await Jewelry.find(query).populate('owner', 'displayName').sort({ createdAt: -1 });
     return docs.map(toClient);
   },

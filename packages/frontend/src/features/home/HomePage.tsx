@@ -4,18 +4,52 @@ import { Loader2, Plus } from 'lucide-react';
 import { CATEGORIES, CATEGORY_LABELS, type Category } from '@jewel/shared';
 import { MainLayout } from '@/components/layout';
 import { Chip, Button } from '@/components/ui';
-import { useJewelryList } from '@/features/jewelry/api';
+import { useJewelryList, type JewelryFilters } from '@/features/jewelry/api';
 import { JewelryCard } from '@/features/jewelry/JewelryCard';
+import { useMyCircles } from '@/features/circles';
+
+const scopeSelectClass =
+  'rounded-xl border border-line bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20';
 
 export function HomePage() {
   const [active, setActive] = useState<Category | 'all'>('all');
-  const { data: items, isLoading, isError } = useJewelryList(
-    active === 'all' ? {} : { category: active },
-  );
+  const [scope, setScope] = useState('all');
+  const { data: circles } = useMyCircles();
+
+  const filters: JewelryFilters = {};
+  if (active !== 'all') filters.category = active;
+  if (scope !== 'all') filters.scope = scope;
+
+  const { data: items, isLoading, isError } = useJewelryList(filters);
+
+  const filtered = active !== 'all' || scope !== 'all';
 
   return (
     <MainLayout>
-      <h1 className="mb-4 font-display text-2xl text-ink md:text-3xl">Browse jewelry</h1>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h1 className="font-display text-2xl text-ink md:text-3xl">Browse jewelry</h1>
+
+        {/* Scope: narrow to public, your own, or a specific circle */}
+        <select
+          value={scope}
+          onChange={(e) => setScope(e.target.value)}
+          aria-label="Filter by visibility"
+          className={scopeSelectClass}
+        >
+          <option value="all">All visible</option>
+          <option value="public">Public</option>
+          <option value="mine">Just mine</option>
+          {circles && circles.length > 0 && (
+            <optgroup label="Circles">
+              {circles.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name}
+                </option>
+              ))}
+            </optgroup>
+          )}
+        </select>
+      </div>
 
       <div className="no-scrollbar mb-6 flex gap-2 overflow-x-auto md:flex-wrap">
         <Chip active={active === 'all'} onClick={() => setActive('all')}>
@@ -40,13 +74,11 @@ export function HomePage() {
             <JewelryCard key={item._id} item={item} />
           ))}
         </div>
+      ) : filtered ? (
+        <p className="py-20 text-center text-muted">No items match this filter.</p>
       ) : (
         <div className="flex flex-col items-center gap-4 py-20 text-center">
-          <p className="text-muted">
-            {active === 'all'
-              ? 'No jewelry yet. Add your first piece!'
-              : `No ${CATEGORY_LABELS[active].toLowerCase()} items yet.`}
-          </p>
+          <p className="text-muted">No jewelry yet. Add your first piece!</p>
           <Link to="/add">
             <Button>
               <Plus className="h-4 w-4" /> Add jewelry

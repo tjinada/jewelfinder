@@ -9,6 +9,7 @@ export interface JewelryFilters {
   colour?: string;
   size?: string;
   necklaceType?: string;
+  scope?: string;
   q?: string;
 }
 
