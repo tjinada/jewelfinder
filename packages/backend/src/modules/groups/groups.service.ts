@@ -1,6 +1,7 @@
 import { Group, IGroupDocument } from './group.model.js';
 import { User } from '../users/user.model.js';
 import { Jewelry } from '../jewelry/jewelry.model.js';
+import { notificationService } from '../notifications/notification.service.js';
 import { AppError } from '../../middleware/error.middleware.js';
 import type { Group as GroupDTO, GroupWithMembers } from '@jewel/shared';
 
@@ -82,7 +83,21 @@ export const groupService = {
     const user = await User.findByEmail(email);
     if (!user) throw new AppError('No user found with that email', 404);
 
+    const alreadyMember = doc.members.some((m) => String(m) === String(user._id));
     await Group.updateOne({ _id: id }, { $addToSet: { members: user._id } });
+
+    // Notify the newly added member (not on a no-op re-add, and never the owner).
+    if (!alreadyMember && String(user._id) !== ownerId) {
+      const owner = await User.findById(ownerId).select('displayName');
+      // Fire-and-forget: a push failure must not fail the add.
+      void notificationService.notifyUser(String(user._id), {
+        title: 'Added to a circle',
+        body: `${owner?.displayName ?? 'Someone'} added you to the circle "${doc.name}"`,
+        tag: `circle-${id}`,
+        data: { url: `/circles/${id}` },
+      });
+    }
+
     return this.getById(ownerId, id);
   },
 
