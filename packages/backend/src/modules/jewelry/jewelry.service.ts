@@ -25,10 +25,10 @@ async function assertSharedGroups(
 ): Promise<void> {
   if (visibility !== 'groups') return;
   const uniqueIds = [...new Set(sharedGroups ?? [])];
-  if (uniqueIds.length === 0) throw new AppError('Select at least one circle', 400);
+  if (uniqueIds.length === 0) throw new AppError('Select at least one closet', 400);
   const owned = await Group.find({ _id: { $in: uniqueIds }, members: ownerId }).distinct('_id');
   if (owned.length !== uniqueIds.length) {
-    throw new AppError('You can only share to circles you belong to', 403);
+    throw new AppError('You can only share to closets you belong to', 403);
   }
 }
 

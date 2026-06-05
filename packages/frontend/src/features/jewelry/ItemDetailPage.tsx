@@ -125,7 +125,7 @@ export function ItemDetailPage() {
             <p className="mt-1 flex items-center gap-1.5 text-sm text-muted">
               <Eye className="h-4 w-4" /> Visible to: {VISIBILITY_LABELS[item.visibility]}
               {item.visibility === 'groups' &&
-                ` · ${item.sharedGroups.length} ${item.sharedGroups.length === 1 ? 'circle' : 'circles'}`}
+                ` · ${item.sharedGroups.length} ${item.sharedGroups.length === 1 ? 'closet' : 'closets'}`}
             </p>
           )}
 

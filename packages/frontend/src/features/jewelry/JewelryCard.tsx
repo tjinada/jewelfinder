@@ -35,8 +35,8 @@ export function JewelryCard({ item }: { item: JewelryItem }) {
           {item.visibility === 'groups' && (
             <span
               className="absolute left-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-ink/60 text-white shadow-md ring-1 ring-white/30"
-              title="Shared to a circle"
-              aria-label="Shared to a circle"
+              title="Shared to a closet"
+              aria-label="Shared to a closet"
             >
               <Users className="h-3.5 w-3.5" />
             </span>

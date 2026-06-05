@@ -40,7 +40,7 @@ export function HomePage() {
           <option value="public">Public</option>
           <option value="mine">Just mine</option>
           {circles && circles.length > 0 && (
-            <optgroup label="Circles">
+            <optgroup label="Closets">
               {circles.map((c) => (
                 <option key={c._id} value={c._id}>
                   {c.name}

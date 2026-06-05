@@ -118,7 +118,7 @@ export function JewelryFormPage() {
       return setError('Please name the new set, or choose “Not part of a set”.');
     }
     if (vis.visibility === 'groups' && vis.sharedGroups.length === 0) {
-      return setError('Pick at least one circle, or choose a different visibility.');
+      return setError('Pick at least one closet, or choose a different visibility.');
     }
 
     try {

@@ -45,9 +45,9 @@ export function CircleViewPage() {
     return (
       <MainLayout>
         <div className="py-20 text-center">
-          <p className="text-muted">This circle couldn’t be found.</p>
+          <p className="text-muted">This closet couldn’t be found.</p>
           <Button className="mt-4" onClick={() => navigate('/circles')}>
-            Back to circles
+            Back to closets
           </Button>
         </div>
       </MainLayout>
@@ -79,7 +79,7 @@ export function CircleViewPage() {
   };
 
   const onRemove = async (memberId: string, displayName: string) => {
-    if (!window.confirm(`Remove ${displayName} from this circle?`)) return;
+    if (!window.confirm(`Remove ${displayName} from this closet?`)) return;
     try {
       await removeMember.mutateAsync(memberId);
     } catch (err) {
@@ -88,14 +88,14 @@ export function CircleViewPage() {
   };
 
   const onDisband = async () => {
-    if (!window.confirm('Disband this circle? Items shared only to it will no longer be visible to its members.'))
+    if (!window.confirm('Disband this closet? Items shared only to it will no longer be visible to its members.'))
       return;
     await disband.mutateAsync(circle._id);
     navigate('/circles', { replace: true });
   };
 
   const onLeave = async () => {
-    if (!window.confirm('Leave this circle?')) return;
+    if (!window.confirm('Leave this closet?')) return;
     await leave.mutateAsync(circle._id);
     navigate('/circles', { replace: true });
   };
@@ -106,7 +106,7 @@ export function CircleViewPage() {
         {/* Header */}
         <div className="mb-6">
           <p className="flex items-center gap-1.5 text-sm font-semibold text-primary">
-            <Users className="h-4 w-4" /> Circle
+            <Users className="h-4 w-4" /> Closet
           </p>
 
           {editingName ? (
@@ -134,7 +134,7 @@ export function CircleViewPage() {
                     setNameDraft(circle.name);
                     setEditingName(true);
                   }}
-                  aria-label="Rename circle"
+                  aria-label="Rename closet"
                   className="text-muted hover:text-primary"
                 >
                   <Pencil className="h-4 w-4" />
@@ -225,7 +225,7 @@ export function CircleViewPage() {
               disabled={disband.isPending}
               className="border-accent/40 text-accent hover:bg-accent/10"
             >
-              <Trash2 className="h-4 w-4" /> Disband circle
+              <Trash2 className="h-4 w-4" /> Disband closet
             </Button>
           ) : (
             <Button
@@ -234,7 +234,7 @@ export function CircleViewPage() {
               disabled={leave.isPending}
               className="border-accent/40 text-accent hover:bg-accent/10"
             >
-              <LogOut className="h-4 w-4" /> Leave circle
+              <LogOut className="h-4 w-4" /> Leave closet
             </Button>
           )}
         </div>

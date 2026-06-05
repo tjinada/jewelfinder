@@ -5,6 +5,7 @@ import { notificationService } from '../notifications/notification.service.js';
 import { AppError } from '../../middleware/error.middleware.js';
 import type { Group as GroupDTO, GroupWithMembers } from '@jewel/shared';
 
+// "Closet" is the user-facing name; the model/collection/field stay `Group`/`sharedGroups`.
 type PopulatedMember = { _id: unknown; displayName: string; email: string };
 
 function toGroup(doc: IGroupDocument, viewerId: string): GroupDTO {
@@ -31,11 +32,11 @@ function toGroupWithMembers(doc: IGroupDocument, viewerId: string): GroupWithMem
 /** Owner-only guard, shared by the management methods. */
 function assertOwner(doc: IGroupDocument, ownerId: string): void {
   if (String(doc.owner) !== ownerId) {
-    throw new AppError('Only the circle owner can do that', 403);
+    throw new AppError('Only the closet owner can do that', 403);
   }
 }
 
-/** Drop a circle from items' `sharedGroups` so leaving/disbanding stops sharing. */
+/** Drop a closet from items' `sharedGroups` so leaving/disbanding stops sharing. */
 async function pruneGroupFromItems(groupId: string, ownerId?: string): Promise<void> {
   const filter: Record<string, unknown> = { sharedGroups: groupId };
   if (ownerId) filter.owner = ownerId;
@@ -43,20 +44,20 @@ async function pruneGroupFromItems(groupId: string, ownerId?: string): Promise<v
 }
 
 export const groupService = {
-  /** Circles the user belongs to. */
+  /** Closets the user belongs to. */
   async listMine(userId: string): Promise<GroupDTO[]> {
     const docs = await Group.find({ members: userId }).sort({ name: 1 });
     return docs.map((d) => toGroup(d, userId));
   },
 
-  /** A circle with its members (members only). */
+  /** A closet with its members (members only). */
   async getById(userId: string, id: string): Promise<GroupWithMembers> {
     const doc = await Group.findById(id).populate('members', 'displayName email');
-    if (!doc) throw new AppError('Circle not found', 404);
+    if (!doc) throw new AppError('Closet not found', 404);
     const isMember = (doc.members as unknown as PopulatedMember[]).some(
       (m) => String(m._id) === userId,
     );
-    if (!isMember) throw new AppError('This is not your circle', 403);
+    if (!isMember) throw new AppError('This is not your closet', 403);
     return toGroupWithMembers(doc, userId);
   },
 
@@ -67,7 +68,7 @@ export const groupService = {
 
   async rename(ownerId: string, id: string, name: string): Promise<GroupDTO> {
     const doc = await Group.findById(id);
-    if (!doc) throw new AppError('Circle not found', 404);
+    if (!doc) throw new AppError('Closet not found', 404);
     assertOwner(doc, ownerId);
     doc.name = name.trim();
     await doc.save();
@@ -77,7 +78,7 @@ export const groupService = {
   /** Owner adds a member by email. Idempotent if they're already in. */
   async addMember(ownerId: string, id: string, email: string): Promise<GroupWithMembers> {
     const doc = await Group.findById(id);
-    if (!doc) throw new AppError('Circle not found', 404);
+    if (!doc) throw new AppError('Closet not found', 404);
     assertOwner(doc, ownerId);
 
     const user = await User.findByEmail(email);
@@ -91,9 +92,9 @@ export const groupService = {
       const owner = await User.findById(ownerId).select('displayName');
       // Fire-and-forget: a push failure must not fail the add.
       void notificationService.notifyUser(String(user._id), {
-        title: 'Added to a circle',
-        body: `${owner?.displayName ?? 'Someone'} added you to the circle "${doc.name}"`,
-        tag: `circle-${id}`,
+        title: 'Added to a closet',
+        body: `${owner?.displayName ?? 'Someone'} added you to the closet "${doc.name}"`,
+        tag: `closet-${id}`,
         data: { url: `/circles/${id}` },
       });
     }
@@ -104,10 +105,10 @@ export const groupService = {
   /** Owner removes a member (not themselves). */
   async removeMember(ownerId: string, id: string, memberId: string): Promise<GroupWithMembers> {
     const doc = await Group.findById(id);
-    if (!doc) throw new AppError('Circle not found', 404);
+    if (!doc) throw new AppError('Closet not found', 404);
     assertOwner(doc, ownerId);
     if (memberId === String(doc.owner)) {
-      throw new AppError('The owner cannot be removed; disband the circle instead', 400);
+      throw new AppError('The owner cannot be removed; disband the closet instead', 400);
     }
 
     await Group.updateOne({ _id: id }, { $pull: { members: memberId } });
@@ -118,22 +119,22 @@ export const groupService = {
   /** Any member except the owner can leave. */
   async leave(userId: string, id: string): Promise<void> {
     const doc = await Group.findById(id);
-    if (!doc) throw new AppError('Circle not found', 404);
+    if (!doc) throw new AppError('Closet not found', 404);
     if (String(doc.owner) === userId) {
-      throw new AppError('The owner cannot leave; disband the circle instead', 400);
+      throw new AppError('The owner cannot leave; disband the closet instead', 400);
     }
     if (!doc.members.some((m) => String(m) === userId)) {
-      throw new AppError('You are not a member of this circle', 400);
+      throw new AppError('You are not a member of this closet', 400);
     }
 
     await Group.updateOne({ _id: id }, { $pull: { members: userId } });
     await pruneGroupFromItems(id, userId);
   },
 
-  /** Owner disbands the circle; clears every dangling reference to it. */
+  /** Owner disbands the closet; clears every dangling reference to it. */
   async remove(ownerId: string, id: string): Promise<void> {
     const doc = await Group.findById(id);
-    if (!doc) throw new AppError('Circle not found', 404);
+    if (!doc) throw new AppError('Closet not found', 404);
     assertOwner(doc, ownerId);
     await pruneGroupFromItems(id);
     await doc.deleteOne();

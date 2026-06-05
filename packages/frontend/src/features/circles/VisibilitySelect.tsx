@@ -8,10 +8,10 @@ export interface VisibilitySelection {
   sharedGroups: string[];
 }
 
-// UI order (Private, My circles, Public) with a short hint under each.
+// UI order (Private, My closets, Public) with a short hint under each.
 const OPTIONS: { value: Visibility; hint: string }[] = [
   { value: 'private', hint: 'Only you' },
-  { value: 'groups', hint: 'Chosen circles' },
+  { value: 'groups', hint: 'Chosen closets' },
   { value: 'public', hint: 'Everyone' },
 ];
 
@@ -20,7 +20,7 @@ interface VisibilitySelectProps {
   onChange: (value: VisibilitySelection) => void;
 }
 
-/** Pick who can see an item: only you, chosen circles, or everyone. */
+/** Pick who can see an item: only you, chosen closets, or everyone. */
 export function VisibilitySelect({ value, onChange }: VisibilitySelectProps) {
   const { data: circles } = useMyCircles();
   const list = circles ?? [];
@@ -67,7 +67,7 @@ export function VisibilitySelect({ value, onChange }: VisibilitySelectProps) {
         <div className="rounded-xl border border-line bg-tile/40 p-3">
           {list.length === 0 ? (
             <p className="text-sm text-muted">
-              You’re not in any circles yet.{' '}
+              You’re not in any closets yet.{' '}
               <Link to="/circles" className="font-semibold text-primary underline">
                 Create one
               </Link>{' '}

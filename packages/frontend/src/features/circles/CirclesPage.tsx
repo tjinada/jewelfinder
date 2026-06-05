@@ -17,7 +17,7 @@ export function CirclesPage() {
   const onCreate = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!name.trim()) return setError('Please name the circle.');
+    if (!name.trim()) return setError('Please name the closet.');
     try {
       const circle = await create.mutateAsync(name.trim());
       setName('');
@@ -32,9 +32,9 @@ export function CirclesPage() {
       <div className="mx-auto max-w-2xl">
         <div className="mb-5">
           <p className="flex items-center gap-1.5 text-sm font-semibold text-primary">
-            <Users className="h-4 w-4" /> Circles
+            <Users className="h-4 w-4" /> Closets
           </p>
-          <h1 className="font-display text-2xl text-ink md:text-3xl">Your circles</h1>
+          <h1 className="font-display text-2xl text-ink md:text-3xl">Your closets</h1>
           <p className="mt-1 text-sm text-muted">
             Share items with a chosen group instead of everyone.
           </p>
@@ -47,7 +47,7 @@ export function CirclesPage() {
             maxLength={60}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="New circle name (e.g. Family)"
+            placeholder="New closet name (e.g. Family)"
             className="flex-1 rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
           <Button type="submit" disabled={create.isPending}>
@@ -87,7 +87,7 @@ export function CirclesPage() {
           </ul>
         ) : (
           <p className="py-16 text-center text-muted">
-            No circles yet. Create one above to start sharing with a group.
+            No closets yet. Create one above to start sharing with a group.
           </p>
         )}
       </div>

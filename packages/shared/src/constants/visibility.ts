@@ -15,5 +15,5 @@ export type Visibility = (typeof VISIBILITY)[number];
 export const VISIBILITY_LABELS: Record<Visibility, string> = {
   private: 'Only me',
   public: 'Everyone',
-  groups: 'My circles',
+  groups: 'My closets',
 };

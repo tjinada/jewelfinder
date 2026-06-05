@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 const navLinks = [
   { to: '/', label: 'Home', end: true },
   { to: '/search', label: 'Search', end: false },
-  { to: '/circles', label: 'Circles', end: false },
+  { to: '/circles', label: 'Closets', end: false },
   { to: '/messages', label: 'Messages', end: false },
   { to: '/requests', label: 'Requests', end: false },
 ] as const;
@@ -138,7 +138,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
                       }}
                       className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink hover:bg-ink/5"
                     >
-                      <Users className="h-4 w-4" /> Circles
+                      <Users className="h-4 w-4" /> Closets
                     </button>
                     <button
                       onClick={() => {

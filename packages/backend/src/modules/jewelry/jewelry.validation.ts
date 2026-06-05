@@ -21,7 +21,7 @@ const baseItem = z.object({
   availability: AvailabilitySchema.optional(),
   set: z.string().nullable().optional(),
   visibility: VisibilitySchema.optional(),
-  sharedGroups: z.array(z.string().regex(/^[a-f\d]{24}$/i, 'Invalid circle id')).optional(),
+  sharedGroups: z.array(z.string().regex(/^[a-f\d]{24}$/i, 'Invalid closet id')).optional(),
   metal: MetalSchema.optional(),
   colour: ColourSchema.optional(),
   size: BangleSizeSchema.optional(),
@@ -48,8 +48,8 @@ function enforceApplicableAttributes(val: z.infer<typeof baseItem>, ctx: z.Refin
 
 /**
  * `sharedGroups` is meaningful only when visibility is 'groups', and in that
- * case at least one circle must be chosen. (That the owner actually belongs to
- * those circles is a DB check, enforced in the service.)
+ * case at least one closet must be chosen. (That the owner actually belongs to
+ * those closets is a DB check, enforced in the service.)
  */
 function enforceVisibility(val: z.infer<typeof baseItem>, ctx: z.RefinementCtx) {
   const shared = val.sharedGroups ?? [];
@@ -58,7 +58,7 @@ function enforceVisibility(val: z.infer<typeof baseItem>, ctx: z.RefinementCtx) 
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['sharedGroups'],
-        message: 'Select at least one circle',
+        message: 'Select at least one closet',
       });
     }
   } else if (shared.length > 0) {
