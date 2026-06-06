@@ -23,6 +23,8 @@ const baseItem = z.object({
   visibility: VisibilitySchema.optional(),
   sharedGroups: z.array(z.string().regex(/^[a-f\d]{24}$/i, 'Invalid closet id')).optional(),
   location: z.string().trim().max(120).optional(),
+  condition: z.number().int().min(1).max(5),
+  conditionNote: z.string().trim().max(300).optional(),
   metal: MetalSchema.optional(),
   colour: ColourSchema.optional(),
   size: BangleSizeSchema.optional(),

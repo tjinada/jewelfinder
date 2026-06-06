@@ -10,6 +10,8 @@ export interface IJewelry {
   visibility: 'private' | 'public' | 'groups';
   sharedGroups: Types.ObjectId[];
   location?: string;
+  condition?: number;
+  conditionNote?: string;
   metal?: string;
   colour?: string;
   size?: string;
@@ -48,6 +50,9 @@ const JewelrySchema = new Schema<IJewelryDocument, IJewelryModel>(
     // Where the item is located. Pre-filled from the owner's profile at post
     // time, but editable per item; empty falls back to the owner's location.
     location: { type: String, trim: true, maxlength: 120, default: '' },
+    // Condition: a 1–5 star rating set at post time; optional note when < 5.
+    condition: { type: Number, min: 1, max: 5 },
+    conditionNote: { type: String, trim: true, maxlength: 300, default: '' },
     // Optional per-category attributes (which apply is enforced in validation).
     metal: String,
     colour: String,

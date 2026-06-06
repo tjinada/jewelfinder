@@ -15,7 +15,7 @@ import {
   type Availability,
 } from '@jewel/shared';
 import { MainLayout } from '@/components/layout';
-import { Button, LocationInput } from '@/components/ui';
+import { Button, LocationInput, StarRating } from '@/components/ui';
 import { cn } from '@/lib/utils';
 import { thumbImageUrl } from '@/lib/media';
 import {
@@ -66,6 +66,8 @@ export function JewelryFormPage() {
   const [setSel, setSetSel] = useState<SetSelection>({ mode: 'none' });
   const [vis, setVis] = useState<VisibilitySelection>({ visibility: 'private', sharedGroups: [] });
   const [location, setLocation] = useState(userLocation);
+  const [condition, setCondition] = useState<number | undefined>(undefined);
+  const [conditionNote, setConditionNote] = useState('');
   const [error, setError] = useState('');
 
   // Prefill in edit mode
@@ -82,6 +84,8 @@ export function JewelryFormPage() {
       setSetSel(existing.set ? { mode: 'existing', id: existing.set } : { mode: 'none' });
       setVis({ visibility: existing.visibility, sharedGroups: existing.sharedGroups });
       setLocation(existing.location ?? '');
+      setCondition(existing.condition);
+      setConditionNote(existing.conditionNote ?? '');
     }
   }, [existing]);
 
@@ -118,6 +122,7 @@ export function JewelryFormPage() {
     if (!name.trim()) return setError('Please enter a name.');
     if (!category) return setError('Please choose a category.');
     if (images.length === 0) return setError('Please add at least one photo.');
+    if (!condition) return setError('Please rate the item’s condition.');
     if (setSel.mode === 'new' && !setSel.name.trim()) {
       return setError('Please name the new set, or choose “Not part of a set”.');
     }
@@ -142,6 +147,8 @@ export function JewelryFormPage() {
         visibility: vis.visibility,
         sharedGroups: vis.visibility === 'groups' ? vis.sharedGroups : undefined,
         location: location.trim() || undefined,
+        condition,
+        conditionNote: condition < 5 ? conditionNote.trim() || undefined : undefined,
         metal: applicable.includes('metal') ? metal : undefined,
         colour: applicable.includes('colour') ? colour : undefined,
         size: applicable.includes('size') ? size : undefined,
@@ -345,6 +352,21 @@ export function JewelryFormPage() {
                 </button>
               ))}
             </div>
+          </Field>
+
+          {/* Condition — whole-star rating; optional note when under 5 */}
+          <Field label="Condition">
+            <StarRating value={condition} onChange={setCondition} />
+            {condition !== undefined && condition < 5 && (
+              <textarea
+                value={conditionNote}
+                onChange={(e) => setConditionNote(e.target.value)}
+                maxLength={300}
+                rows={3}
+                placeholder="Optional — describe the condition (e.g. light scratching, a missing stone)"
+                className="mt-3 w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink outline-none placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            )}
           </Field>
 
           {error && (

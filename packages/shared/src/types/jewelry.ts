@@ -40,6 +40,8 @@ export const JewelryItemSchema = JewelryAttributesSchema.extend({
   visibility: VisibilitySchema.default('private'),
   sharedGroups: z.array(z.string()).default([]),
   location: z.string().max(120).optional(),
+  condition: z.number().int().min(1).max(5).optional(),
+  conditionNote: z.string().max(300).optional(),
   createdAt: z.string().or(z.date()),
   updatedAt: z.string().or(z.date()),
 });
@@ -54,5 +56,7 @@ export const CreateJewelryInputSchema = JewelryAttributesSchema.extend({
   visibility: VisibilitySchema.optional(),
   sharedGroups: z.array(z.string()).optional(),
   location: z.string().max(120).optional(),
+  condition: z.number().int().min(1).max(5),
+  conditionNote: z.string().max(300).optional(),
 });
 export type CreateJewelryInput = z.infer<typeof CreateJewelryInputSchema>;

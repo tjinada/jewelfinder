@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Pencil, Trash2, Loader2, RefreshCw, Link2, CalendarDays, Eye, MapPin } from 'lucide-react';
 import { CATEGORY_LABELS, METAL_LABELS, NECKLACE_TYPE_LABELS, COLOURS, VISIBILITY_LABELS } from '@jewel/shared';
 import { MainLayout } from '@/components/layout';
-import { Button } from '@/components/ui';
+import { Button, StarRating } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
 import { fullImageUrl, thumbImageUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
@@ -127,6 +127,18 @@ export function ItemDetailPage() {
               {item.visibility === 'groups' &&
                 ` · ${item.sharedGroups.length} ${item.sharedGroups.length === 1 ? 'closet' : 'closets'}`}
             </p>
+          )}
+
+          {item.condition && (
+            <div className="mt-4">
+              <div className="flex items-center gap-2">
+                <StarRating value={item.condition} readOnly size="sm" />
+                <span className="text-sm font-semibold text-ink">{item.condition}/5</span>
+              </div>
+              {item.conditionNote && (
+                <p className="mt-1.5 text-sm text-ink/70">{item.conditionNote}</p>
+              )}
+            </div>
           )}
 
           {item.set && (
