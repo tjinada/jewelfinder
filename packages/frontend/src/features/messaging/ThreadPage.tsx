@@ -136,7 +136,7 @@ export function ThreadPage() {
       {/* Composer */}
       <form
         onSubmit={onSubmit}
-        className="flex items-end gap-2 border-t border-line bg-surface px-3 py-3 safe-bottom"
+        className="flex items-end gap-2 border-t border-line bg-surface px-3 pt-3 pb-[calc(0.75rem_+_env(safe-area-inset-bottom))]"
       >
         <input
           value={text}
