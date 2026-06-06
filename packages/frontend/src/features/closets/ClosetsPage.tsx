@@ -91,7 +91,7 @@ export function ClosetsPage() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {/* My closet — items the user owns */}
             <Link
-              to="/?scope=mine"
+              to="/closets/mine"
               className={tileBase}
               style={{
                 backgroundColor: MY_CLOSET_COLOR.bg,

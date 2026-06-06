@@ -10,7 +10,7 @@ import { LoginPage, RegisterPage } from '@/features/auth';
 import { HomePage } from '@/features/home';
 import { JewelryFormPage, ItemDetailPage } from '@/features/jewelry';
 import { SetViewPage } from '@/features/sets';
-import { ClosetsPage, ClosetViewPage } from '@/features/closets';
+import { ClosetsPage, ClosetViewPage, MyClosetPage } from '@/features/closets';
 import { ConversationListPage, ThreadPage } from '@/features/messaging';
 import { RequestsPage } from '@/features/bookings';
 import { SettingsPage } from '@/features/notifications';
@@ -51,6 +51,7 @@ export default function App() {
                 <Route path="/item/:id/edit" element={<JewelryFormPage />} />
                 <Route path="/set/:id" element={<SetViewPage />} />
                 <Route path="/closets" element={<ClosetsPage />} />
+                <Route path="/closets/mine" element={<MyClosetPage />} />
                 <Route path="/closets/:id" element={<ClosetViewPage />} />
                 <Route path="/messages" element={<ConversationListPage />} />
                 <Route path="/messages/:id" element={<ThreadPage />} />

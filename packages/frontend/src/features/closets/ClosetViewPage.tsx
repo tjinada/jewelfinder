@@ -5,12 +5,11 @@ import { MainLayout } from '@/components/layout';
 import { Button } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
 import { getErrorMessage } from '@/features/auth';
-import { useJewelryList } from '@/features/jewelry/api';
-import { JewelryCard } from '@/features/jewelry/JewelryCard';
 import { cn } from '@/lib/utils';
 import { useCloset, useRenameCloset, useDisbandCloset, useLeaveCloset } from './api';
 import { MembersSheet } from './MembersSheet';
 import { AddItemsSheet } from './AddItemsSheet';
+import { ClosetItems } from './ClosetItems';
 
 export function ClosetViewPage() {
   const { id } = useParams<{ id: string }>();
@@ -18,7 +17,6 @@ export function ClosetViewPage() {
   const userId = useAuthStore((s) => s.user?.id);
 
   const { data: closet, isLoading, isError } = useCloset(id);
-  const { data: items, isLoading: itemsLoading } = useJewelryList({ scope: id });
   const rename = useRenameCloset(id ?? '');
   const disband = useDisbandCloset();
   const leave = useLeaveCloset();
@@ -181,21 +179,7 @@ export function ClosetViewPage() {
               <Plus className="h-4 w-4" /> Add items
             </Button>
           </div>
-          {itemsLoading ? (
-            <div className="flex justify-center py-10">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            </div>
-          ) : items && items.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3">
-              {items.map((item) => (
-                <JewelryCard key={item._id} item={item} />
-              ))}
-            </div>
-          ) : (
-            <p className="py-10 text-center font-display text-sm italic text-muted">
-              Your closet is waiting. Add your first piece and let the sharing begin.
-            </p>
-          )}
+          <ClosetItems scope={closet._id} />
         </div>
       </div>
 
