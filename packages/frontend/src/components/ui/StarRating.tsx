@@ -26,7 +26,7 @@ export function StarRating({ value = 0, onChange, readOnly, size = 'md', classNa
             className={cn(
               SIZES[size],
               'transition-colors',
-              filled ? 'fill-current text-gold' : 'fill-none text-line',
+              filled ? 'fill-current text-gold' : 'fill-none text-muted',
             )}
           />
         );
