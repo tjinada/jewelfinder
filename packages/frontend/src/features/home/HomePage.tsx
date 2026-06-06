@@ -180,7 +180,7 @@ export function HomePage() {
           <p className="text-lg font-display italic text-muted">This closet is empty for now. Every great collection starts somewhere.</p>
           <Link to="/add">
             <Button>
-              <Plus className="h-4 w-4" /> Add jewelry
+              <Plus className="h-4 w-4" /> Add
             </Button>
           </Link>
         </div>
