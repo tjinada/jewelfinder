@@ -7,7 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { connectDatabase } from './config/database.js';
-import { config } from './config/index.js';
+import { config, validateConfig } from './config/index.js';
 import { errorHandler, requestLogger } from './middleware/index.js';
 import { sendSuccess } from './utils/response.js';
 import { authRoutes } from './modules/auth/index.js';
@@ -89,6 +89,7 @@ app.use(errorHandler);
 
 const start = async () => {
   try {
+    validateConfig();
     await connectDatabase();
     await ensureMediaDirs();
     initWebPush();

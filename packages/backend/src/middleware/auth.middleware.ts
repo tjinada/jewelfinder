@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt, { type SignOptions, type Secret } from 'jsonwebtoken';
 import { User, IUserDocument } from '../modules/users/user.model.js';
 import { AppError } from './error.middleware.js';
+import { config } from '../config/index.js';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -20,8 +21,8 @@ export interface JwtPayload {
   exp?: number;
 }
 
-const JWT_SECRET: Secret = process.env.JWT_SECRET || 'change-this-in-production';
-const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN || '7d') as SignOptions['expiresIn'];
+const JWT_SECRET: Secret = config.jwtSecret;
+const JWT_EXPIRES_IN = config.jwtExpiresIn as SignOptions['expiresIn'];
 
 export const generateToken = (user: IUserDocument): string => {
   const payload: JwtPayload = {
