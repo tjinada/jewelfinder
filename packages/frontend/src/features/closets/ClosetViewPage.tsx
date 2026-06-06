@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Loader2, X, Pencil, Check, ChevronRight } from 'lucide-react';
+import { Loader2, X, Pencil, Check, ChevronRight, Plus } from 'lucide-react';
 import { Hanger } from '@/components/icons/Hanger';
 import { MainLayout } from '@/components/layout';
 import { Button } from '@/components/ui';
@@ -11,6 +11,7 @@ import { JewelryCard } from '@/features/jewelry/JewelryCard';
 import { cn } from '@/lib/utils';
 import { useCloset, useRenameCloset, useDisbandCloset, useLeaveCloset } from './api';
 import { MembersSheet } from './MembersSheet';
+import { AddItemsSheet } from './AddItemsSheet';
 
 export function ClosetViewPage() {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +28,7 @@ export function ClosetViewPage() {
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
   const [membersOpen, setMembersOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -178,7 +180,12 @@ export function ClosetViewPage() {
 
         {/* Items shared into this closet */}
         <div>
-          <h2 className="mb-3 font-display text-xl font-bold text-ink">Items in this closet</h2>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-display text-xl font-bold text-ink">Items in this closet</h2>
+            <Button onClick={() => setAddOpen(true)} className="px-3">
+              <Plus className="h-4 w-4" /> Add items
+            </Button>
+          </div>
           {itemsLoading ? (
             <div className="flex justify-center py-10">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -207,6 +214,8 @@ export function ClosetViewPage() {
         disbanding={disband.isPending}
         leaving={leave.isPending}
       />
+
+      <AddItemsSheet open={addOpen} onClose={() => setAddOpen(false)} closetId={closet._id} />
     </MainLayout>
   );
 }

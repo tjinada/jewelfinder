@@ -104,7 +104,20 @@ export const jewelryService = {
     if (scope && scope !== 'all') {
       if (scope === 'public') query.visibility = 'public';
       else if (scope === 'mine') query.owner = viewerId;
-      else query.sharedGroups = scope; // a circle id
+      else {
+        // A closet id. An item appears in a closet when it's explicitly shared
+        // into it OR when it's public and owned by one of the closet's members
+        // (a public item surfaces in every closet its owner belongs to).
+        const group = await Group.findById(scope).select('members');
+        const memberIds = group?.members ?? [];
+        const scopeOr: Record<string, unknown>[] = [{ sharedGroups: scope }];
+        if (memberIds.length > 0) {
+          scopeOr.push({ visibility: 'public', owner: { $in: memberIds } });
+        }
+        // Both the visibility filter and the scope filter must hold, so AND them.
+        query.$and = [{ $or }, { $or: scopeOr }];
+        delete query.$or;
+      }
     }
 
     const docs = await Jewelry.find(query).populate('owner', 'displayName location').sort({ createdAt: -1 });
@@ -176,5 +189,27 @@ export const jewelryService = {
     await doc.save();
     await doc.populate('owner', 'displayName location');
     return toClient(doc);
+  },
+
+  /**
+   * Curate items into a closet: each owned, non-public item gets the closet
+   * added to its `sharedGroups` (flipping visibility to 'groups'). Public items
+   * are skipped — they already surface in every closet their owner belongs to,
+   * and demoting them to 'groups' would shrink their reach. Idempotent.
+   */
+  async shareToCloset(
+    ownerId: string,
+    closetId: string,
+    itemIds: string[],
+  ): Promise<{ added: number }> {
+    const member = await Group.exists({ _id: closetId, members: ownerId });
+    if (!member) throw new AppError('You can only add items to closets you belong to', 403);
+
+    const uniqueIds = [...new Set(itemIds)];
+    const result = await Jewelry.updateMany(
+      { _id: { $in: uniqueIds }, owner: ownerId, visibility: { $ne: 'public' } },
+      { $set: { visibility: 'groups' }, $addToSet: { sharedGroups: closetId } },
+    );
+    return { added: result.modifiedCount };
   },
 };

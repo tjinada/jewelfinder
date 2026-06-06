@@ -48,23 +48,32 @@ async function pruneGroupFromItems(groupId: string, ownerId?: string): Promise<v
   await Jewelry.updateMany(filter, { $pull: { sharedGroups: groupId } });
 }
 
-/** How many items are shared into each closet, counting every contributor. */
-async function countItemsByGroup(groupIds: unknown[]): Promise<Map<string, number>> {
-  if (groupIds.length === 0) return new Map();
-  const rows = await Jewelry.aggregate<{ _id: unknown; count: number }>([
-    { $match: { sharedGroups: { $in: groupIds } } },
-    { $unwind: '$sharedGroups' },
-    { $match: { sharedGroups: { $in: groupIds } } },
-    { $group: { _id: '$sharedGroups', count: { $sum: 1 } } },
-  ]);
-  return new Map(rows.map((r) => [String(r._id), r.count]));
+/**
+ * How many items each closet shows: items explicitly shared into it, plus
+ * public items owned by any of its members (a public item appears in every
+ * closet its owner belongs to). Counted per closet so each uses its own member
+ * list; closets-per-user is small, so the parallel queries stay cheap.
+ */
+async function countItemsForGroups(groups: IGroupDocument[]): Promise<Map<string, number>> {
+  const entries = await Promise.all(
+    groups.map(async (g) => {
+      const count = await Jewelry.countDocuments(closetItemCountQuery(g._id, g.members));
+      return [String(g._id), count] as const;
+    }),
+  );
+  return new Map(entries);
+}
+
+/** The "items shown in this closet" filter, shared by the count helpers. */
+function closetItemCountQuery(id: unknown, memberIds: unknown[]): Record<string, unknown> {
+  return { $or: [{ sharedGroups: id }, { visibility: 'public', owner: { $in: memberIds } }] };
 }
 
 export const groupService = {
   /** Closets the user belongs to. */
   async listMine(userId: string): Promise<GroupDTO[]> {
     const docs = await Group.find({ members: userId }).sort({ name: 1 });
-    const counts = await countItemsByGroup(docs.map((d) => d._id));
+    const counts = await countItemsForGroups(docs);
     return docs.map((d) => toGroup(d, userId, counts.get(String(d._id)) ?? 0));
   },
 
@@ -76,7 +85,8 @@ export const groupService = {
       (m) => String(m._id) === userId,
     );
     if (!isMember) throw new AppError('This is not your closet', 403);
-    const itemCount = await Jewelry.countDocuments({ sharedGroups: id });
+    const memberIds = (doc.members as unknown as PopulatedMember[]).map((m) => m._id);
+    const itemCount = await Jewelry.countDocuments(closetItemCountQuery(id, memberIds));
     return toGroupWithMembers(doc, userId, itemCount);
   },
 
@@ -91,7 +101,7 @@ export const groupService = {
     assertOwner(doc, ownerId);
     doc.name = name.trim();
     await doc.save();
-    const itemCount = await Jewelry.countDocuments({ sharedGroups: id });
+    const itemCount = await Jewelry.countDocuments(closetItemCountQuery(id, doc.members));
     return toGroup(doc, ownerId, itemCount);
   },
 

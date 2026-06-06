@@ -34,4 +34,13 @@ export const jewelryController = {
     const item = await jewelryService.setAvailability(req.userId!, req.params.id, req.body.availability);
     sendSuccess(res, item);
   }),
+
+  share: asyncHandler(async (req: Request, res: Response) => {
+    const result = await jewelryService.shareToCloset(
+      req.userId!,
+      req.body.closetId,
+      req.body.itemIds,
+    );
+    sendSuccess(res, result);
+  }),
 };

@@ -112,3 +112,21 @@ export function useSetAvailability(id: string) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['jewelry'] }),
   });
 }
+
+/** Add the signed-in user's own items to a closet (skips public items server-side). */
+export function useShareItemsToCloset() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ closetId, itemIds }: { closetId: string; itemIds: string[] }) => {
+      const { data } = await api.post<ApiResponse<{ added: number }>>('/jewelry/share', {
+        closetId,
+        itemIds,
+      });
+      return data.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['jewelry'] });
+      qc.invalidateQueries({ queryKey: ['closets'] });
+    },
+  });
+}

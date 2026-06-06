@@ -12,6 +12,7 @@ import {
   listJewelryQuery,
   idParam,
   availabilityBody,
+  shareToClosetBody,
 } from './jewelry.validation.js';
 
 const router: RouterType = Router();
@@ -22,6 +23,7 @@ router.use(authenticate);
 router.get('/', validateQuery(listJewelryQuery), jewelryController.list);
 router.get('/:id', validateParams(idParam), jewelryController.get);
 router.post('/', validateBody(createJewelryBody), jewelryController.create);
+router.post('/share', validateBody(shareToClosetBody), jewelryController.share);
 router.patch('/:id', validateParams(idParam), validateBody(updateJewelryBody), jewelryController.update);
 router.delete('/:id', validateParams(idParam), jewelryController.remove);
 router.patch(

@@ -102,5 +102,14 @@ export const availabilityBody = z.object({
   availability: AvailabilitySchema,
 });
 
+export const shareToClosetBody = z.object({
+  closetId: z.string().regex(/^[a-f\d]{24}$/i, 'Invalid closet id'),
+  itemIds: z
+    .array(z.string().regex(/^[a-f\d]{24}$/i, 'Invalid id'))
+    .min(1, 'Select at least one item')
+    .max(200),
+});
+
 export type JewelryBody = z.infer<typeof baseItem>;
 export type ListJewelryQuery = z.infer<typeof listJewelryQuery>;
+export type ShareToClosetBody = z.infer<typeof shareToClosetBody>;
