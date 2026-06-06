@@ -191,7 +191,7 @@ export function ClosetViewPage() {
             </div>
           ) : (
             <p className="py-10 text-center font-display text-sm italic text-muted">
-              No items have been shared into this closet yet.
+              Your closet is waiting. Add your first piece and let the sharing begin.
             </p>
           )}
         </div>

@@ -74,7 +74,7 @@ export function ConversationListPage() {
         <div className="flex flex-col items-center gap-3 py-20 text-center">
           <MessageCircle className="h-10 w-10 text-muted/60" />
           <p className="text-lg font-display italic text-muted">
-            No conversations yet. When an owner accepts your loan request, a chat opens here.
+            No messages yet - but your next great borrow is one conversation away.
           </p>
         </div>
       )}

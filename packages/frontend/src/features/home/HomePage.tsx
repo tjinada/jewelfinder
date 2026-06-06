@@ -174,10 +174,10 @@ export function HomePage() {
           ))}
         </div>
       ) : narrowed ? (
-        <p className="py-20 text-center font-display italic text-muted">No jewelry matches your search.</p>
+        <p className="py-20 text-center font-display italic text-muted">This closet is empty for now. Every great collection starts somewhere.</p>
       ) : (
         <div className="flex flex-col items-center gap-4 py-20 text-center">
-          <p className="text-lg font-display italic text-muted">No jewelry yet. Add your first piece!</p>
+          <p className="text-lg font-display italic text-muted">This closet is empty for now. Every great collection starts somewhere.</p>
           <Link to="/add">
             <Button>
               <Plus className="h-4 w-4" /> Add jewelry

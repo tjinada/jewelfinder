@@ -168,7 +168,7 @@ export function MembersSheet({
                   disabled={disbanding}
                   className="w-full border-accent/40 text-accent hover:bg-accent/10"
                 >
-                  <Trash2 className="h-4 w-4" /> Disband closet
+                  <Trash2 className="h-4 w-4" /> Delete closet
                 </Button>
               ) : (
                 <Button

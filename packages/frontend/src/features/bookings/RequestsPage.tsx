@@ -153,8 +153,8 @@ export function RequestsPage() {
           <CalendarClock className="h-10 w-10 text-muted/60" />
           <p className="text-lg font-display italic text-muted">
             {tab === 'incoming'
-              ? 'No loan requests yet.'
-              : 'You haven’t requested any loans yet. Find a piece you like and request it.'}
+              ? 'Every piece has its next moment. Yours is coming.'
+              : 'Nothing yet - have you explored what's in your closets?'}
           </p>
         </div>
       )}
