@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Share, X } from 'lucide-react';
 import { GlassSurface } from '@/components/ui';
-import { useAuthStore } from '@/stores/authStore';
 
 /** The Chromium-only event that lets us trigger the native install dialog. */
 interface BeforeInstallPromptEvent extends Event {
@@ -41,10 +40,10 @@ const isIOS = (): boolean => {
  *    native install via our own button.
  *  - iOS/Safari: no install API exists, so we show the Share → Add to Home
  *    Screen instructions instead.
- * Hidden when already installed, when recently dismissed, or until signed in.
+ * Hidden when already installed, when recently dismissed, or until the brief
+ * post-load delay passes.
  */
 export function InstallPrompt() {
-  const user = useAuthStore((s) => s.user);
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [dismissed, setDismissed] = useState(() => recentlyDismissed());
   const [ready, setReady] = useState(false);
@@ -86,7 +85,7 @@ export function InstallPrompt() {
     setDismissed(true);
   };
 
-  if (!user || dismissed || !ready || isStandalone()) return null;
+  if (dismissed || !ready || isStandalone()) return null;
 
   const mode: 'native' | 'ios' | null = deferred ? 'native' : isIOS() ? 'ios' : null;
   if (!mode) return null;
