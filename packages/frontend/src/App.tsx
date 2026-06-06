@@ -10,7 +10,7 @@ import { LoginPage, RegisterPage } from '@/features/auth';
 import { HomePage } from '@/features/home';
 import { JewelryFormPage, ItemDetailPage } from '@/features/jewelry';
 import { SetViewPage } from '@/features/sets';
-import { ClosetsPage, ClosetViewPage, MyClosetPage } from '@/features/closets';
+import { ClosetsPage, ClosetViewPage, MyClosetPage, JoinClosetPage } from '@/features/closets';
 import { ConversationListPage, ThreadPage } from '@/features/messaging';
 import { RequestsPage } from '@/features/bookings';
 import { SettingsPage } from '@/features/notifications';
@@ -42,6 +42,7 @@ export default function App() {
               {/* Public */}
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/join/:token" element={<JoinClosetPage />} />
 
               {/* Protected */}
               <Route element={<ProtectedRoute />}>

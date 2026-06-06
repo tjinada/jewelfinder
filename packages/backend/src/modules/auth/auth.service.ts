@@ -1,7 +1,6 @@
 import { User, IUserDocument } from '../users/user.model.js';
 import { AppError } from '../../middleware/error.middleware.js';
 import { generateToken } from '../../middleware/auth.middleware.js';
-import { groupService } from '../groups/groups.service.js';
 import type { RegisterInput, LoginInput, UpdateMeInput } from './auth.validation.js';
 
 export interface PublicUser {
@@ -46,18 +45,6 @@ export const authService = {
       displayName,
       location,
     });
-
-    // Auto-join any closets this email was invited to. Best-effort: a failure
-    // here must never block sign-up.
-    try {
-      await groupService.acceptPendingInvitesForUser({
-        id: String(user._id),
-        email: user.email,
-        displayName: user.displayName,
-      });
-    } catch (err) {
-      console.error('Failed to accept pending closet invites on register:', err);
-    }
 
     return { token: generateToken(user), user: toPublicUser(user) };
   },

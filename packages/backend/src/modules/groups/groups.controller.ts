@@ -24,20 +24,30 @@ export const groupController = {
     sendSuccess(res, group);
   }),
 
-  addMember: asyncHandler(async (req: Request, res: Response) => {
-    const group = await groupService.addMember(req.userId!, req.params.id, req.body.email);
-    sendSuccess(res, group);
+  getJoinLink: asyncHandler(async (req: Request, res: Response) => {
+    const link = await groupService.getJoinLink(req.userId!, req.params.id);
+    sendSuccess(res, link);
   }),
 
-  createInvite: asyncHandler(async (req: Request, res: Response) => {
-    const result = await groupService.createInvite(req.userId!, req.params.id, req.body.email);
+  createJoinLink: asyncHandler(async (req: Request, res: Response) => {
+    const link = await groupService.createJoinLink(req.userId!, req.params.id);
+    sendSuccess(res, link);
+  }),
+
+  disableJoinLink: asyncHandler(async (req: Request, res: Response) => {
+    await groupService.disableJoinLink(req.userId!, req.params.id);
+    sendNoContent(res);
+  }),
+
+  resolveJoin: asyncHandler(async (req: Request, res: Response) => {
+    const info = await groupService.resolveJoinToken(req.params.token);
+    if (!info) throw new AppError('This invite link is no longer valid', 404);
+    sendSuccess(res, info);
+  }),
+
+  join: asyncHandler(async (req: Request, res: Response) => {
+    const result = await groupService.joinByToken(req.userId!, req.params.token);
     sendSuccess(res, result);
-  }),
-
-  resolveInvite: asyncHandler(async (req: Request, res: Response) => {
-    const invite = await groupService.getInviteByToken(req.params.token);
-    if (!invite) throw new AppError('This invite link is no longer valid', 404);
-    sendSuccess(res, invite);
   }),
 
   removeMember: asyncHandler(async (req: Request, res: Response) => {

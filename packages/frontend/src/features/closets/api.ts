@@ -61,32 +61,75 @@ export function useDisbandCloset() {
   });
 }
 
-export function useAddMember(id: string) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (email: string) => {
-      const { data } = await api.post<ApiResponse<GroupWithMembers>>(`/groups/${id}/members`, {
-        email,
-      });
+export interface JoinLinkState {
+  token: string | null;
+  expiresAt: string | null;
+  expired: boolean;
+}
+
+/** Owner: the closet's current shareable join-link state. */
+export function useJoinLink(id?: string) {
+  return useQuery({
+    queryKey: ['closets', 'joinLink', id],
+    enabled: !!id,
+    queryFn: async () => {
+      const { data } = await api.get<ApiResponse<JoinLinkState>>(`/groups/${id}/join-link`);
       return data.data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['closets'] }),
   });
 }
 
-/**
- * Owner invites an email that isn't registered yet. Returns `{ added: true }`
- * if the email had since signed up (added directly), otherwise `{ token }` for
- * building the `/register?invite=<token>` link.
- */
-export function useCreateInvite(id: string) {
+/** Owner: mint a fresh join link (used for both create and reset). */
+export function useSaveJoinLink(id: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (email: string) => {
-      const { data } = await api.post<ApiResponse<{ added?: true; token?: string }>>(
-        `/groups/${id}/invites`,
-        { email },
+    mutationFn: async () => {
+      const { data } = await api.post<ApiResponse<{ token: string; expiresAt: string }>>(
+        `/groups/${id}/join-link`,
       );
+      return data.data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['closets', 'joinLink', id] }),
+  });
+}
+
+/** Owner: turn the join link off. */
+export function useDisableJoinLink(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      await api.delete(`/groups/${id}/join-link`);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['closets', 'joinLink', id] }),
+  });
+}
+
+export interface ResolvedJoin {
+  closetName: string;
+  inviterName: string;
+  memberCount: number;
+  expired: boolean;
+}
+
+/** Public: resolve a join token for the join landing page. */
+export function useResolveJoin(token?: string) {
+  return useQuery({
+    queryKey: ['join', token],
+    enabled: !!token,
+    retry: false,
+    queryFn: async () => {
+      const { data } = await api.get<ApiResponse<ResolvedJoin>>(`/groups/join/${token}`);
+      return data.data;
+    },
+  });
+}
+
+/** Join a closet by its token. Returns the closet id to navigate to. */
+export function useJoinCloset() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (token: string) => {
+      const { data } = await api.post<ApiResponse<{ closetId: string }>>(`/groups/join/${token}`);
       return data.data;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['closets'] }),

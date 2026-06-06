@@ -1,11 +1,11 @@
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
-import { Loader2, UserPlus, X, Trash2, LogOut, Mail, Copy, Check, Share2 } from 'lucide-react';
+import { Loader2, X, Trash2, LogOut, Link2, Copy, Check, Share2 } from 'lucide-react';
 import type { GroupWithMembers } from '@jewel/shared';
 import { Button } from '@/components/ui';
-import { getErrorMessage, getErrorCode } from '@/features/auth';
-import { useAddMember, useRemoveMember, useCreateInvite } from './api';
+import { getErrorMessage } from '@/features/auth';
+import { useRemoveMember, useJoinLink, useSaveJoinLink, useDisableJoinLink } from './api';
 
 interface MembersSheetProps {
   open: boolean;
@@ -18,12 +18,24 @@ interface MembersSheetProps {
   leaving: boolean;
 }
 
+/** Friendly "expires in N hours/days" from an ISO timestamp. */
+function expiryLabel(expiresAt: string): string {
+  const ms = new Date(expiresAt).getTime() - Date.now();
+  if (ms <= 0) return 'Expired';
+  const hours = Math.round(ms / 3_600_000);
+  if (hours >= 24) {
+    const days = Math.round(hours / 24);
+    return `expires in ${days} day${days === 1 ? '' : 's'}`;
+  }
+  return `expires in ${hours} hour${hours === 1 ? '' : 's'}`;
+}
+
 /**
  * Bottom-sheet for viewing and managing a closet's members. Mirrors the
  * FilterSheet pattern (portal + framer-motion slide-up) so the interaction is
- * familiar. Owners can add/remove members and disband; other members see the
- * roster and can leave. This keeps the closet page itself focused on its items,
- * regardless of how many members a closet has.
+ * familiar. Owners manage the shareable invite link and can remove members or
+ * disband; other members see the roster and can leave. Members join only via
+ * the invite link — there's no add-by-email.
  */
 export function MembersSheet({
   open,
@@ -36,56 +48,39 @@ export function MembersSheet({
   leaving,
 }: MembersSheetProps) {
   const { isOwner } = closet;
-  const addMember = useAddMember(closet._id);
   const removeMember = useRemoveMember(closet._id);
-  const createInvite = useCreateInvite(closet._id);
-  const [email, setEmail] = useState('');
+  const joinLink = useJoinLink(isOwner ? closet._id : undefined);
+  const saveLink = useSaveJoinLink(closet._id);
+  const disableLink = useDisableJoinLink(closet._id);
   const [error, setError] = useState('');
-  const [invite, setInvite] = useState<{ email: string; url?: string } | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const onAdd = async (e: FormEvent) => {
-    e.preventDefault();
+  const link = joinLink.data;
+  const hasActiveLink = !!link?.token && !link.expired;
+  const joinUrl = link?.token ? `${window.location.origin}/join/${link.token}` : '';
+
+  const onCreateOrReset = async () => {
     setError('');
-    setInvite(null);
-    if (!email.trim()) return setError('Enter an email address.');
     try {
-      await addMember.mutateAsync(email.trim());
-      setEmail('');
+      await saveLink.mutateAsync();
     } catch (err) {
-      // Not a registered user yet — offer to send an invite link instead.
-      if (getErrorCode(err) === 'EMAIL_NOT_REGISTERED') {
-        setInvite({ email: email.trim() });
-      } else {
-        setError(getErrorMessage(err));
-      }
+      setError(getErrorMessage(err));
     }
   };
 
-  const onSendInvite = async () => {
-    if (!invite) return;
+  const onDisableLink = async () => {
     setError('');
     try {
-      const result = await createInvite.mutateAsync(invite.email);
-      if (result.token) {
-        setInvite({
-          email: invite.email,
-          url: `${window.location.origin}/register?invite=${result.token}`,
-        });
-      } else {
-        // Already registered in the meantime — they were added directly.
-        setInvite(null);
-        setEmail('');
-      }
+      await disableLink.mutateAsync();
     } catch (err) {
       setError(getErrorMessage(err));
     }
   };
 
   const copyLink = async () => {
-    if (!invite?.url) return;
+    if (!joinUrl) return;
     try {
-      await navigator.clipboard.writeText(invite.url);
+      await navigator.clipboard.writeText(joinUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -94,10 +89,10 @@ export function MembersSheet({
   };
 
   const shareLink = async () => {
-    if (!invite?.url) return;
+    if (!joinUrl) return;
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Join my closet on The Clasp', url: invite.url });
+        await navigator.share({ title: `Join ${closet.name} on The Clasp`, url: joinUrl });
       } catch {
         // share cancelled — ignore
       }
@@ -148,56 +143,19 @@ export function MembersSheet({
             </div>
 
             {isOwner && (
-              <form onSubmit={onAdd} className="mb-4 flex gap-2">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Add member by email"
-                  className="flex-1 rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                />
-                <Button type="submit" disabled={addMember.isPending}>
-                  {addMember.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <UserPlus className="h-4 w-4" />
-                  )}
-                  Add
-                </Button>
-              </form>
-            )}
+              <div className="mb-4">
+                <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-muted">
+                  Invite link
+                </p>
 
-            {error && (
-              <p className="mb-4 rounded-lg bg-[#F4E7D5] px-3 py-2 text-sm text-onloan">{error}</p>
-            )}
-
-            {invite && (
-              <div className="mb-4 rounded-2xl border border-line bg-surface p-4">
-                {!invite.url ? (
+                {joinLink.isLoading ? (
+                  <div className="flex justify-center py-3">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted" />
+                  </div>
+                ) : hasActiveLink ? (
                   <>
-                    <p className="text-sm text-ink/80">
-                      <span className="font-semibold">{invite.email}</span> isn’t on The Clasp yet —
-                      send them an invite link?
-                    </p>
-                    <div className="mt-3 flex gap-2">
-                      <Button onClick={onSendInvite} disabled={createInvite.isPending}>
-                        {createInvite.isPending ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Mail className="h-4 w-4" />
-                        )}
-                        Send invite link
-                      </Button>
-                      <Button variant="ghost" onClick={() => setInvite(null)}>
-                        Cancel
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-sm font-semibold text-ink">Invite link for {invite.email}</p>
-                    <div className="mt-2 flex items-center gap-2 rounded-xl border border-dashed border-line bg-cream/60 px-3 py-2">
-                      <span className="flex-1 truncate text-xs text-muted">{invite.url}</span>
+                    <div className="flex items-center gap-2 rounded-xl border border-dashed border-line bg-surface px-3 py-2">
+                      <span className="flex-1 truncate text-xs text-muted">{joinUrl}</span>
                       <button
                         type="button"
                         onClick={copyLink}
@@ -219,12 +177,53 @@ export function MembersSheet({
                         <Share2 className="h-4 w-4" />
                       </button>
                     </div>
-                    <p className="mt-2 text-[11px] text-muted">
-                      When they sign up with this email, they’ll join automatically.
+                    <div className="mt-2 flex items-center justify-between gap-3">
+                      <p className="min-w-0 truncate text-[11px] text-muted">
+                        Anyone with this link can join
+                        {link?.expiresAt ? ` · ${expiryLabel(link.expiresAt)}` : ''}
+                      </p>
+                      <div className="flex flex-none gap-3 text-xs font-semibold">
+                        <button
+                          type="button"
+                          onClick={onCreateOrReset}
+                          disabled={saveLink.isPending}
+                          className="text-primary hover:underline disabled:opacity-50"
+                        >
+                          Reset
+                        </button>
+                        <button
+                          type="button"
+                          onClick={onDisableLink}
+                          disabled={disableLink.isPending}
+                          className="text-accent hover:underline disabled:opacity-50"
+                        >
+                          Turn off
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="mb-2 text-sm text-muted">
+                      {link?.expired
+                        ? 'Your invite link expired.'
+                        : 'Create a link to invite people to this closet.'}
                     </p>
+                    <Button onClick={onCreateOrReset} disabled={saveLink.isPending}>
+                      {saveLink.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Link2 className="h-4 w-4" />
+                      )}
+                      {link?.expired ? 'Get a new link' : 'Create invite link'}
+                    </Button>
                   </>
                 )}
               </div>
+            )}
+
+            {error && (
+              <p className="mb-4 rounded-lg bg-[#F4E7D5] px-3 py-2 text-sm text-onloan">{error}</p>
             )}
 
             <ul className="space-y-2">

@@ -6,13 +6,7 @@ export const createGroupBody = z.object({
 
 export const renameGroupBody = createGroupBody;
 
-export const addMemberBody = z.object({
-  email: z.string().trim().toLowerCase().email('A valid email is required'),
-});
-
-export const inviteBody = addMemberBody;
-
-export const inviteTokenParam = z.object({
+export const joinTokenParam = z.object({
   token: z.string().regex(/^[a-f\d]{20,128}$/i, 'Invalid invite'),
 });
 
@@ -26,4 +20,3 @@ export const memberParams = z.object({
 });
 
 export type CreateGroupBody = z.infer<typeof createGroupBody>;
-export type AddMemberBody = z.infer<typeof addMemberBody>;

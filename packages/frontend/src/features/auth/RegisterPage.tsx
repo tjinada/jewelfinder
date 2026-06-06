@@ -1,34 +1,26 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Hanger } from '@/components/icons/Hanger';
 import { Button, LocationInput } from '@/components/ui';
-import { useRegister, useInviteResolve, getErrorMessage } from './useAuth';
+import { useRegister, getErrorMessage } from './useAuth';
 import { AuthShell, inputClass, labelClass } from './AuthShell';
 
 export function RegisterPage() {
   const navigate = useNavigate();
   const register = useRegister();
   const [params] = useSearchParams();
-  const inviteToken = params.get('invite') ?? undefined;
-  const invite = useInviteResolve(inviteToken);
+  // Arrived from a closet invite link? Return there after sign-up to auto-join.
+  const joinToken = params.get('join');
 
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [location, setLocation] = useState('');
 
-  // A valid invite locks the email to the invited address so the auto-join
-  // (matched by email at sign-up) is guaranteed.
-  const invitedValid = !!invite.data && !invite.data.expired;
-  useEffect(() => {
-    if (invitedValid && invite.data) setEmail(invite.data.email);
-  }, [invitedValid, invite.data]);
-
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
       await register.mutateAsync({ displayName, email, password, location });
-      navigate('/', { replace: true });
+      navigate(joinToken ? `/join/${joinToken}` : '/', { replace: true });
     } catch {
       // error surfaced below
     }
@@ -36,25 +28,6 @@ export function RegisterPage() {
 
   return (
     <AuthShell>
-      {invite.data &&
-        (invite.data.expired ? (
-          <div className="mb-5 rounded-2xl border border-line bg-cream/60 p-4 text-sm text-muted">
-            This invite link has expired, but you can still create an account.
-          </div>
-        ) : (
-          <div className="mb-5 flex items-start gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-4">
-            <Hanger className="mt-0.5 h-5 w-5 flex-none text-primary" />
-            <div>
-              <p className="text-sm font-semibold text-primary">
-                You’re invited to “{invite.data.closetName}”
-              </p>
-              <p className="mt-0.5 text-xs text-ink/70">
-                {invite.data.inviterName} invited you — finish signing up to join.
-              </p>
-            </div>
-          </div>
-        ))}
-
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
           <label className={labelClass} htmlFor="displayName">Display name</label>
@@ -77,10 +50,9 @@ export function RegisterPage() {
             type="email"
             autoComplete="email"
             required
-            readOnly={invitedValid}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className={`${inputClass}${invitedValid ? ' bg-cream/60 text-muted' : ''}`}
+            className={inputClass}
             placeholder="you@example.com"
           />
         </div>

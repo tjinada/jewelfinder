@@ -1,5 +1,4 @@
 import { Group, IGroupDocument } from './group.model.js';
-import { GroupInvite } from './groupInvite.model.js';
 import { User } from '../users/user.model.js';
 import { Jewelry } from '../jewelry/jewelry.model.js';
 import { notificationService } from '../notifications/notification.service.js';
@@ -36,8 +35,8 @@ function toGroupWithMembers(
   return { ...toGroup(doc, viewerId, itemCount), memberCount: members.length, members };
 }
 
-// Invite links stay valid for two weeks.
-const INVITE_TTL_MS = 14 * 24 * 60 * 60 * 1000;
+// Join links stay valid for 72 hours; the owner resets to mint a fresh one.
+const JOIN_TTL_MS = 72 * 60 * 60 * 1000;
 
 /** Owner-only guard, shared by the management methods. */
 function assertOwner(doc: IGroupDocument, ownerId: string): void {
@@ -110,35 +109,6 @@ export const groupService = {
     return toGroup(doc, ownerId, itemCount);
   },
 
-  /** Owner adds a member by email. Idempotent if they're already in. */
-  async addMember(ownerId: string, id: string, email: string): Promise<GroupWithMembers> {
-    const doc = await Group.findById(id);
-    if (!doc) throw new AppError('Closet not found', 404);
-    assertOwner(doc, ownerId);
-
-    const user = await User.findByEmail(email);
-    if (!user) {
-      throw new AppError('No user found with that email', 404, 'EMAIL_NOT_REGISTERED');
-    }
-
-    const alreadyMember = doc.members.some((m) => String(m) === String(user._id));
-    await Group.updateOne({ _id: id }, { $addToSet: { members: user._id } });
-
-    // Notify the newly added member (not on a no-op re-add, and never the owner).
-    if (!alreadyMember && String(user._id) !== ownerId) {
-      const owner = await User.findById(ownerId).select('displayName');
-      // Fire-and-forget: a push failure must not fail the add.
-      void notificationService.notifyUser(String(user._id), {
-        title: 'Added to a closet',
-        body: `${owner?.displayName ?? 'Someone'} just let you in. Welcome to ${doc.name}, something beautiful awaits.`,
-        tag: `closet-${id}`,
-        data: { url: `/closets/${id}` },
-      });
-    }
-
-    return this.getById(ownerId, id);
-  },
-
   /** Owner removes a member (not themselves). */
   async removeMember(ownerId: string, id: string, memberId: string): Promise<GroupWithMembers> {
     const doc = await Group.findById(id);
@@ -177,92 +147,88 @@ export const groupService = {
     await doc.deleteOne();
   },
 
-  /**
-   * Owner invites an email that isn't a registered user yet. Returns a token the
-   * client turns into a `/register?invite=<token>` link to share. If the email
-   * has since registered, they're added directly instead.
-   */
-  async createInvite(
+  /** Owner: current join-link state (token absent => no active link). */
+  async getJoinLink(
     ownerId: string,
     id: string,
-    email: string,
-  ): Promise<{ added: true } | { token: string }> {
+  ): Promise<{ token: string | null; expiresAt: Date | null; expired: boolean }> {
     const doc = await Group.findById(id);
     if (!doc) throw new AppError('Closet not found', 404);
     assertOwner(doc, ownerId);
-
-    const normalized = email.toLowerCase().trim();
-
-    // Raced with a sign-up? Just add them.
-    const user = await User.findByEmail(normalized);
-    if (user) {
-      await Group.updateOne({ _id: id }, { $addToSet: { members: user._id } });
-      if (String(user._id) !== ownerId) {
-        const owner = await User.findById(ownerId).select('displayName');
-        void notificationService.notifyUser(String(user._id), {
-          title: 'Added to a closet',
-          body: `${owner?.displayName ?? 'Someone'} just let you in. Welcome to ${doc.name}, something beautiful awaits.`,
-          tag: `closet-${id}`,
-          data: { url: `/closets/${id}` },
-        });
-      }
-      return { added: true };
-    }
-
-    const token = randomBytes(24).toString('hex');
-    const expiresAt = new Date(Date.now() + INVITE_TTL_MS);
-    await GroupInvite.findOneAndUpdate(
-      { group: id, email: normalized },
-      { $set: { invitedBy: ownerId, token, status: 'pending', expiresAt } },
-      { upsert: true, new: true },
-    );
-    return { token };
+    const expiresAt = doc.joinTokenExpiresAt ?? null;
+    return {
+      token: doc.joinToken ?? null,
+      expiresAt,
+      expired: !!expiresAt && expiresAt.getTime() < Date.now(),
+    };
   },
 
-  /** Public: resolve an invite link for the register page. */
-  async getInviteByToken(
-    token: string,
-  ): Promise<{ closetName: string; inviterName: string; email: string; expired: boolean } | null> {
-    const invite = await GroupInvite.findOne({ token, status: 'pending' })
-      .populate('group', 'name')
-      .populate('invitedBy', 'displayName');
-    if (!invite) return null;
-    const group = invite.group as unknown as { name?: string } | null;
-    const inviter = invite.invitedBy as unknown as { displayName?: string } | null;
+  /** Owner: mint a fresh join link (used for both "create" and "reset"). */
+  async createJoinLink(ownerId: string, id: string): Promise<{ token: string; expiresAt: Date }> {
+    const doc = await Group.findById(id);
+    if (!doc) throw new AppError('Closet not found', 404);
+    assertOwner(doc, ownerId);
+    const token = randomBytes(24).toString('hex');
+    const expiresAt = new Date(Date.now() + JOIN_TTL_MS);
+    await Group.updateOne(
+      { _id: id },
+      { $set: { joinToken: token, joinTokenExpiresAt: expiresAt } },
+    );
+    return { token, expiresAt };
+  },
+
+  /** Owner: turn the link off. `$unset` keeps the field out of the sparse unique index. */
+  async disableJoinLink(ownerId: string, id: string): Promise<void> {
+    const doc = await Group.findById(id);
+    if (!doc) throw new AppError('Closet not found', 404);
+    assertOwner(doc, ownerId);
+    await Group.updateOne({ _id: id }, { $unset: { joinToken: '', joinTokenExpiresAt: '' } });
+  },
+
+  /** Public: resolve a join link so a visitor sees what they're joining. */
+  async resolveJoinToken(token: string): Promise<{
+    closetName: string;
+    inviterName: string;
+    memberCount: number;
+    expired: boolean;
+  } | null> {
+    const doc = await Group.findOne({ joinToken: token }).populate('owner', 'displayName');
+    if (!doc || !doc.joinToken) return null;
+    const owner = doc.owner as unknown as { displayName?: string } | null;
     return {
-      closetName: group?.name ?? 'a closet',
-      inviterName: inviter?.displayName ?? 'Someone',
-      email: invite.email,
-      expired: invite.expiresAt.getTime() < Date.now(),
+      closetName: doc.name,
+      inviterName: owner?.displayName ?? 'Someone',
+      memberCount: doc.members.length,
+      expired: !!doc.joinTokenExpiresAt && doc.joinTokenExpiresAt.getTime() < Date.now(),
     };
   },
 
   /**
-   * Called right after a user registers: add them to every closet they had a
-   * pending, unexpired invite for, and let the inviter know. Best-effort —
-   * never throws into the registration flow.
+   * Join a closet via its link. Anyone with a live token joins instantly. The
+   * owner gets a "<name> has joined your <closet>" push on a genuinely new join.
    */
-  async acceptPendingInvitesForUser(user: {
-    id: string;
-    email: string;
-    displayName: string;
-  }): Promise<void> {
-    const invites = await GroupInvite.find({
-      email: user.email.toLowerCase(),
-      status: 'pending',
-      expiresAt: { $gt: new Date() },
-    });
-    for (const invite of invites) {
-      await Group.updateOne({ _id: invite.group }, { $addToSet: { members: user.id } });
-      invite.status = 'accepted';
-      await invite.save();
-      const group = await Group.findById(invite.group).select('name');
-      void notificationService.notifyUser(String(invite.invitedBy), {
-        title: 'Closet invite accepted',
-        body: `${user.displayName} just joined "${group?.name ?? 'your closet'}"`,
-        tag: `closet-${invite.group}`,
-        data: { url: `/closets/${invite.group}` },
-      });
+  async joinByToken(userId: string, token: string): Promise<{ closetId: string }> {
+    const doc = await Group.findOne({ joinToken: token });
+    if (!doc || !doc.joinToken) throw new AppError('This invite link is no longer valid', 404);
+    if (doc.joinTokenExpiresAt && doc.joinTokenExpiresAt.getTime() < Date.now()) {
+      throw new AppError('This invite link has expired', 410);
     }
+
+    const closetId = String(doc._id);
+    const alreadyMember = doc.members.some((m) => String(m) === userId);
+    if (!alreadyMember) {
+      await Group.updateOne({ _id: doc._id }, { $addToSet: { members: userId } });
+      // Notify the owner (skip if the joiner is the owner). Fire-and-forget.
+      if (String(doc.owner) !== userId) {
+        const user = await User.findById(userId).select('displayName');
+        void notificationService.notifyUser(String(doc.owner), {
+          title: 'New closet member',
+          body: `${user?.displayName ?? 'Someone'} has joined your ${doc.name}`,
+          tag: `closet-${closetId}`,
+          data: { url: `/closets/${closetId}` },
+        });
+      }
+    }
+    return { closetId };
   },
 };

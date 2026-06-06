@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui';
 import { useLogin, getErrorMessage } from './useAuth';
 import { AuthShell, inputClass, labelClass } from './AuthShell';
@@ -7,18 +7,22 @@ import { AuthShell, inputClass, labelClass } from './AuthShell';
 export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation() as { state?: { from?: { pathname: string } } };
+  const [params] = useSearchParams();
   const login = useLogin();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  // A closet invite link sends us back to itself after login to auto-join;
+  // otherwise return wherever the user was headed.
+  const joinToken = params.get('join');
   const from = location.state?.from?.pathname || '/';
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
       await login.mutateAsync({ email, password });
-      navigate(from, { replace: true });
+      navigate(joinToken ? `/join/${joinToken}` : from, { replace: true });
     } catch {
       // error surfaced below
     }

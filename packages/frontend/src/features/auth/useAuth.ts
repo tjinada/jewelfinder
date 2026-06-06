@@ -98,25 +98,4 @@ export function useLogout() {
   };
 }
 
-export interface ResolvedInvite {
-  closetName: string;
-  inviterName: string;
-  email: string;
-  expired: boolean;
-}
-
-/** Public: resolve a closet invite token for the register page. */
-export function useInviteResolve(token?: string) {
-  return useQuery({
-    queryKey: ['invite', token],
-    enabled: !!token,
-    retry: false,
-    staleTime: 5 * 60 * 1000,
-    queryFn: async () => {
-      const { data } = await api.get<ApiResponse<ResolvedInvite>>(`/groups/invites/${token}`);
-      return data.data;
-    },
-  });
-}
-
 export { getErrorMessage, getErrorCode };
