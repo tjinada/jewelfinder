@@ -3,8 +3,9 @@
  * scripts/api-regression.mjs
  *
  * End-to-end API regression for The Clasp. Hits the running backend over HTTP,
- * exercises the core flows (auth, closets + invite/join links, jewelry +
- * visibility gating, bookings, conversations, notifications, permissions) and
+ * exercises the core flows (auth, closets + invite/join links + membership,
+ * jewelry + visibility gating + sharing, bookings, conversations, sets,
+ * notifications, permissions) and
  * prints a pass/fail line per check. Exits non-zero if anything fails, so it's
  * CI-friendly.
  *
@@ -102,6 +103,12 @@ async function main() {
   const tokenC = payload(regC)?.token;
   check('Register user C', ok(regC) && !!tokenC, errMsg(regC));
 
+  const regD = await req('POST', '/auth/register', {
+    body: { email: mkEmail('member'), password: pw, displayName: 'Member D', location: 'Barrie, ON' },
+  });
+  const tokenD = payload(regD)?.token;
+  check('Register user D', ok(regD) && !!tokenD, errMsg(regD));
+
   const dupe = await req('POST', '/auth/register', {
     body: { email: emailB, password: pw, displayName: 'Dupe', location: 'X' },
   });
@@ -127,7 +134,7 @@ async function main() {
   const goodLogin = await req('POST', '/auth/login', { body: { email: emailB, password: pw } });
   check('Login with correct password succeeds', ok(goodLogin) && !!payload(goodLogin)?.token, errMsg(goodLogin));
 
-  if (!tokenA || !tokenB || !tokenC) {
+  if (!tokenA || !tokenB || !tokenC || !tokenD) {
     console.log(`\n${RED}Auth failed — cannot continue.${RESET}`);
     finish();
   }
@@ -162,6 +169,21 @@ async function main() {
 
   const joinAgain = await req('POST', `/groups/join/${joinToken}`, { token: tokenB });
   check('Re-joining is idempotent (no error)', ok(joinAgain) && payload(joinAgain)?.closetId === closetId, errMsg(joinAgain));
+
+  const renameClo = await req('PATCH', `/groups/${closetId}`, { token: tokenA, body: { name: `Renamed Closet ${stamp}` } });
+  check('Owner renames the closet', ok(renameClo) && payload(renameClo)?.name === `Renamed Closet ${stamp}`, errMsg(renameClo));
+
+  const renameGuard = await req('PATCH', `/groups/${closetId}`, { token: tokenB, body: { name: 'Nope' } });
+  check('Non-owner cannot rename the closet (403)', renameGuard.status === 403, `got ${renameGuard.status}`);
+
+  const detailMember = await req('GET', `/groups/${closetId}`, { token: tokenB });
+  check('Member can open closet detail', ok(detailMember) && Array.isArray(payload(detailMember)?.members), errMsg(detailMember));
+
+  const detailOutsider = await req('GET', `/groups/${closetId}`, { token: tokenC });
+  check('Non-member cannot open closet detail (403)', detailOutsider.status === 403, `got ${detailOutsider.status}`);
+
+  const joinD = await req('POST', `/groups/join/${joinToken}`, { token: tokenD });
+  check('User D joins via the link', ok(joinD) && payload(joinD)?.closetId === closetId, errMsg(joinD));
 
   const disableLink = await req('DELETE', `/groups/${closetId}/join-link`, { token: tokenA });
   check('Owner turns the link off (204)', disableLink.status === 204, `got ${disableLink.status}`);
@@ -216,6 +238,20 @@ async function main() {
   const getPubAsB = await req('GET', `/jewelry/${pubId}`, { token: tokenB });
   check('B can fetch the public item directly', ok(getPubAsB) && payload(getPubAsB)?._id === pubId, errMsg(getPubAsB));
 
+  // Editing visibility revokes access: flip a public item to private.
+  const mkFlip = await req('POST', '/jewelry', { token: tokenA, body: { ...baseItem, name: 'Flip Earrings', visibility: 'public' } });
+  const flipId = payload(mkFlip)?._id;
+  check('Create a public item to edit', ok(mkFlip) && !!flipId, errMsg(mkFlip));
+
+  const bSeesFlip = await req('GET', `/jewelry/${flipId}`, { token: tokenB });
+  check('B can see it while public', ok(bSeesFlip), errMsg(bSeesFlip));
+
+  const flip = await req('PATCH', `/jewelry/${flipId}`, { token: tokenA, body: { ...baseItem, name: 'Flip Earrings', visibility: 'private' } });
+  check('Owner edits it to private', ok(flip) && payload(flip)?.visibility === 'private', errMsg(flip));
+
+  const bAfterFlip = await req('GET', `/jewelry/${flipId}`, { token: tokenB });
+  check('B can no longer see it after the edit (404)', bAfterFlip.status === 404, `got ${bAfterFlip.status}`);
+
   // ---- Bookings -----------------------------------------------------------
   section('Bookings');
   const start = isoPlus(7), end = isoPlus(8);
@@ -248,6 +284,25 @@ async function main() {
 
   const decideAgain = await req('PATCH', `/bookings/${bookingId}/decision`, { token: tokenA, body: { action: 'reject' } });
   check('Already-handled request cannot be decided again (400)', decideAgain.status === 400, `got ${decideAgain.status}`);
+
+  const overlap = await req('POST', '/bookings', { token: tokenD, body: { item: pubId, startDate: start, endDate: end } });
+  check('Overlapping an accepted booking is rejected (409)', overlap.status === 409, `got ${overlap.status}`);
+
+  const toReject = await req('POST', '/bookings', { token: tokenD, body: { item: pubId, startDate: isoPlus(20), endDate: isoPlus(21) } });
+  const rejectId = payload(toReject)?._id;
+  check('D requests a different range', ok(toReject) && !!rejectId, errMsg(toReject));
+  const reject = await req('PATCH', `/bookings/${rejectId}/decision`, { token: tokenA, body: { action: 'reject' } });
+  check('Owner rejects a pending request', ok(reject) && payload(reject)?.status === 'rejected', errMsg(reject));
+
+  const toCancel = await req('POST', '/bookings', { token: tokenD, body: { item: pubId, startDate: isoPlus(30), endDate: isoPlus(31) } });
+  const cancelId = payload(toCancel)?._id;
+  check('D makes a request to cancel', ok(toCancel) && !!cancelId, errMsg(toCancel));
+  const cancelGuard = await req('PATCH', `/bookings/${cancelId}/cancel`, { token: tokenC });
+  check('Only the requester can cancel (403)', cancelGuard.status === 403, `got ${cancelGuard.status}`);
+  const cancel = await req('PATCH', `/bookings/${cancelId}/cancel`, { token: tokenD });
+  check('Requester cancels their pending request', ok(cancel) && payload(cancel)?.status === 'cancelled', errMsg(cancel));
+  const cancelDone = await req('PATCH', `/bookings/${cancelId}/cancel`, { token: tokenD });
+  check('A non-pending request cannot be cancelled (400)', cancelDone.status === 400, `got ${cancelDone.status}`);
 
   // ---- Conversations ------------------------------------------------------
   section('Conversations');
@@ -289,6 +344,67 @@ async function main() {
   const adminAsUser = await req('GET', '/notifications/admin/overview', { token: tokenA });
   check('Non-admin blocked from admin overview (403)', adminAsUser.status === 403, `got ${adminAsUser.status}`);
 
+  // ---- Closet membership & sharing ---------------------------------------
+  section('Closet membership & sharing');
+
+  const scopeList = await req('GET', `/jewelry?scope=${closetId}`, { token: tokenB });
+  check('Scope filter returns the closet-shared item', ok(scopeList) && (payload(scopeList) || []).some((i) => i._id === grpId), errMsg(scopeList));
+
+  const mkShare = await req('POST', '/jewelry', { token: tokenA, body: { ...baseItem, name: 'Shared Later', visibility: 'private' } });
+  const shareId = payload(mkShare)?._id;
+  check('Create a private item to share', ok(mkShare) && !!shareId, errMsg(mkShare));
+  const share = await req('POST', '/jewelry/share', { token: tokenA, body: { closetId, itemIds: [shareId] } });
+  check('Owner shares it into the closet', ok(share) && payload(share)?.added === 1, errMsg(share));
+  const bSeesShared = await req('GET', `/jewelry/${shareId}`, { token: tokenB });
+  check('Member can now see the shared item', ok(bSeesShared), errMsg(bSeesShared));
+
+  // Resolve member ids from the closet detail (robust to the user-id field name).
+  const detail = await req('GET', `/groups/${closetId}`, { token: tokenA });
+  const members = payload(detail)?.members || [];
+  const idByEmail = (email) => (members.find((m) => m.email === email) || {})._id;
+  const ownerMemberId = idByEmail(mkEmail('owner'));
+  const memberDId = idByEmail(mkEmail('member'));
+
+  const dSeesGrp = await req('GET', `/jewelry/${grpId}`, { token: tokenD });
+  check('D (member) can see the closet item before removal', ok(dSeesGrp), errMsg(dSeesGrp));
+  const removeGuard = await req('DELETE', `/groups/${closetId}/members/${memberDId}`, { token: tokenB });
+  check('Non-owner cannot remove a member (403)', removeGuard.status === 403, `got ${removeGuard.status}`);
+  const removeOwner = await req('DELETE', `/groups/${closetId}/members/${ownerMemberId}`, { token: tokenA });
+  check('The owner cannot be removed (400)', removeOwner.status === 400, `got ${removeOwner.status}`);
+  const removeD = await req('DELETE', `/groups/${closetId}/members/${memberDId}`, { token: tokenA });
+  check('Owner removes member D', ok(removeD), errMsg(removeD));
+  const dAfterRemove = await req('GET', `/jewelry/${grpId}`, { token: tokenD });
+  check('D loses access to the closet item after removal (404)', dAfterRemove.status === 404, `got ${dAfterRemove.status}`);
+
+  const ownerLeave = await req('POST', `/groups/${closetId}/leave`, { token: tokenA });
+  check('Owner cannot leave their own closet (400)', ownerLeave.status === 400, `got ${ownerLeave.status}`);
+  const outsiderLeave = await req('POST', `/groups/${closetId}/leave`, { token: tokenC });
+  check('A non-member cannot leave (400)', outsiderLeave.status === 400, `got ${outsiderLeave.status}`);
+  const bLeave = await req('POST', `/groups/${closetId}/leave`, { token: tokenB });
+  check('Member B leaves the closet (204)', bLeave.status === 204, `got ${bLeave.status}`);
+  const bAfterLeave = await req('GET', `/jewelry/${grpId}`, { token: tokenB });
+  check('B loses access to the closet item after leaving (404)', bAfterLeave.status === 404, `got ${bAfterLeave.status}`);
+
+  // ---- Sets ---------------------------------------------------------------
+  section('Sets');
+  const mkSet = await req('POST', '/sets', { token: tokenA, body: { name: `Test Set ${stamp}` } });
+  const setId = payload(mkSet)?._id;
+  check('Create a set', ok(mkSet) && !!setId, errMsg(mkSet));
+  const setList = await req('GET', '/sets', { token: tokenA });
+  check('Set appears in the owner list', ok(setList) && (payload(setList) || []).some((s) => s._id === setId), errMsg(setList));
+  const setGet = await req('GET', `/sets/${setId}`, { token: tokenA });
+  check('Set detail returns its items array', ok(setGet) && Array.isArray(payload(setGet)?.items), errMsg(setGet));
+  const setRename = await req('PATCH', `/sets/${setId}`, { token: tokenA, body: { name: `Renamed Set ${stamp}` } });
+  check('Owner renames the set', ok(setRename) && payload(setRename)?.name === `Renamed Set ${stamp}`, errMsg(setRename));
+  const setRenameGuard = await req('PATCH', `/sets/${setId}`, { token: tokenB, body: { name: 'Nope' } });
+  check('Non-owner cannot edit the set (403)', setRenameGuard.status === 403, `got ${setRenameGuard.status}`);
+  const setDelGuard = await req('DELETE', `/sets/${setId}`, { token: tokenB });
+  check('Non-owner cannot delete the set (403)', setDelGuard.status === 403, `got ${setDelGuard.status}`);
+  const setDel = await req('DELETE', `/sets/${setId}`, { token: tokenA });
+  check('Owner deletes the set (204)', setDel.status === 204, `got ${setDel.status}`);
+  const setGone = await req('GET', `/sets/${setId}`, { token: tokenA });
+  check('Deleted set is gone (404)', setGone.status === 404, `got ${setGone.status}`);
+
   // ---- Profile ------------------------------------------------------------
   section('Profile');
   const updateMe = await req('PATCH', '/auth/me', { token: tokenA, body: { location: 'Uxbridge, ON' } });
@@ -296,7 +412,7 @@ async function main() {
 
   // ---- Cleanup (best effort) ---------------------------------------------
   section('Cleanup (best effort)');
-  for (const [name, id] of [['public', pubId], ['private', privId], ['groups', grpId]]) {
+  for (const [name, id] of [['public', pubId], ['private', privId], ['groups', grpId], ['edited', flipId], ['shared', shareId]]) {
     if (!id) continue;
     const del = await req('DELETE', `/jewelry/${id}`, { token: tokenA });
     check(`Delete ${name} item`, del.status === 204 || ok(del), `got ${del.status}`);
