@@ -8,6 +8,7 @@
     "dev": "tsx watch src/app.ts",
     "build": "tsc",
     "start": "node dist/app.js",
+    "wipe": "tsx scripts/wipe-data.ts",
     "lint": "eslint src --ext .ts",
     "clean": "rimraf dist"
   },
