@@ -9,6 +9,7 @@ import { fullImageUrl, thumbImageUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
 import { itemTitle } from './format';
 import { useJewelryItem, useDeleteJewelry } from './api';
+import { ImageLightbox } from './ImageLightbox';
 import { LoanRequestModal } from '@/features/bookings';
 
 const colourLabel = (id?: string) => COLOURS.find((c) => c.id === id)?.label;
@@ -22,6 +23,7 @@ export function ItemDetailPage() {
   const del = useDeleteJewelry();
 
   const [active, setActive] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const [requestOpen, setRequestOpen] = useState(false);
   const [requested, setRequested] = useState(false);
 
@@ -72,7 +74,14 @@ export function ItemDetailPage() {
         <div className="relative overflow-hidden rounded-2xl bg-tile">
           <div className="aspect-[4/3] md:aspect-[16/10]">
             {heroImage ? (
-              <img src={heroImage} alt={itemTitle(item)} className="h-full w-full object-cover" />
+              <button
+                type="button"
+                onClick={() => setLightboxOpen(true)}
+                aria-label="View full image"
+                className="block h-full w-full cursor-zoom-in"
+              >
+                <img src={heroImage} alt={itemTitle(item)} className="h-full w-full object-cover" />
+              </button>
             ) : (
               <div className="flex h-full items-center justify-center text-muted">No photo</div>
             )}
@@ -207,6 +216,15 @@ export function ItemDetailPage() {
           </div>
         </div>
       </div>
+
+      <ImageLightbox
+        open={lightboxOpen}
+        images={item.images}
+        index={active}
+        onIndex={setActive}
+        onClose={() => setLightboxOpen(false)}
+        alt={itemTitle(item)}
+      />
 
       {!isOwner && (
         <LoanRequestModal
