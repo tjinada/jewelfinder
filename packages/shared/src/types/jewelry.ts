@@ -5,7 +5,6 @@ import {
   COLOUR_IDS,
   BANGLE_SIZES,
   NECKLACE_TYPES,
-  AVAILABILITY,
 } from '../constants/categories';
 import { VISIBILITY } from '../constants/visibility';
 
@@ -13,7 +12,6 @@ export const CategorySchema = z.enum(CATEGORIES);
 export const MetalSchema = z.enum(METALS);
 export const NecklaceTypeSchema = z.enum(NECKLACE_TYPES);
 export const BangleSizeSchema = z.enum(BANGLE_SIZES);
-export const AvailabilitySchema = z.enum(AVAILABILITY);
 export const VisibilitySchema = z.enum(VISIBILITY);
 export const ColourSchema = z.enum(
   COLOUR_IDS as [string, ...string[]],
@@ -35,7 +33,6 @@ export const JewelryItemSchema = JewelryAttributesSchema.extend({
   name: z.string().min(1).max(60),
   category: CategorySchema,
   images: z.array(z.string()).default([]),
-  availability: AvailabilitySchema.default('available'),
   set: z.string().nullable().optional(),
   visibility: VisibilitySchema.default('private'),
   sharedGroups: z.array(z.string()).default([]),
@@ -51,7 +48,6 @@ export const CreateJewelryInputSchema = JewelryAttributesSchema.extend({
   name: z.string().min(1).max(60),
   category: CategorySchema,
   images: z.array(z.string()).default([]),
-  availability: AvailabilitySchema.optional(),
   set: z.string().nullable().optional(),
   visibility: VisibilitySchema.optional(),
   sharedGroups: z.array(z.string()).optional(),

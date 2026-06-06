@@ -5,7 +5,6 @@ export interface IJewelry {
   name: string;
   category: string;
   images: string[];
-  availability: 'available' | 'onLoan';
   setId: Types.ObjectId | null;
   visibility: 'private' | 'public' | 'groups';
   sharedGroups: Types.ObjectId[];
@@ -29,12 +28,6 @@ const JewelrySchema = new Schema<IJewelryDocument, IJewelryModel>(
     name: { type: String, required: true, trim: true, maxlength: 60 },
     category: { type: String, required: true, index: true },
     images: { type: [String], default: [] },
-    availability: {
-      type: String,
-      enum: ['available', 'onLoan'],
-      default: 'available',
-      index: true,
-    },
     // Set membership lands in Phase 4; nullable until then.
     // (DB field is `setId` — `set` is a reserved Mongoose Document method.)
     setId: { type: Schema.Types.ObjectId, ref: 'Set', default: null, index: true },

@@ -11,7 +11,6 @@ import {
   updateJewelryBody,
   listJewelryQuery,
   idParam,
-  availabilityBody,
   shareToClosetBody,
 } from './jewelry.validation.js';
 
@@ -26,11 +25,5 @@ router.post('/', validateBody(createJewelryBody), jewelryController.create);
 router.post('/share', validateBody(shareToClosetBody), jewelryController.share);
 router.patch('/:id', validateParams(idParam), validateBody(updateJewelryBody), jewelryController.update);
 router.delete('/:id', validateParams(idParam), jewelryController.remove);
-router.patch(
-  '/:id/availability',
-  validateParams(idParam),
-  validateBody(availabilityBody),
-  jewelryController.setAvailability,
-);
 
 export default router;

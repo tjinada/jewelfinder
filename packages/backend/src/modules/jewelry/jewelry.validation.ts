@@ -5,7 +5,6 @@ import {
   ColourSchema,
   BangleSizeSchema,
   NecklaceTypeSchema,
-  AvailabilitySchema,
   VisibilitySchema,
   CATEGORY_ATTRIBUTES,
   type Category,
@@ -18,7 +17,6 @@ const baseItem = z.object({
   name: z.string().trim().min(1, 'Name is required').max(60),
   category: CategorySchema,
   images: z.array(z.string()).min(1, 'At least one photo is required').max(8),
-  availability: AvailabilitySchema.optional(),
   set: z.string().nullable().optional(),
   visibility: VisibilitySchema.optional(),
   sharedGroups: z.array(z.string().regex(/^[a-f\d]{24}$/i, 'Invalid closet id')).optional(),
@@ -87,7 +85,6 @@ export const listJewelryQuery = z.object({
   colour: ColourSchema.optional(),
   size: BangleSizeSchema.optional(),
   necklaceType: NecklaceTypeSchema.optional(),
-  availability: AvailabilitySchema.optional(),
   set: z.string().optional(),
   // 'all' | 'public' | 'mine' | a circle id. Narrows within the visible set.
   scope: z.string().optional(),
@@ -96,10 +93,6 @@ export const listJewelryQuery = z.object({
 
 export const idParam = z.object({
   id: z.string().regex(/^[a-f\d]{24}$/i, 'Invalid id'),
-});
-
-export const availabilityBody = z.object({
-  availability: AvailabilitySchema,
 });
 
 export const shareToClosetBody = z.object({

@@ -12,11 +12,9 @@ import {
   NECKLACE_TYPE_LABELS,
   COLOURS,
   type Category,
-  type Availability,
 } from '@jewel/shared';
 import { MainLayout } from '@/components/layout';
 import { Button, LocationInput, StarRating } from '@/components/ui';
-import { cn } from '@/lib/utils';
 import { thumbImageUrl } from '@/lib/media';
 import {
   useCreateJewelry,
@@ -58,7 +56,6 @@ export function JewelryFormPage() {
   const [name, setName] = useState('');
   const [category, setCategory] = useState<Category | ''>('');
   const [images, setImages] = useState<string[]>([]);
-  const [availability, setAvailability] = useState<Availability>('available');
   const [metal, setMetal] = useState<string | undefined>();
   const [colour, setColour] = useState<string | undefined>();
   const [size, setSize] = useState<string | undefined>();
@@ -76,7 +73,6 @@ export function JewelryFormPage() {
       setName(existing.name ?? '');
       setCategory(existing.category);
       setImages(existing.images);
-      setAvailability(existing.availability);
       setMetal(existing.metal);
       setColour(existing.colour);
       setSize(existing.size);
@@ -142,7 +138,6 @@ export function JewelryFormPage() {
         name: name.trim(),
         category,
         images,
-        availability,
         set: setId,
         visibility: vis.visibility,
         sharedGroups: vis.visibility === 'groups' ? vis.sharedGroups : undefined,
@@ -329,29 +324,6 @@ export function JewelryFormPage() {
           {/* Visibility — who can see this item */}
           <Field label="Visibility">
             <VisibilitySelect value={vis} onChange={setVis} />
-          </Field>
-
-          {/* Availability */}
-          <Field label="Availability">
-            <div className="flex gap-2">
-              {(['available', 'onLoan'] as const).map((a) => (
-                <button
-                  type="button"
-                  key={a}
-                  onClick={() => setAvailability(a)}
-                  className={cn(
-                    'flex-1 rounded-xl border px-4 py-3 text-sm font-semibold',
-                    availability === a
-                      ? a === 'available'
-                        ? 'border-available bg-[#E2F0EA] text-available'
-                        : 'border-onloan bg-[#F4E7D5] text-onloan'
-                      : 'border-line bg-surface text-ink/60',
-                  )}
-                >
-                  {a === 'available' ? 'Available' : 'On loan'}
-                </button>
-              ))}
-            </div>
           </Field>
 
           {/* Condition — whole-star rating; optional note when under 5 */}

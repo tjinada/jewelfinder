@@ -61,11 +61,6 @@ export function HomePage() {
   // Active attribute filters shown as removable chips beneath the search bar.
   const activeChips: { key: keyof SearchFilters; label: string }[] = [];
   if (filters.category) activeChips.push({ key: 'category', label: CATEGORY_LABELS[filters.category] });
-  if (filters.availability)
-    activeChips.push({
-      key: 'availability',
-      label: filters.availability === 'available' ? 'Available' : 'On loan',
-    });
   if (filters.metal)
     activeChips.push({
       key: 'metal',

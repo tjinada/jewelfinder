@@ -12,7 +12,6 @@ import {
   NECKLACE_TYPE_LABELS,
   COLOURS,
   type Category,
-  type Availability,
 } from '@jewel/shared';
 import { Chip, Button } from '@/components/ui';
 import { ATTRIBUTE_FILTER_KEYS, countActiveFilters, type SearchFilters } from './filters';
@@ -98,25 +97,6 @@ export function FilterSheet({ open, value, onChange, onClear, onClose }: FilterS
                 {CATEGORIES.map((c) => (
                   <Chip key={c} active={value.category === c} onClick={() => chooseCategory(c)}>
                     {CATEGORY_LABELS[c]}
-                  </Chip>
-                ))}
-              </div>
-            </div>
-
-            {/* Availability */}
-            <div className="mb-5">
-              <span className={labelClass}>Availability</span>
-              <div className="flex flex-wrap gap-2">
-                <Chip active={!value.availability} onClick={() => set({ availability: undefined })}>
-                  Any
-                </Chip>
-                {(['available', 'onLoan'] as Availability[]).map((a) => (
-                  <Chip
-                    key={a}
-                    active={value.availability === a}
-                    onClick={() => set({ availability: a })}
-                  >
-                    {a === 'available' ? 'Available' : 'On loan'}
                   </Chip>
                 ))}
               </div>

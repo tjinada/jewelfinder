@@ -185,7 +185,7 @@ export function VisibilitySelect({ value, onChange }: VisibilitySelectProps) {
                       void submitNew();
                     }
                   }}
-                  placeholder="New closet name"
+                  placeholder="Name this closet"
                   className="flex-1 rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
                 <Button type="button" onClick={() => void submitNew()} disabled={create.isPending}>

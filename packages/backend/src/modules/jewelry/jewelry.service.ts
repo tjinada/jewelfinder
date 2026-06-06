@@ -40,7 +40,6 @@ function normalizeForCategory(input: JewelryBody) {
     name: input.name.trim(),
     category: input.category,
     images: input.images,
-    availability: input.availability ?? 'available',
     setId: input.set ?? null,
     visibility,
     // sharedGroups only travels with 'groups' visibility; cleared otherwise.
@@ -66,7 +65,6 @@ function toClient(doc: IJewelryDocument): JewelryItem {
     name: doc.name,
     category: doc.category as JewelryItem['category'],
     images: doc.images,
-    availability: doc.availability,
     set: doc.setId ? String(doc.setId) : null,
     visibility: doc.visibility as JewelryItem['visibility'],
     sharedGroups: doc.sharedGroups.map(String),
@@ -88,7 +86,7 @@ export const jewelryService = {
   /** Browse/search, scoped to what the viewer is allowed to see. */
   async list(viewerId: string, filters: ListJewelryQuery): Promise<JewelryItem[]> {
     const query: Record<string, unknown> = {};
-    for (const key of ['category', 'metal', 'colour', 'size', 'necklaceType', 'availability'] as const) {
+    for (const key of ['category', 'metal', 'colour', 'size', 'necklaceType'] as const) {
       if (filters[key]) query[key] = filters[key];
     }
     if (filters.set) query.setId = filters.set;
@@ -173,22 +171,6 @@ export const jewelryService = {
     const images = [...doc.images];
     await doc.deleteOne();
     await Promise.allSettled(images.map((f) => removeImage(f)));
-  },
-
-  /** Master switch: 'available' = listed/open to loan requests, 'onLoan' = paused. */
-  async setAvailability(
-    ownerId: string,
-    id: string,
-    availability: 'available' | 'onLoan',
-  ): Promise<JewelryItem> {
-    const doc = await Jewelry.findById(id);
-    if (!doc) throw new AppError('Item not found', 404);
-    if (String(doc.owner) !== ownerId) throw new AppError('You can only change your own items', 403);
-
-    doc.availability = availability;
-    await doc.save();
-    await doc.populate('owner', 'displayName location');
-    return toClient(doc);
   },
 
   /**

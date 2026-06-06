@@ -57,7 +57,7 @@ export function ClosetsPage() {
               maxLength={60}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="New closet name"
+              placeholder="Name this closet"
               className="flex-1 rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
             <Button type="submit" disabled={create.isPending}>

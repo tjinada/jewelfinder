@@ -1,9 +1,8 @@
-import type { Availability, Category } from '@jewel/shared';
+import type { Category } from '@jewel/shared';
 
 /** Filters shared between the search page and the filter sheet. */
 export interface SearchFilters {
   category?: Category;
-  availability?: Availability;
   metal?: string;
   colour?: string;
   size?: string;

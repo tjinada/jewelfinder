@@ -3,6 +3,7 @@ import { Booking, IBookingDocument } from './booking.model.js';
 import { Jewelry } from '../jewelry/jewelry.model.js';
 import { conversationService } from '../conversations/conversation.service.js';
 import { notificationService } from '../notifications/notification.service.js';
+import { isVisibleTo } from '../groups/visibility.js';
 import { AppError } from '../../middleware/error.middleware.js';
 import type { Booking as BookingDTO, DateRange } from '@jewel/shared';
 import type { CreateBookingBody } from './booking.validation.js';
@@ -77,9 +78,13 @@ export const bookingService = {
     if (String(item.owner) === requesterId) {
       throw new AppError('You cannot request your own item', 400);
     }
-    if (item.availability !== 'available') {
-      throw new AppError('This item is not accepting loan requests right now', 400);
-    }
+    const visible = await isVisibleTo(requesterId, {
+      ownerId: String(item.owner),
+      visibility: item.visibility,
+      sharedGroups: item.sharedGroups,
+    });
+    // 404 (not 403) so a hidden item's existence isn't leaked.
+    if (!visible) throw new AppError('Item not found', 404);
     if (input.startDate < todayISO()) {
       throw new AppError('The start date is in the past', 400);
     }

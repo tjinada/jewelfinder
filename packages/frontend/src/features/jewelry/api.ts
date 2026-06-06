@@ -1,10 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, type ApiResponse } from '@/lib/api';
-import type { JewelryItem, Availability, Visibility } from '@jewel/shared';
+import type { JewelryItem, Visibility } from '@jewel/shared';
 
 export interface JewelryFilters {
   category?: string;
-  availability?: string;
   metal?: string;
   colour?: string;
   size?: string;
@@ -17,7 +16,6 @@ export interface JewelryInput {
   name?: string;
   category: string;
   images: string[];
-  availability?: Availability;
   metal?: string;
   colour?: string;
   size?: string;
@@ -95,19 +93,6 @@ export function useDeleteJewelry() {
   return useMutation({
     mutationFn: async (id: string) => {
       await api.delete(`/jewelry/${id}`);
-    },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['jewelry'] }),
-  });
-}
-
-export function useSetAvailability(id: string) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (availability: Availability) => {
-      const { data } = await api.patch<ApiResponse<JewelryItem>>(`/jewelry/${id}/availability`, {
-        availability,
-      });
-      return data.data;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['jewelry'] }),
   });

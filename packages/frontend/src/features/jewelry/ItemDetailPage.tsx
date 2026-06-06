@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Pencil, Trash2, Loader2, RefreshCw, Link2, CalendarDays, Eye, MapPin } from 'lucide-react';
+import { ArrowLeft, Pencil, Trash2, Loader2, Link2, CalendarDays, Eye, MapPin } from 'lucide-react';
 import { CATEGORY_LABELS, METAL_LABELS, NECKLACE_TYPE_LABELS, COLOURS, VISIBILITY_LABELS } from '@jewel/shared';
 import { MainLayout } from '@/components/layout';
 import { Button, StarRating } from '@/components/ui';
@@ -8,7 +8,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { fullImageUrl, thumbImageUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
 import { itemTitle } from './format';
-import { useJewelryItem, useDeleteJewelry, useSetAvailability } from './api';
+import { useJewelryItem, useDeleteJewelry } from './api';
 import { LoanRequestModal } from '@/features/bookings';
 
 const colourLabel = (id?: string) => COLOURS.find((c) => c.id === id)?.label;
@@ -20,7 +20,6 @@ export function ItemDetailPage() {
 
   const { data: item, isLoading, isError } = useJewelryItem(id);
   const del = useDeleteJewelry();
-  const setAvailability = useSetAvailability(id ?? '');
 
   const [active, setActive] = useState(0);
   const [requestOpen, setRequestOpen] = useState(false);
@@ -59,9 +58,6 @@ export function ItemDetailPage() {
     item.necklaceType && NECKLACE_TYPE_LABELS[item.necklaceType],
     item.size && `Size ${item.size}`,
   ].filter(Boolean) as string[];
-
-  const toggleAvailability = () =>
-    setAvailability.mutate(item.availability === 'available' ? 'onLoan' : 'available');
 
   const onDelete = async () => {
     if (!window.confirm('Delete this item? This cannot be undone.')) return;
@@ -172,15 +168,6 @@ export function ItemDetailPage() {
                 <h2 className="mb-3 text-xs font-bold uppercase tracking-wide text-muted">Manage</h2>
                 <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                   <Button
-                    onClick={toggleAvailability}
-                    disabled={setAvailability.isPending}
-                    variant="gold"
-                    className="w-full sm:w-auto"
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                    {item.availability === 'available' ? 'Pause loan requests' : 'List for loan'}
-                  </Button>
-                  <Button
                     variant="ghost"
                     onClick={() => navigate(`/item/${item._id}/edit`)}
                     className="w-full sm:w-auto"
@@ -199,25 +186,21 @@ export function ItemDetailPage() {
               </>
             ) : (
               <div>
-                {item.availability === 'available' ? (
-                  requested ? (
-                    <div className="rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-primary">
-                      Request sent — you’ll hear back once the owner responds.{' '}
-                      <Link to="/requests" className="font-semibold underline">
-                        View your requests
-                      </Link>
-                    </div>
-                  ) : (
-                    <Button
-                      variant="gold"
-                      onClick={() => setRequestOpen(true)}
-                      className="w-full sm:w-auto"
-                    >
-                      <CalendarDays className="h-4 w-4" /> Request to loan
-                    </Button>
-                  )
+                {requested ? (
+                  <div className="rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-primary">
+                    Request sent — you’ll hear back once the owner responds.{' '}
+                    <Link to="/requests" className="font-semibold underline">
+                      View your requests
+                    </Link>
+                  </div>
                 ) : (
-                  <p className="text-sm text-muted">This piece isn’t available for loan right now.</p>
+                  <Button
+                    variant="gold"
+                    onClick={() => setRequestOpen(true)}
+                    className="w-full sm:w-auto"
+                  >
+                    <CalendarDays className="h-4 w-4" /> Request to loan
+                  </Button>
                 )}
               </div>
             )}

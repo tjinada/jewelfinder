@@ -72,9 +72,6 @@ export const COLOURS = [
 export type ColourId = (typeof COLOURS)[number]['id'];
 export const COLOUR_IDS = COLOURS.map((c) => c.id) as ColourId[];
 
-export const AVAILABILITY = ['available', 'onLoan'] as const;
-export type Availability = (typeof AVAILABILITY)[number];
-
 // ---- Category -> attributes -------------------------------------------------
 // Physical attributes only. Set membership is universal (any item may join a
 // set) and is handled separately, so it is intentionally NOT an attribute here.
