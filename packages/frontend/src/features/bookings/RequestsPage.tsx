@@ -154,7 +154,7 @@ export function RequestsPage() {
           <p className="text-lg font-display italic text-muted">
             {tab === 'incoming'
               ? 'Every piece has its next moment. Yours is coming.'
-              : 'Nothing yet - have you explored what's in your closets?'}
+              : "Nothing yet - have you explored what's in your closets?"}
           </p>
         </div>
       )}
