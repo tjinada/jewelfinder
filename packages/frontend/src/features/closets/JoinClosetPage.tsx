@@ -1,17 +1,27 @@
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, CheckCircle2 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui';
 import { Hanger } from '@/components/icons/Hanger';
 import { getErrorMessage } from '@/features/auth';
 import { useResolveJoin, useJoinCloset } from './api';
 
+/** True when running as an installed standalone PWA (vs a normal browser tab). */
+function isStandalonePwa(): boolean {
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as unknown as { standalone?: boolean }).standalone === true
+  );
+}
+
 /**
  * Public landing page for a shareable closet invite link (`/join/:token`).
  *
- * - Authenticated (incl. an installed PWA opening the link): join immediately
- *   and redirect into the closet.
+ * - Authenticated in the installed app: join and drop straight into the closet.
+ * - Authenticated in a browser (e.g. an iOS link that opened in Safari rather
+ *   than the PWA): join, then show a success screen pointing back to the app —
+ *   the membership is already recorded server-side.
  * - Logged out: show what they're joining, then send them to register/login
  *   carrying `?join=<token>` so they land back here and auto-join after auth.
  */
@@ -19,6 +29,7 @@ export function JoinClosetPage() {
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const isAuthed = useAuthStore((s) => !!s.token);
+  const standalone = isStandalonePwa();
 
   const join = useJoinCloset();
   // Only resolve for logged-out visitors; logged-in users auto-join right away.
@@ -27,7 +38,11 @@ export function JoinClosetPage() {
   useEffect(() => {
     if (!isAuthed || !token || join.isPending || join.isSuccess) return;
     join.mutate(token, {
-      onSuccess: ({ closetId }) => navigate(`/closets/${closetId}`, { replace: true }),
+      onSuccess: ({ closetId }) => {
+        // In the installed app, go straight into the closet. In a browser, stay
+        // and let the success screen below point them back to the app.
+        if (standalone) navigate(`/closets/${closetId}`, { replace: true });
+      },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthed, token]);
@@ -46,6 +61,25 @@ export function JoinClosetPage() {
               >
                 Go home
               </Button>
+            </>
+          ) : join.isSuccess ? (
+            <>
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-available/10 text-available">
+                <CheckCircle2 className="h-7 w-7" />
+              </div>
+              <p className="font-display text-2xl text-ink">You’re in!</p>
+              <p className="mt-1 text-sm text-muted">
+                Open The Clasp from your Home Screen to see the closet — or keep browsing here.
+              </p>
+              {join.data && (
+                <Button
+                  variant="ruby"
+                  onClick={() => navigate(`/closets/${join.data!.closetId}`, { replace: true })}
+                  className="mt-6 w-full justify-center"
+                >
+                  View the closet
+                </Button>
+              )}
             </>
           ) : (
             <>
