@@ -54,7 +54,7 @@ if (ids.length === 0) {
   // Jewelry collection name can be "jewelry" or "jewelries" depending on
   // pluralization — discover it so this works either way.
   const jcol = db.getCollectionNames().find((n) => /^jewel/i.test(n)) || "jewelries";
-  const convs = db.conversations.find({ participants: { \$in: ids } }).map((c) => c._id);
+  const convs = db.conversations.distinct("_id", { participants: { \$in: ids } });
   const bookingFilter = { \$or: [{ owner: { \$in: ids } }, { requester: { \$in: ids } }] };
 
   if (!confirm) {
