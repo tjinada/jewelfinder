@@ -82,7 +82,7 @@ export function MembersSheet({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 320 }}
-            className="fixed inset-x-0 bottom-0 z-[60] mx-auto max-h-[85vh] max-w-lg overflow-y-auto rounded-t-3xl border-t border-white/60 bg-cream/95 p-5 backdrop-blur-2xl safe-bottom"
+            className="fixed inset-x-0 bottom-0 z-[60] mx-auto max-h-[85vh] max-w-lg overflow-y-auto rounded-t-3xl border-t border-white/60 bg-cream/95 px-5 pt-5 pb-[calc(1.5rem_+_env(safe-area-inset-bottom))] backdrop-blur-2xl"
           >
             <div className="mb-4 flex items-center justify-between">
               <h2 className="flex items-center gap-2 font-display text-xl text-ink">
