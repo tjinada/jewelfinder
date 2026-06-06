@@ -67,7 +67,7 @@ export function LoanRequestModal({ open, itemId, itemName, onClose, onDone }: Lo
           >
             <div className="mb-1 flex items-start justify-between gap-3">
               <div>
-                <h2 className="font-display text-xl text-ink">Request to loan</h2>
+                <h2 className="font-display text-xl text-ink">Ask to borrow</h2>
                 <p className="text-sm text-muted">{itemName}</p>
               </div>
               <button onClick={onClose} aria-label="Close" className="text-ink/50 hover:text-ink">
@@ -96,7 +96,7 @@ export function LoanRequestModal({ open, itemId, itemName, onClose, onDone }: Lo
               onChange={(e) => setNote(e.target.value)}
               maxLength={500}
               rows={3}
-              placeholder="Add a note for the owner (optional)…"
+              placeholder="Add a note (optional)"
               className="mt-4 w-full resize-none rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink outline-none placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
 

@@ -123,7 +123,7 @@ export const groupService = {
       // Fire-and-forget: a push failure must not fail the add.
       void notificationService.notifyUser(String(user._id), {
         title: 'Added to a closet',
-        body: `${owner?.displayName ?? 'Someone'} added you to the closet "${doc.name}"`,
+        body: `${owner?.displayName ?? 'Someone'} just let you in. Welcome to ${doc.name}, something beautiful awaits.`,
         tag: `closet-${id}`,
         data: { url: `/closets/${id}` },
       });

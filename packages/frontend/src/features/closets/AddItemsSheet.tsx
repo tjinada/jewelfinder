@@ -100,7 +100,7 @@ export function AddItemsSheet({ open, onClose, closetId }: AddItemsSheetProps) {
               </div>
             ) : candidates.length === 0 ? (
               <p className="py-10 text-center font-display text-sm italic text-muted">
-                All your items are already here. Public items show up automatically.
+                Everything you've shared is already displayed. Your closet is ready
               </p>
             ) : (
               <>

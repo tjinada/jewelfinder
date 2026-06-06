@@ -1,7 +1,7 @@
 import { forwardRef, type ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
-type Variant = 'primary' | 'gold' | 'ghost';
+type Variant = 'primary' | 'gold' | 'ghost' | 'ruby';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
@@ -11,6 +11,7 @@ const variants: Record<Variant, string> = {
   primary: 'bg-primary text-gold-light hover:bg-primary-dark',
   gold: 'bg-gold text-[#3A2A10] hover:brightness-105',
   ghost: 'bg-surface text-ink border border-line hover:bg-cream',
+  ruby: 'bg-accent text-gold-light hover:brightness-110',
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(

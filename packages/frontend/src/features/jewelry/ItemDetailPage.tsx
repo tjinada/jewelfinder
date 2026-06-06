@@ -195,11 +195,11 @@ export function ItemDetailPage() {
                   </div>
                 ) : (
                   <Button
-                    variant="gold"
+                    variant="ruby"
                     onClick={() => setRequestOpen(true)}
                     className="w-full sm:w-auto"
                   >
-                    <CalendarDays className="h-4 w-4" /> Request to loan
+                    <CalendarDays className="h-4 w-4" /> Ask to borrow
                   </Button>
                 )}
               </div>
