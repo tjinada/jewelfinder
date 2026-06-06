@@ -173,7 +173,7 @@ export function JewelryFormPage() {
     <MainLayout>
       <div className="mx-auto max-w-2xl">
         <h1 className="mb-5 font-display text-2xl text-ink md:text-3xl">
-          {editing ? 'Edit item' : 'Add jewelry'}
+          {editing ? 'Edit item' : 'Add'}
         </h1>
 
         <form onSubmit={onSubmit} className="space-y-5">
@@ -195,7 +195,7 @@ export function JewelryFormPage() {
               ))}
 
               {images.length < 8 && (
-                <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-line text-muted hover:border-primary/50 hover:text-primary">
+                <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-muted text-muted hover:border-primary/50 hover:text-primary">
                   {upload.isPending ? (
                     <Loader2 className="h-5 w-5 animate-spin" />
                   ) : (
