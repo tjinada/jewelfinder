@@ -81,7 +81,7 @@ export function AddItemsSheet({ open, onClose, closetId }: AddItemsSheetProps) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 320 }}
-            className="fixed inset-x-0 bottom-0 z-[60] mx-auto flex max-h-[85vh] max-w-lg flex-col rounded-t-3xl border-t border-white/60 bg-cream/95 p-5 backdrop-blur-2xl safe-bottom"
+            className="fixed inset-x-0 bottom-0 z-[60] mx-auto flex max-h-[85vh] max-w-lg flex-col rounded-t-3xl border-t border-white/60 bg-cream/95 px-5 pt-5 pb-[calc(1.5rem_+_env(safe-area-inset-bottom))] backdrop-blur-2xl"
           >
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-display text-xl text-ink">Add your items</h2>
