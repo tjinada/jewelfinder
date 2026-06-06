@@ -74,6 +74,25 @@ export function useAddMember(id: string) {
   });
 }
 
+/**
+ * Owner invites an email that isn't registered yet. Returns `{ added: true }`
+ * if the email had since signed up (added directly), otherwise `{ token }` for
+ * building the `/register?invite=<token>` link.
+ */
+export function useCreateInvite(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (email: string) => {
+      const { data } = await api.post<ApiResponse<{ added?: true; token?: string }>>(
+        `/groups/${id}/invites`,
+        { email },
+      );
+      return data.data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['closets'] }),
+  });
+}
+
 /** Removing a member prunes their items' sharing for this closet, so refresh jewelry too. */
 export function useRemoveMember(id: string) {
   const qc = useQueryClient();

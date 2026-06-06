@@ -1,8 +1,10 @@
 import { Group, IGroupDocument } from './group.model.js';
+import { GroupInvite } from './groupInvite.model.js';
 import { User } from '../users/user.model.js';
 import { Jewelry } from '../jewelry/jewelry.model.js';
 import { notificationService } from '../notifications/notification.service.js';
 import { AppError } from '../../middleware/error.middleware.js';
+import { randomBytes } from 'crypto';
 import type { Group as GroupDTO, GroupWithMembers } from '@jewel/shared';
 
 // "Closet" is the user-facing name; the model/collection/field stay `Group`/`sharedGroups`.
@@ -33,6 +35,9 @@ function toGroupWithMembers(
   }));
   return { ...toGroup(doc, viewerId, itemCount), memberCount: members.length, members };
 }
+
+// Invite links stay valid for two weeks.
+const INVITE_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 
 /** Owner-only guard, shared by the management methods. */
 function assertOwner(doc: IGroupDocument, ownerId: string): void {
@@ -112,7 +117,9 @@ export const groupService = {
     assertOwner(doc, ownerId);
 
     const user = await User.findByEmail(email);
-    if (!user) throw new AppError('No user found with that email', 404);
+    if (!user) {
+      throw new AppError('No user found with that email', 404, 'EMAIL_NOT_REGISTERED');
+    }
 
     const alreadyMember = doc.members.some((m) => String(m) === String(user._id));
     await Group.updateOne({ _id: id }, { $addToSet: { members: user._id } });
@@ -168,5 +175,94 @@ export const groupService = {
     assertOwner(doc, ownerId);
     await pruneGroupFromItems(id);
     await doc.deleteOne();
+  },
+
+  /**
+   * Owner invites an email that isn't a registered user yet. Returns a token the
+   * client turns into a `/register?invite=<token>` link to share. If the email
+   * has since registered, they're added directly instead.
+   */
+  async createInvite(
+    ownerId: string,
+    id: string,
+    email: string,
+  ): Promise<{ added: true } | { token: string }> {
+    const doc = await Group.findById(id);
+    if (!doc) throw new AppError('Closet not found', 404);
+    assertOwner(doc, ownerId);
+
+    const normalized = email.toLowerCase().trim();
+
+    // Raced with a sign-up? Just add them.
+    const user = await User.findByEmail(normalized);
+    if (user) {
+      await Group.updateOne({ _id: id }, { $addToSet: { members: user._id } });
+      if (String(user._id) !== ownerId) {
+        const owner = await User.findById(ownerId).select('displayName');
+        void notificationService.notifyUser(String(user._id), {
+          title: 'Added to a closet',
+          body: `${owner?.displayName ?? 'Someone'} just let you in. Welcome to ${doc.name}, something beautiful awaits.`,
+          tag: `closet-${id}`,
+          data: { url: `/closets/${id}` },
+        });
+      }
+      return { added: true };
+    }
+
+    const token = randomBytes(24).toString('hex');
+    const expiresAt = new Date(Date.now() + INVITE_TTL_MS);
+    await GroupInvite.findOneAndUpdate(
+      { group: id, email: normalized },
+      { $set: { invitedBy: ownerId, token, status: 'pending', expiresAt } },
+      { upsert: true, new: true },
+    );
+    return { token };
+  },
+
+  /** Public: resolve an invite link for the register page. */
+  async getInviteByToken(
+    token: string,
+  ): Promise<{ closetName: string; inviterName: string; email: string; expired: boolean } | null> {
+    const invite = await GroupInvite.findOne({ token, status: 'pending' })
+      .populate('group', 'name')
+      .populate('invitedBy', 'displayName');
+    if (!invite) return null;
+    const group = invite.group as unknown as { name?: string } | null;
+    const inviter = invite.invitedBy as unknown as { displayName?: string } | null;
+    return {
+      closetName: group?.name ?? 'a closet',
+      inviterName: inviter?.displayName ?? 'Someone',
+      email: invite.email,
+      expired: invite.expiresAt.getTime() < Date.now(),
+    };
+  },
+
+  /**
+   * Called right after a user registers: add them to every closet they had a
+   * pending, unexpired invite for, and let the inviter know. Best-effort —
+   * never throws into the registration flow.
+   */
+  async acceptPendingInvitesForUser(user: {
+    id: string;
+    email: string;
+    displayName: string;
+  }): Promise<void> {
+    const invites = await GroupInvite.find({
+      email: user.email.toLowerCase(),
+      status: 'pending',
+      expiresAt: { $gt: new Date() },
+    });
+    for (const invite of invites) {
+      await Group.updateOne({ _id: invite.group }, { $addToSet: { members: user.id } });
+      invite.status = 'accepted';
+      await invite.save();
+      const group = await Group.findById(invite.group).select('name');
+      void notificationService.notifyUser(String(invite.invitedBy), {
+        title: 'Closet invite accepted',
+        body: `${user.displayName} just joined "${group?.name ?? 'your closet'}"`,
+        tag: `closet-${invite.group}`,
+        data: { url: `/closets/${invite.group}` },
+      });
+    }
   },
 };

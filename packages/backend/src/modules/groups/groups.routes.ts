@@ -6,11 +6,17 @@ import {
   createGroupBody,
   renameGroupBody,
   addMemberBody,
+  inviteBody,
+  inviteTokenParam,
   idParam,
   memberParams,
 } from './group.validation.js';
 
 const router: RouterType = Router();
+
+// Public: resolve an invite link so a logged-out invitee can see what they're
+// joining on the register page. Declared before `authenticate`.
+router.get('/invites/:token', validateParams(inviteTokenParam), groupController.resolveInvite);
 
 router.use(authenticate);
 
@@ -21,6 +27,7 @@ router.patch('/:id', validateParams(idParam), validateBody(renameGroupBody), gro
 router.delete('/:id', validateParams(idParam), groupController.remove);
 
 router.post('/:id/members', validateParams(idParam), validateBody(addMemberBody), groupController.addMember);
+router.post('/:id/invites', validateParams(idParam), validateBody(inviteBody), groupController.createInvite);
 router.delete('/:id/members/:userId', validateParams(memberParams), groupController.removeMember);
 router.post('/:id/leave', validateParams(idParam), groupController.leave);
 

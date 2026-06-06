@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { asyncHandler } from '../../middleware/error.middleware.js';
+import { asyncHandler, AppError } from '../../middleware/error.middleware.js';
 import { sendSuccess, sendCreated, sendNoContent } from '../../utils/response.js';
 import { groupService } from './groups.service.js';
 
@@ -27,6 +27,17 @@ export const groupController = {
   addMember: asyncHandler(async (req: Request, res: Response) => {
     const group = await groupService.addMember(req.userId!, req.params.id, req.body.email);
     sendSuccess(res, group);
+  }),
+
+  createInvite: asyncHandler(async (req: Request, res: Response) => {
+    const result = await groupService.createInvite(req.userId!, req.params.id, req.body.email);
+    sendSuccess(res, result);
+  }),
+
+  resolveInvite: asyncHandler(async (req: Request, res: Response) => {
+    const invite = await groupService.getInviteByToken(req.params.token);
+    if (!invite) throw new AppError('This invite link is no longer valid', 404);
+    sendSuccess(res, invite);
   }),
 
   removeMember: asyncHandler(async (req: Request, res: Response) => {

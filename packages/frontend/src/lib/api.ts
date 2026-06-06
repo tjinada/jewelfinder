@@ -47,6 +47,7 @@ export interface ApiResponse<T> {
 interface ApiErrorBody {
   status: 'error';
   message: string;
+  code?: string;
   errors?: Array<{ field: string; message: string }>;
 }
 
@@ -57,4 +58,12 @@ export function getErrorMessage(error: unknown): string {
   }
   if (error instanceof Error) return error.message;
   return 'Something went wrong';
+}
+
+/** The machine-readable error code from the API (e.g. 'EMAIL_NOT_REGISTERED'), if any. */
+export function getErrorCode(error: unknown): string | undefined {
+  if (axios.isAxiosError(error)) {
+    return (error.response?.data as ApiErrorBody | undefined)?.code;
+  }
+  return undefined;
 }

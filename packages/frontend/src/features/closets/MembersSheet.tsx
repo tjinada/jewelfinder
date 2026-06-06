@@ -1,11 +1,11 @@
 import { useState, type FormEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
-import { Loader2, UserPlus, X, Trash2, LogOut } from 'lucide-react';
+import { Loader2, UserPlus, X, Trash2, LogOut, Mail, Copy, Check, Share2 } from 'lucide-react';
 import type { GroupWithMembers } from '@jewel/shared';
 import { Button } from '@/components/ui';
-import { getErrorMessage } from '@/features/auth';
-import { useAddMember, useRemoveMember } from './api';
+import { getErrorMessage, getErrorCode } from '@/features/auth';
+import { useAddMember, useRemoveMember, useCreateInvite } from './api';
 
 interface MembersSheetProps {
   open: boolean;
@@ -38,18 +38,71 @@ export function MembersSheet({
   const { isOwner } = closet;
   const addMember = useAddMember(closet._id);
   const removeMember = useRemoveMember(closet._id);
+  const createInvite = useCreateInvite(closet._id);
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
+  const [invite, setInvite] = useState<{ email: string; url?: string } | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const onAdd = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
+    setInvite(null);
     if (!email.trim()) return setError('Enter an email address.');
     try {
       await addMember.mutateAsync(email.trim());
       setEmail('');
     } catch (err) {
+      // Not a registered user yet — offer to send an invite link instead.
+      if (getErrorCode(err) === 'EMAIL_NOT_REGISTERED') {
+        setInvite({ email: email.trim() });
+      } else {
+        setError(getErrorMessage(err));
+      }
+    }
+  };
+
+  const onSendInvite = async () => {
+    if (!invite) return;
+    setError('');
+    try {
+      const result = await createInvite.mutateAsync(invite.email);
+      if (result.token) {
+        setInvite({
+          email: invite.email,
+          url: `${window.location.origin}/register?invite=${result.token}`,
+        });
+      } else {
+        // Already registered in the meantime — they were added directly.
+        setInvite(null);
+        setEmail('');
+      }
+    } catch (err) {
       setError(getErrorMessage(err));
+    }
+  };
+
+  const copyLink = async () => {
+    if (!invite?.url) return;
+    try {
+      await navigator.clipboard.writeText(invite.url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard unavailable — ignore
+    }
+  };
+
+  const shareLink = async () => {
+    if (!invite?.url) return;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Join my closet on The Clasp', url: invite.url });
+      } catch {
+        // share cancelled — ignore
+      }
+    } else {
+      void copyLink();
     }
   };
 
@@ -116,6 +169,62 @@ export function MembersSheet({
 
             {error && (
               <p className="mb-4 rounded-lg bg-[#F4E7D5] px-3 py-2 text-sm text-onloan">{error}</p>
+            )}
+
+            {invite && (
+              <div className="mb-4 rounded-2xl border border-line bg-surface p-4">
+                {!invite.url ? (
+                  <>
+                    <p className="text-sm text-ink/80">
+                      <span className="font-semibold">{invite.email}</span> isn’t on The Clasp yet —
+                      send them an invite link?
+                    </p>
+                    <div className="mt-3 flex gap-2">
+                      <Button onClick={onSendInvite} disabled={createInvite.isPending}>
+                        {createInvite.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Mail className="h-4 w-4" />
+                        )}
+                        Send invite link
+                      </Button>
+                      <Button variant="ghost" onClick={() => setInvite(null)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm font-semibold text-ink">Invite link for {invite.email}</p>
+                    <div className="mt-2 flex items-center gap-2 rounded-xl border border-dashed border-line bg-cream/60 px-3 py-2">
+                      <span className="flex-1 truncate text-xs text-muted">{invite.url}</span>
+                      <button
+                        type="button"
+                        onClick={copyLink}
+                        aria-label="Copy link"
+                        className="flex-none text-muted hover:text-primary"
+                      >
+                        {copied ? (
+                          <Check className="h-4 w-4 text-available" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={shareLink}
+                        aria-label="Share link"
+                        className="flex-none text-muted hover:text-primary"
+                      >
+                        <Share2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <p className="mt-2 text-[11px] text-muted">
+                      When they sign up with this email, they’ll join automatically.
+                    </p>
+                  </>
+                )}
+              </div>
             )}
 
             <ul className="space-y-2">

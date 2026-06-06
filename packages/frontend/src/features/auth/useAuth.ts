@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api, type ApiResponse, getErrorMessage } from '@/lib/api';
+import { api, type ApiResponse, getErrorMessage, getErrorCode } from '@/lib/api';
 import { useAuthStore, type AuthUser } from '@/stores/authStore';
 
 interface AuthResponse {
@@ -98,4 +98,25 @@ export function useLogout() {
   };
 }
 
-export { getErrorMessage };
+export interface ResolvedInvite {
+  closetName: string;
+  inviterName: string;
+  email: string;
+  expired: boolean;
+}
+
+/** Public: resolve a closet invite token for the register page. */
+export function useInviteResolve(token?: string) {
+  return useQuery({
+    queryKey: ['invite', token],
+    enabled: !!token,
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const { data } = await api.get<ApiResponse<ResolvedInvite>>(`/groups/invites/${token}`);
+      return data.data;
+    },
+  });
+}
+
+export { getErrorMessage, getErrorCode };

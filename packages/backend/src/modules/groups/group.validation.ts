@@ -10,6 +10,12 @@ export const addMemberBody = z.object({
   email: z.string().trim().toLowerCase().email('A valid email is required'),
 });
 
+export const inviteBody = addMemberBody;
+
+export const inviteTokenParam = z.object({
+  token: z.string().regex(/^[a-f\d]{20,128}$/i, 'Invalid invite'),
+});
+
 export const idParam = z.object({
   id: z.string().regex(/^[a-f\d]{24}$/i, 'Invalid id'),
 });
