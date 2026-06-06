@@ -5,7 +5,7 @@ import { queryClient } from '@/lib/queryClient';
 import { useAuthStore } from '@/stores/authStore';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ProtectedRoute } from '@/components/routing/ProtectedRoute';
-import { OfflineIndicator, PWAUpdatePrompt } from '@/components/pwa';
+import { OfflineIndicator, PWAUpdatePrompt, InstallPrompt } from '@/components/pwa';
 import { LoginPage, RegisterPage } from '@/features/auth';
 import { HomePage } from '@/features/home';
 import { JewelryFormPage, ItemDetailPage } from '@/features/jewelry';
@@ -67,6 +67,7 @@ export default function App() {
             </Routes>
 
             <PWAUpdatePrompt />
+            <InstallPrompt />
           </AuthInitializer>
         </BrowserRouter>
       </QueryClientProvider>
