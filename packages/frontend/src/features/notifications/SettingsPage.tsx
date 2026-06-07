@@ -14,6 +14,7 @@ import {
   type TestResult,
 } from './push';
 import { useAdminNotificationOverview } from './api';
+import { getVersionInfo } from '@/lib/version';
 
 function StatusRow({ label, value, tone }: { label: string; value: string; tone?: 'good' | 'bad' }) {
   return (
@@ -347,6 +348,7 @@ function AdminCard() {
 
 export function SettingsPage() {
   const isAdmin = !!useAuthStore((s) => s.user?.isAdmin);
+  const { version, buildDate } = getVersionInfo();
 
   return (
     <MainLayout>
@@ -358,6 +360,13 @@ export function SettingsPage() {
           <NotificationsCard />
           {isAdmin && <AdminCard />}
         </div>
+
+        <p
+          className="mt-6 text-center text-xs text-muted"
+          title={`Built ${new Date(buildDate).toLocaleString()}`}
+        >
+          The Clasp · v{version}
+        </p>
       </div>
     </MainLayout>
   );
