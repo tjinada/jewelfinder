@@ -3,7 +3,10 @@ import bcrypt from 'bcryptjs';
 
 export interface IUser {
   email: string;
-  password: string;
+  // Optional: Google-only accounts have no password.
+  password?: string;
+  // Google account subject id ('sub'), present once Google is linked.
+  googleId?: string;
   displayName: string;
   location: string;
   createdAt: Date;
@@ -41,7 +44,9 @@ const UserSchema = new Schema<IUserDocument, IUserModel>({
   },
   password: {
     type: String,
-    required: true,
+  },
+  googleId: {
+    type: String,
   },
   displayName: {
     type: String,
@@ -94,6 +99,10 @@ const UserSchema = new Schema<IUserDocument, IUserModel>({
   },
 });
 
+// Unique only among accounts that have linked Google (sparse skips absent).
+// Unlinking must `$unset` the field (not set null) to stay out of this index.
+UserSchema.index({ googleId: 1 }, { unique: true, sparse: true });
+
 // Hash password before saving
 UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
@@ -107,6 +116,7 @@ UserSchema.pre('save', async function (next) {
 });
 
 UserSchema.methods.comparePassword = async function (password: string): Promise<boolean> {
+  if (!this.password) return false;
   return bcrypt.compare(password, this.password);
 };
 

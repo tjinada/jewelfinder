@@ -8,6 +8,8 @@ export interface AuthUser {
   location?: string;
   createdAt: string | Date;
   isAdmin?: boolean;
+  googleLinked?: boolean;
+  hasPassword?: boolean;
   preferences?: {
     notifications: { messages: boolean };
     theme: 'light' | 'dark' | 'system';

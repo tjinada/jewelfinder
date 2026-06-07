@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { asyncHandler } from '../../middleware/error.middleware.js';
 import { sendSuccess } from '../../utils/response.js';
 import { authService } from './auth.service.js';
-import type { RegisterInput, LoginInput, UpdateMeInput } from './auth.validation.js';
+import type { RegisterInput, LoginInput, UpdateMeInput, GoogleTokenInput } from './auth.validation.js';
 
 export const authController = {
   register: asyncHandler(async (req: Request, res: Response) => {
@@ -23,6 +23,25 @@ export const authController = {
   logoutAll: asyncHandler(async (req: Request, res: Response) => {
     const result = await authService.logoutAll(req.userId!);
     sendSuccess(res, result);
+  }),
+
+  googleConfig: asyncHandler(async (_req: Request, res: Response) => {
+    sendSuccess(res, authService.googleConfig());
+  }),
+
+  google: asyncHandler(async (req: Request, res: Response) => {
+    const result = await authService.googleSignIn((req.body as GoogleTokenInput).credential);
+    sendSuccess(res, result);
+  }),
+
+  googleLink: asyncHandler(async (req: Request, res: Response) => {
+    const user = await authService.linkGoogle(req.userId!, (req.body as GoogleTokenInput).credential);
+    sendSuccess(res, { user });
+  }),
+
+  googleUnlink: asyncHandler(async (req: Request, res: Response) => {
+    const user = await authService.unlinkGoogle(req.userId!);
+    sendSuccess(res, { user });
   }),
 
   getMe: asyncHandler(async (req: Request, res: Response) => {

@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui';
 import { useLogin, getErrorMessage } from './useAuth';
+import { GoogleSignInButton } from './GoogleSignInButton';
 import { AuthShell, inputClass, labelClass } from './AuthShell';
 
 export function LoginPage() {
@@ -69,6 +70,10 @@ export function LoginPage() {
           {login.isPending ? 'Signing in…' : 'Sign in'}
         </Button>
       </form>
+
+      <GoogleSignInButton
+        afterSignIn={() => navigate(joinToken ? `/join/${joinToken}` : from, { replace: true })}
+      />
 
       <p className="mt-5 text-center text-sm text-ink/70">
         New here?{' '}

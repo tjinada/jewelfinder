@@ -29,6 +29,13 @@ export const updateMeSchema = z.object({
   }),
 });
 
+export const googleTokenSchema = z.object({
+  body: z.object({
+    credential: z.string().min(1, 'Missing Google credential'),
+  }),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>['body'];
 export type LoginInput = z.infer<typeof loginSchema>['body'];
 export type UpdateMeInput = z.infer<typeof updateMeSchema>['body'];
+export type GoogleTokenInput = z.infer<typeof googleTokenSchema>['body'];

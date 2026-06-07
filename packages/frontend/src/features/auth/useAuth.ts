@@ -98,4 +98,62 @@ export function useLogout() {
   };
 }
 
+/** The Google client ID (null when Google sign-in isn't configured server-side). */
+export function useGoogleConfig() {
+  return useQuery({
+    queryKey: ['auth', 'google-config'],
+    queryFn: async () => {
+      const { data } = await api.get<ApiResponse<{ clientId: string | null }>>(
+        '/auth/google/config',
+      );
+      return data.data;
+    },
+    staleTime: Infinity,
+    retry: false,
+  });
+}
+
+/** Sign in (or sign up) with a Google ID token. */
+export function useGoogleSignIn() {
+  const setAuth = useAuthStore((s) => s.setAuth);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (input: { credential: string }) => {
+      const { data } = await api.post<ApiResponse<AuthResponse>>('/auth/google', input);
+      return data.data;
+    },
+    onSuccess: (data) => {
+      queryClient.clear();
+      setAuth(data.user, data.token);
+    },
+  });
+}
+
+/** Connect Google to the signed-in account. */
+export function useLinkGoogle() {
+  const setUser = useAuthStore((s) => s.setUser);
+
+  return useMutation({
+    mutationFn: async (input: { credential: string }) => {
+      const { data } = await api.post<ApiResponse<{ user: AuthUser }>>('/auth/google/link', input);
+      return data.data.user;
+    },
+    onSuccess: (user) => setUser(user),
+  });
+}
+
+/** Disconnect Google from the signed-in account. */
+export function useUnlinkGoogle() {
+  const setUser = useAuthStore((s) => s.setUser);
+
+  return useMutation({
+    mutationFn: async () => {
+      const { data } = await api.post<ApiResponse<{ user: AuthUser }>>('/auth/google/unlink', {});
+      return data.data.user;
+    },
+    onSuccess: (user) => setUser(user),
+  });
+}
+
 export { getErrorMessage, getErrorCode };

@@ -77,6 +77,7 @@ app.get('/api/health/db', async (_req, res, next) => {
 // Stricter throttle on the credential endpoints, before the auth router.
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
+app.post('/api/auth/google', authLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/jewelry', jewelryRoutes);
 app.use('/api/sets', setRoutes);

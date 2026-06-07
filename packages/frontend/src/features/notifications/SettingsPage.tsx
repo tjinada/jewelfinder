@@ -3,7 +3,7 @@ import { Bell, BellOff, Loader2, RefreshCw, Send, ShieldCheck, Check, X, MapPin 
 import { MainLayout } from '@/components/layout';
 import { Button, LocationInput } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
-import { useUpdateProfile, getErrorMessage } from '@/features/auth';
+import { useUpdateProfile, getErrorMessage, GoogleConnectionCard } from '@/features/auth';
 import { cn } from '@/lib/utils';
 import {
   loadPushDiagnostics,
@@ -354,6 +354,7 @@ export function SettingsPage() {
         <h1 className="mb-4 font-display text-2xl text-ink md:text-3xl">Settings</h1>
         <div className="flex flex-col gap-4">
           <ProfileCard />
+          <GoogleConnectionCard />
           <NotificationsCard />
           {isAdmin && <AdminCard />}
         </div>

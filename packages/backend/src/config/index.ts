@@ -25,6 +25,9 @@ export const config = {
   vapidPrivateKey: process.env.VAPID_PRIVATE_KEY || '',
   vapidEmail: process.env.VAPID_EMAIL || '',
 
+  // Google sign-in (OAuth Web client ID). Blank disables Google sign-in.
+  googleClientId: process.env.GOOGLE_CLIENT_ID || '',
+
   // Frontend origin (CORS in development)
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
 
