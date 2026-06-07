@@ -35,22 +35,39 @@ const LOAN_STATE_LABELS: Record<LoanState, string> = {
 };
 
 type Side = 'incoming' | 'outgoing';
-type Section = { title: string; states: LoanState[] };
+type FilterKey = 'pending' | 'active' | 'upcoming' | 'history';
+type RequestFilter = 'all' | FilterKey;
+type Section = { key: FilterKey; title: string; states: LoanState[] };
 
 const SECTIONS: Record<Side, Section[]> = {
   incoming: [
-    { title: 'Needs your response', states: ['pending'] },
-    { title: 'On loan', states: ['overdue', 'onloan'] },
-    { title: 'Upcoming', states: ['upcoming'] },
-    { title: 'History', states: ['returned', 'rejected', 'cancelled'] },
+    { key: 'pending', title: 'Needs your response', states: ['pending'] },
+    { key: 'active', title: 'On loan', states: ['overdue', 'onloan'] },
+    { key: 'upcoming', title: 'Upcoming', states: ['upcoming'] },
+    { key: 'history', title: 'History', states: ['returned', 'rejected', 'cancelled'] },
   ],
   outgoing: [
-    { title: 'Awaiting response', states: ['pending'] },
-    { title: 'In your hands', states: ['overdue', 'onloan'] },
-    { title: 'Upcoming', states: ['upcoming'] },
-    { title: 'History', states: ['returned', 'rejected', 'cancelled'] },
+    { key: 'pending', title: 'Awaiting response', states: ['pending'] },
+    { key: 'active', title: 'In your hands', states: ['overdue', 'onloan'] },
+    { key: 'upcoming', title: 'Upcoming', states: ['upcoming'] },
+    { key: 'history', title: 'History', states: ['returned', 'rejected', 'cancelled'] },
   ],
 };
+
+const FILTER_STATES: Record<FilterKey, LoanState[]> = {
+  pending: ['pending'],
+  active: ['overdue', 'onloan'],
+  upcoming: ['upcoming'],
+  history: ['returned', 'rejected', 'cancelled'],
+};
+
+const FILTERS: { key: RequestFilter; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'active', label: 'On loan' },
+  { key: 'upcoming', label: 'Upcoming' },
+  { key: 'pending', label: 'Pending' },
+  { key: 'history', label: 'History' },
+];
 
 function BookingRow({ booking, side, state }: { booking: Booking; side: Side; state: LoanState }) {
   const decide = useDecideBooking();
@@ -156,6 +173,7 @@ function BookingRow({ booking, side, state }: { booking: Booking; side: Side; st
 
 export function RequestsPage() {
   const [tab, setTab] = useState<Side>('incoming');
+  const [filter, setFilter] = useState<RequestFilter>('all');
   const incoming = useIncomingBookings();
   const outgoing = useOutgoingBookings();
 
@@ -163,6 +181,22 @@ export function RequestsPage() {
   const bookings = active.data ?? [];
   const stated = bookings.map((b) => ({ b, state: loanState(b) }));
   const outCount = stated.filter((x) => x.state === 'onloan' || x.state === 'overdue').length;
+
+  const countFor = (key: RequestFilter) =>
+    key === 'all' ? stated.length : stated.filter((x) => FILTER_STATES[key].includes(x.state)).length;
+
+  const visibleSections = SECTIONS[tab]
+    .filter((s) => filter === 'all' || s.key === filter)
+    .map((section) => {
+      let items = stated.filter((x) => section.states.includes(x.state));
+      if (section.key === 'active') {
+        items = [...items].sort((a, b) => a.b.endDate.localeCompare(b.b.endDate));
+      } else if (section.key === 'upcoming') {
+        items = [...items].sort((a, b) => a.b.startDate.localeCompare(b.b.startDate));
+      }
+      return { section, items };
+    })
+    .filter((r) => r.items.length > 0);
 
   const tabClass = (t: Side) =>
     cn(
@@ -184,11 +218,36 @@ export function RequestsPage() {
       </div>
 
       {outCount > 0 && (
-        <p className="mx-auto mb-4 max-w-2xl px-1 text-sm text-muted">
+        <p className="mx-auto mb-3 max-w-2xl px-1 text-sm text-muted">
           {tab === 'incoming'
             ? `${outCount} of your pieces ${outCount === 1 ? 'is' : 'are'} out right now.`
             : `You have ${outCount} ${outCount === 1 ? 'piece' : 'pieces'} on loan.`}
         </p>
+      )}
+
+      {!active.isLoading && bookings.length > 0 && (
+        <div className="mx-auto mb-5 flex max-w-2xl flex-wrap gap-2 px-1">
+          {FILTERS.map((f) => {
+            const selected = filter === f.key;
+            return (
+              <button
+                key={f.key}
+                onClick={() => setFilter(f.key)}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors',
+                  selected
+                    ? 'bg-primary text-gold-light'
+                    : 'border border-line bg-surface text-ink/70 hover:bg-ink/5',
+                )}
+              >
+                {f.label}
+                <span className={cn('text-xs', selected ? 'text-gold-light/80' : 'text-muted')}>
+                  {countFor(f.key)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       )}
 
       {active.isLoading ? (
@@ -206,15 +265,10 @@ export function RequestsPage() {
         </div>
       ) : (
         <div className="mx-auto max-w-2xl">
-          {SECTIONS[tab].map((section) => {
-            let items = stated.filter((x) => section.states.includes(x.state));
-            if (!items.length) return null;
-            if (section.states.includes('onloan')) {
-              items = [...items].sort((a, b) => a.b.endDate.localeCompare(b.b.endDate));
-            } else if (section.states.includes('upcoming')) {
-              items = [...items].sort((a, b) => a.b.startDate.localeCompare(b.b.startDate));
-            }
-            return (
+          {visibleSections.length === 0 ? (
+            <p className="py-16 text-center font-display italic text-muted">Nothing here.</p>
+          ) : (
+            visibleSections.map(({ section, items }) => (
               <div key={section.title} className="mb-6">
                 <h2 className="mb-2 px-1 text-xs font-bold uppercase tracking-wide text-muted">
                   {section.title}
@@ -225,8 +279,8 @@ export function RequestsPage() {
                   ))}
                 </div>
               </div>
-            );
-          })}
+            ))
+          )}
         </div>
       )}
     </MainLayout>
