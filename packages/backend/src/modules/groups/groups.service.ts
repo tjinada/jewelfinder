@@ -221,9 +221,11 @@ export const groupService = {
       // Notify the owner (skip if the joiner is the owner). Fire-and-forget.
       if (String(doc.owner) !== userId) {
         const user = await User.findById(userId).select('displayName');
+        // Don't repeat "Closet" when the name already includes the word.
+        const closetLabel = /closet/i.test(doc.name) ? doc.name : `${doc.name} Closet`;
         void notificationService.notifyUser(String(doc.owner), {
-          title: 'New closet member',
-          body: `${user?.displayName ?? 'Someone'} has joined your ${doc.name}`,
+          title: 'Your Closet has expanded',
+          body: `${user?.displayName ?? 'Someone'} has joined your ${closetLabel}`,
           tag: `closet-${closetId}`,
           data: { url: `/closets/${closetId}` },
         });

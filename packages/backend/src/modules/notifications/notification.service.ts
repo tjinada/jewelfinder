@@ -85,8 +85,8 @@ export const notificationService = {
     const body = JSON.stringify({
       title: payload.title,
       body: payload.body,
-      icon: '/icons/icon.svg',
-      badge: '/icons/icon.svg',
+      icon: '/icons/icon-maskable-512.png',
+      badge: '/icons/icon-maskable-512.png',
       tag: payload.tag,
       data: payload.data ?? {},
     });
@@ -134,8 +134,8 @@ export const notificationService = {
     const body = JSON.stringify({
       title: 'Test notification',
       body: 'Push notifications are working on this device 🎉',
-      icon: '/icons/icon.svg',
-      badge: '/icons/icon.svg',
+      icon: '/icons/icon-maskable-512.png',
+      badge: '/icons/icon-maskable-512.png',
       tag: 'jewel-test',
       data: { url: '/settings' },
     });

@@ -3,11 +3,10 @@ import { Users, MapPin } from 'lucide-react';
 import type { JewelryItem } from '@jewel/shared';
 import { Card } from '@/components/ui';
 import { thumbImageUrl } from '@/lib/media';
-import { itemTitle, itemSubtitle } from './format';
+import { itemTitle } from './format';
 
 export function JewelryCard({ item, closetLabel }: { item: JewelryItem; closetLabel?: string }) {
   const img = thumbImageUrl(item.images[0]);
-  const subtitle = itemSubtitle(item);
 
   return (
     <Link to={`/item/${item._id}`}>
@@ -44,7 +43,6 @@ export function JewelryCard({ item, closetLabel }: { item: JewelryItem; closetLa
         </div>
         <div className="px-3 pb-3.5">
           <div className="truncate text-[15px] font-semibold">{itemTitle(item)}</div>
-          {subtitle && <div className="my-1 truncate text-xs text-muted">{subtitle}</div>}
           {item.location && (
             <div className="mt-1 flex items-center gap-1 text-xs text-muted">
               <MapPin className="h-3.5 w-3.5 flex-none" />
