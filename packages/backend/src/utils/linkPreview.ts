@@ -83,9 +83,12 @@ function metaTags(title: string, description: string, url: string): string {
  * HTML for a closet invite landing page with personalised preview tags, or
  * null if preview injection is unavailable (caller should serve the default).
  */
-export function inviteHtml(inviterName: string, closetName: string, pathname: string): string | null {
+export function inviteHtml(closetName: string, pathname: string): string | null {
   if (!ready) return null;
-  const title = `${inviterName} thinks you belong in ${closetName} Closet.`;
+  // Don't repeat "Closet" when the name already contains the word.
+  const name = closetName.trim();
+  const label = /closet/i.test(name) ? name : `${name} Closet`;
+  const title = `You're invited to join ${label}.`;
   const block = metaTags(title, INVITE_DESCRIPTION, `${BASE_URL}${pathname}`);
   return `${headPart}\n    ${block}\n    ${tailPart}`;
 }

@@ -132,7 +132,7 @@ if (config.isProduction) {
       try {
         const info = await groupService.resolveJoinToken(joinMatch[1]);
         if (info && !info.expired) {
-          const html = inviteHtml(info.inviterName, info.closetName, req.path);
+          const html = inviteHtml(info.closetName, req.path);
           if (html) {
             res.type('html').send(html);
             return;
