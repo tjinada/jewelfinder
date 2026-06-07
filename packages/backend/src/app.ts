@@ -32,7 +32,16 @@ app.set('trust proxy', 1);
 
 // Security headers. CSP is intentionally OFF for now — it'll be added in a
 // later pass (report-only first, then enforced) to avoid breaking the PWA.
-app.use(helmet({ contentSecurityPolicy: false }));
+// COOP is relaxed to `same-origin-allow-popups` so the Google sign-in popup
+// keeps its link back to the app window (default `same-origin` severs it and
+// the popup blanks out); the protection against cross-origin window attacks
+// otherwise stays in place.
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+  }),
+);
 
 app.use(
   cors({
