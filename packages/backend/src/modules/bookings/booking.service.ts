@@ -34,6 +34,7 @@ function toClient(doc: IBookingDocument): BookingDTO {
     status: doc.status,
     note: doc.note || undefined,
     conversation: doc.conversation ? String(doc.conversation) : null,
+    returnedAt: doc.returnedAt ?? null,
     createdAt: doc.createdAt,
   };
 }
@@ -63,6 +64,7 @@ async function hasAcceptedOverlap(
   const query: Record<string, unknown> = {
     item: itemId,
     status: 'accepted',
+    returnedAt: null,
     startDate: { $lte: end },
     endDate: { $gte: start },
   };
@@ -142,7 +144,9 @@ export const bookingService = {
     // 404 (not 403) so a hidden item's existence isn't leaked.
     if (!visible) throw new AppError('Item not found', 404);
 
-    const docs = await Booking.find({ item: itemId, status: 'accepted' }).select('startDate endDate');
+    const docs = await Booking.find({ item: itemId, status: 'accepted', returnedAt: null }).select(
+      'startDate endDate',
+    );
     return docs.map((d) => ({ startDate: d.startDate, endDate: d.endDate }));
   },
 
@@ -200,6 +204,20 @@ export const bookingService = {
     if (String(booking.requester) !== requesterId) throw new AppError('This is not your request', 403);
     if (booking.status !== 'pending') throw new AppError('Only pending requests can be cancelled', 400);
     booking.status = 'cancelled';
+    await booking.save();
+    return toClient(booking);
+  },
+
+  /** Owner marks an accepted loan as returned. A returned loan is excluded from
+   *  availability (see hasAcceptedOverlap / rangesForItem), so an early return
+   *  frees the remaining dates immediately. */
+  async markReturned(ownerId: string, id: string): Promise<BookingDTO> {
+    const booking = await Booking.findById(id);
+    if (!booking) throw new AppError('Request not found', 404);
+    if (String(booking.owner) !== ownerId) throw new AppError('This is not your loan to close', 403);
+    if (booking.status !== 'accepted') throw new AppError('Only accepted loans can be returned', 400);
+    if (booking.returnedAt) throw new AppError('This loan is already marked returned', 400);
+    booking.returnedAt = new Date();
     await booking.save();
     return toClient(booking);
   },

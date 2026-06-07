@@ -33,4 +33,9 @@ export const bookingController = {
     const booking = await bookingService.cancel(req.userId!, req.params.id);
     sendSuccess(res, booking);
   }),
+
+  markReturned: asyncHandler(async (req: Request, res: Response) => {
+    const booking = await bookingService.markReturned(req.userId!, req.params.id);
+    sendSuccess(res, booking);
+  }),
 };

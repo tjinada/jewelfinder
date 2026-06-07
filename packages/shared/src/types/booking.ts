@@ -19,6 +19,7 @@ export const BookingSchema = z.object({
   status: BookingStatusSchema,
   note: z.string().optional(),
   conversation: z.string().nullable().optional(),
+  returnedAt: z.string().or(z.date()).nullable().optional(),
   createdAt: z.string().or(z.date()),
 });
 export type Booking = z.infer<typeof BookingSchema>;

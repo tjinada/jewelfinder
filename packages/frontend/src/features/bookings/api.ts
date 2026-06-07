@@ -82,3 +82,15 @@ export function useCancelBooking() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['bookings'] }),
   });
 }
+
+/** Owner marks an accepted loan as returned (frees the remaining dates). */
+export function useReturnBooking() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await api.patch<ApiResponse<Booking>>(`/bookings/${id}/return`);
+      return data.data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['bookings'] }),
+  });
+}

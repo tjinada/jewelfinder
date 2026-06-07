@@ -10,6 +10,7 @@ export interface IBooking {
   status: 'pending' | 'accepted' | 'rejected' | 'cancelled';
   note?: string;
   conversation: Types.ObjectId | null;
+  returnedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,6 +27,7 @@ const BookingSchema = new Schema<IBookingDocument, IBookingModel>(
     status: { type: String, enum: [...BOOKING_STATUSES], default: 'pending', index: true },
     note: { type: String, trim: true, maxlength: 500 },
     conversation: { type: Schema.Types.ObjectId, ref: 'Conversation', default: null },
+    returnedAt: { type: Date, default: null },
   },
   { timestamps: true },
 );

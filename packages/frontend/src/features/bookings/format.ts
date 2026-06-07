@@ -1,4 +1,4 @@
-import type { DateRange } from '@jewel/shared';
+import type { Booking, DateRange } from '@jewel/shared';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -35,4 +35,27 @@ export function formatRange(start: string, end: string): string {
   const year = asLocalDate(end).getFullYear();
   if (start === end) return `${formatDate(start)}, ${year}`;
   return `${formatDate(start)} – ${formatDate(end)}, ${year}`;
+}
+
+export type LoanState =
+  | 'pending'
+  | 'upcoming'
+  | 'onloan'
+  | 'overdue'
+  | 'returned'
+  | 'rejected'
+  | 'cancelled';
+
+/** Derived lifecycle state for a booking, from status + dates + returnedAt.
+ *  'accepted' isn't shown directly — it resolves to upcoming / onloan / overdue
+ *  / returned. */
+export function loanState(b: Booking): LoanState {
+  if (b.status === 'pending') return 'pending';
+  if (b.status === 'rejected') return 'rejected';
+  if (b.status === 'cancelled') return 'cancelled';
+  if (b.returnedAt) return 'returned';
+  const today = todayISO();
+  if (b.startDate > today) return 'upcoming';
+  if (b.endDate < today) return 'overdue';
+  return 'onloan';
 }

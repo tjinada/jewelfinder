@@ -14,5 +14,6 @@ router.get('/outgoing', bookingController.outgoing);
 router.get('/item/:id/ranges', validateParams(idParam), bookingController.ranges);
 router.patch('/:id/decision', validateParams(idParam), validateBody(decisionBody), bookingController.decide);
 router.patch('/:id/cancel', validateParams(idParam), bookingController.cancel);
+router.patch('/:id/return', validateParams(idParam), bookingController.markReturned);
 
 export default router;
