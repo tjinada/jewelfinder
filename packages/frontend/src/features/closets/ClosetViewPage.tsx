@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Loader2, X, Pencil, Check, ChevronRight, Plus } from 'lucide-react';
 import { MainLayout } from '@/components/layout';
 import { Button } from '@/components/ui';
+import { DensityToggle } from '@/components/ui/DensityToggle';
 import { useAuthStore } from '@/stores/authStore';
 import { getErrorMessage } from '@/features/auth';
 import { cn } from '@/lib/utils';
@@ -89,7 +90,7 @@ export function ClosetViewPage() {
     <MainLayout>
       <div className="mx-auto max-w-2xl">
         {/* Header */}
-        <div className="mb-5">
+        <div className="mb-4">
           {editingName ? (
             <div className="mt-1 flex items-center gap-2">
               <input
@@ -123,11 +124,6 @@ export function ClosetViewPage() {
               )}
             </div>
           )}
-
-          <p className="mt-1 text-sm text-muted">
-            {closet.memberCount} {closet.memberCount === 1 ? 'member' : 'members'} ·{' '}
-            {closet.itemCount} {closet.itemCount === 1 ? 'item' : 'items'}
-          </p>
         </div>
 
         {error && (
@@ -140,7 +136,7 @@ export function ClosetViewPage() {
             setMembersOpen(true);
             void refetch();
           }}
-          className="mb-8 flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-left transition-colors hover:bg-cream/60"
+          className="mb-6 flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-left transition-colors hover:bg-cream/60"
         >
           <div className="flex flex-none">
             {shownMembers.map((m, i) => (
@@ -176,11 +172,21 @@ export function ClosetViewPage() {
 
         {/* Items shared into this closet */}
         <div>
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-display text-xl font-bold text-ink">Items in this closet</h2>
-            <Button onClick={() => setAddOpen(true)} className="px-3">
-              <Plus className="h-4 w-4" /> Add items
-            </Button>
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <h2 className="font-display text-xl font-bold text-ink">Items</h2>
+              <span className="text-xs text-muted">
+                {closet.itemCount} {closet.itemCount === 1 ? 'item' : 'items'}
+              </span>
+              <button
+                onClick={() => setAddOpen(true)}
+                aria-label="Add items"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-gold-light active:scale-95"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
+            <DensityToggle />
           </div>
           <ClosetItems scope={closet._id} />
         </div>

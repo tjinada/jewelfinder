@@ -4,6 +4,9 @@ import { Search, SlidersHorizontal, Loader2, X, Plus } from 'lucide-react';
 import { CATEGORY_LABELS, METAL_LABELS, NECKLACE_TYPE_LABELS, COLOURS, type JewelryItem } from '@jewel/shared';
 import { MainLayout } from '@/components/layout';
 import { Button } from '@/components/ui';
+import { DensityToggle } from '@/components/ui/DensityToggle';
+import { cn } from '@/lib/utils';
+import { useGridStore, gridColsClass } from '@/stores/gridStore';
 import { useJewelryList } from '@/features/jewelry/api';
 import { JewelryCard } from '@/features/jewelry/JewelryCard';
 import { useMyClosets } from '@/features/closets';
@@ -21,6 +24,7 @@ export function HomePage() {
   const [filters, setFilters] = useState<SearchFilters>({});
   const [sheetOpen, setSheetOpen] = useState(false);
   const { data: closets } = useMyClosets();
+  const density = useGridStore((s) => s.density);
 
   const closetNameById = useMemo(
     () => new Map((closets ?? []).map((c) => [c._id, c.name])),
@@ -136,6 +140,8 @@ export function HomePage() {
             </span>
           )}
         </button>
+
+        <DensityToggle className="self-center" />
       </div>
 
       {activeChips.length > 0 && (
@@ -163,7 +169,7 @@ export function HomePage() {
       ) : isError ? (
         <p className="py-20 text-center font-display italic text-muted">Couldn’t load items. Please try again.</p>
       ) : items && items.length > 0 ? (
-        <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className={cn('grid gap-3.5', gridColsClass[density])}>
           {items.map((item) => (
             <JewelryCard key={item._id} item={item} closetLabel={closetLabelFor(item)} />
           ))}

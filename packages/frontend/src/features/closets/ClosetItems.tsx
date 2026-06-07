@@ -9,6 +9,8 @@ import {
 import { useJewelryList } from '@/features/jewelry/api';
 import { JewelryCard } from '@/features/jewelry/JewelryCard';
 import { useDebounce } from '@/lib/useDebounce';
+import { cn } from '@/lib/utils';
+import { useGridStore, gridColsClass } from '@/stores/gridStore';
 import { FilterSheet } from '@/features/home/FilterSheet';
 import { countActiveFilters, type SearchFilters } from '@/features/home/filters';
 
@@ -28,6 +30,7 @@ export function ClosetItems({ scope }: ClosetItemsProps) {
   const [text, setText] = useState('');
   const [filters, setFilters] = useState<SearchFilters>({});
   const [sheetOpen, setSheetOpen] = useState(false);
+  const density = useGridStore((s) => s.density);
 
   const debouncedQ = useDebounce(text.trim(), 300);
 
@@ -120,7 +123,7 @@ export function ClosetItems({ scope }: ClosetItemsProps) {
           Couldn’t load items. Please try again.
         </p>
       ) : items && items.length > 0 ? (
-        <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3">
+        <div className={cn('grid gap-3.5', gridColsClass[density])}>
           {items.map((item) => (
             <JewelryCard key={item._id} item={item} />
           ))}
