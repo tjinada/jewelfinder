@@ -46,7 +46,7 @@ const SECTIONS: Record<Side, Section[]> = {
   ],
   outgoing: [
     { title: 'Awaiting response', states: ['pending'] },
-    { title: 'You have out', states: ['overdue', 'onloan'] },
+    { title: 'In your hands', states: ['overdue', 'onloan'] },
     { title: 'Upcoming', states: ['upcoming'] },
     { title: 'History', states: ['returned', 'rejected', 'cancelled'] },
   ],
@@ -56,8 +56,13 @@ function BookingRow({ booking, side, state }: { booking: Booking; side: Side; st
   const decide = useDecideBooking();
   const cancel = useCancelBooking();
   const markReturned = useReturnBooking();
-  const personName = side === 'incoming' ? booking.requesterName : booking.ownerName;
-  const personLabel = side === 'incoming' ? 'from' : 'to';
+  const otherName = (side === 'incoming' ? booking.requesterName : booking.ownerName) ?? 'someone';
+  // Preposition that reads correctly for the relationship: Borrowing is always
+  // "from <owner>"; Sharing is "to <borrower>" once it's a real loan, and "from
+  // <borrower>" while it's still a pending/declined request.
+  const requestLike = state === 'pending' || state === 'rejected' || state === 'cancelled';
+  const personLine =
+    side === 'outgoing' ? `from ${otherName}` : `${requestLike ? 'from' : 'to'} ${otherName}`;
 
   const onReturn = () => {
     if (!window.confirm('Mark this piece as returned? This frees up the remaining dates.')) return;
@@ -90,9 +95,7 @@ function BookingRow({ booking, side, state }: { booking: Booking; side: Side; st
         </div>
 
         <p className="text-sm text-ink/80">{formatRange(booking.startDate, booking.endDate)}</p>
-        <p className="text-xs text-muted">
-          {personLabel} {personName ?? 'someone'}
-        </p>
+        <p className="text-xs text-muted">{personLine}</p>
         {booking.note && <p className="mt-1 text-sm text-ink/70">“{booking.note}”</p>}
 
         {/* Actions */}
@@ -183,7 +186,7 @@ export function RequestsPage() {
       {outCount > 0 && (
         <p className="mx-auto mb-4 max-w-2xl px-1 text-sm text-muted">
           {tab === 'incoming'
-            ? `${outCount} of your ${outCount === 1 ? 'piece is' : 'pieces are'} out right now.`
+            ? `${outCount} of your pieces ${outCount === 1 ? 'is' : 'are'} out right now.`
             : `You have ${outCount} ${outCount === 1 ? 'piece' : 'pieces'} on loan.`}
         </p>
       )}
