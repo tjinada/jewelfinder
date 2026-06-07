@@ -1,0 +1,47 @@
+# =============================================================================
+# The Clasp — Admin Analytics  (on-demand, read-only, LAN only)
+# =============================================================================
+# A standalone analytics dashboard you bring up only when you want to look at
+# numbers. It is NOT part of the main stack and is NEVER routed through the
+# Cloudflare Tunnel — it is reachable only on your LAN (e.g. the Unraid IP).
+#
+# Usage:
+#   docker compose -f docker-compose.admin.yml up -d --build
+#   →  browse  http://<unraid-ip>:8091
+#   docker compose -f docker-compose.admin.yml down        # when finished
+#
+# NETWORK NOTE (the one gotcha):
+#   This joins the main stack's network so it can reach the Mongo container.
+#   Docker names that network "<project>_jewel", where <project> is normally the
+#   folder the main docker-compose.yml runs from. Confirm the exact name with:
+#       docker network ls        # look for the entry ending in _jewel
+#   If it is not "jewelfinder_jewel", set CLASP_NETWORK before running, e.g.:
+#       CLASP_NETWORK=myfolder_jewel docker compose -f docker-compose.admin.yml up -d --build
+#
+# SECURITY: no auth — it only ever returns aggregate counts (no emails / PII),
+# and it stays on the trusted LAN. Keep it off the public tunnel.
+# =============================================================================
+
+services:
+  clasp-admin:
+    container_name: clasp-admin
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    ports:
+      # host:container — published on the LAN (reach it at http://<unraid-ip>:8091)
+      - "8091:3000"
+    environment:
+      - MONGO_URI=${MONGO_URI:-mongodb://jewel-mongo:27017/jewel-finder}
+      - PORT=3000
+    networks:
+      - jewel
+    # On-demand tool: don't resurrect it on reboot. `up` runs it until `down`.
+    restart: "no"
+
+networks:
+  # The network is created and owned by the main docker-compose.yml; we only
+  # attach to it. Override the name with CLASP_NETWORK if yours differs.
+  jewel:
+    external: true
+    name: ${CLASP_NETWORK:-jewelfinder_jewel}

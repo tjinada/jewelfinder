@@ -1,0 +1,13 @@
+{
+  "name": "clasp-admin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "On-demand, read-only analytics dashboard for The Clasp. Standalone — intentionally NOT part of the pnpm workspace, so it never gets pulled into the app build and stays decoupled from backend internals.",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "mongodb": "^6.12.0"
+  }
+}
