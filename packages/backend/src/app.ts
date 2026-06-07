@@ -19,6 +19,8 @@ import { conversationRoutes } from './modules/conversations/index.js';
 import { bookingRoutes } from './modules/bookings/index.js';
 import { notificationRoutes, initWebPush } from './modules/notifications/index.js';
 import { mediaRoutes, ensureMediaDirs } from './modules/media/index.js';
+import { groupService } from './modules/groups/groups.service.js';
+import { initLinkPreview, inviteHtml } from './utils/linkPreview.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -112,10 +114,36 @@ app.use('/api/media', mediaRoutes);
 // Serve the built frontend in production
 if (config.isProduction) {
   const frontendPath = path.join(__dirname, '../../frontend/dist');
+  const indexHtmlPath = path.join(frontendPath, 'index.html');
+
+  // Prime the link-preview template (for personalised closet-invite previews).
+  initLinkPreview(indexHtmlPath);
+
   app.use(express.static(frontendPath));
-  app.get('*', (req, res, next) => {
+
+  // SPA fallback. Closet invite links (`/join/:token`) get personalised
+  // Open Graph tags injected so the link preview names the inviter and closet;
+  // everything else serves index.html as-is (its baked-in default preview).
+  app.get('*', async (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
-    res.sendFile(path.join(frontendPath, 'index.html'));
+
+    const joinMatch = req.path.match(/^\/join\/([^/]+)\/?$/);
+    if (joinMatch) {
+      try {
+        const info = await groupService.resolveJoinToken(joinMatch[1]);
+        if (info && !info.expired) {
+          const html = inviteHtml(info.inviterName, info.closetName, req.path);
+          if (html) {
+            res.type('html').send(html);
+            return;
+          }
+        }
+      } catch {
+        // Fall through to the default page on any lookup error.
+      }
+    }
+
+    res.sendFile(indexHtmlPath);
   });
 }
 

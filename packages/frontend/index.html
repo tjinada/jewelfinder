@@ -7,7 +7,27 @@
     <!-- PWA meta -->
     <meta name="theme-color" content="#1A3A2E" />
     <meta name="color-scheme" content="light" />
-    <meta name="description" content="The Clasp — borrow theirs, lend yours. Share jewelry within your community" />
+
+    <!-- Link preview (Open Graph / Twitter). Everything between the og markers
+         below is the DEFAULT ("regular link") preview, served as-is by
+         express.static for the homepage and ordinary routes. The backend swaps
+         this region for personalised tags on closet invite links
+         (/join/:token) — see packages/backend/src/utils/linkPreview.ts.
+         Keep the markers intact. -->
+    <!-- og:start -->
+    <meta name="description" content="The Clasp is a space to share the beautiful pieces in your closet with the people you trust most. Borrow Theirs. Lend Yours. Open your Closet today." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="The Clasp" />
+    <meta property="og:title" content="The Clasp" />
+    <meta property="og:description" content="The Clasp is a space to share the beautiful pieces in your closet with the people you trust most. Borrow Theirs. Lend Yours. Open your Closet today." />
+    <meta property="og:url" content="https://theclasp.ca" />
+    <meta property="og:image" content="https://theclasp.ca/icons/icon-512.png" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="The Clasp" />
+    <meta name="twitter:description" content="The Clasp is a space to share the beautiful pieces in your closet with the people you trust most. Borrow Theirs. Lend Yours. Open your Closet today." />
+    <meta name="twitter:image" content="https://theclasp.ca/icons/icon-512.png" />
+    <!-- og:end -->
+
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="The Clasp" />
