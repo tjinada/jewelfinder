@@ -1,6 +1,7 @@
 import { type ReactNode, type FormEvent, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Search, Plus, LogOut, Settings } from 'lucide-react';
+import { useIsFetching, useQueryClient } from '@tanstack/react-query';
+import { Search, Plus, LogOut, Settings, RefreshCw } from 'lucide-react';
 import { GlassSurface } from '@/components/ui';
 import { BottomNav } from './BottomNav';
 import { useAuthStore } from '@/stores/authStore';
@@ -23,6 +24,8 @@ const navLinks = [
  */
 export function MainLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const isFetching = useIsFetching();
   const user = useAuthStore((s) => s.user);
   const logout = useLogout();
   const unread = useUnreadCount();
@@ -104,6 +107,16 @@ export function MainLayout({ children }: { children: ReactNode }) {
               className="hidden items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-gold-light md:inline-flex"
             >
               <Plus className="h-4 w-4" /> Add
+            </button>
+
+            {/* Refresh the current screen's data on demand (spins while fetching). */}
+            <button
+              onClick={() => queryClient.invalidateQueries()}
+              aria-label="Refresh"
+              title="Refresh"
+              className="flex h-10 w-10 items-center justify-center rounded-full text-ink/70 transition-colors hover:bg-ink/5 hover:text-ink"
+            >
+              <RefreshCw className={cn('h-5 w-5', isFetching > 0 && 'animate-spin')} />
             </button>
 
             {/* Profile + menu */}

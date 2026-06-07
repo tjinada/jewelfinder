@@ -16,7 +16,7 @@ export function ClosetViewPage() {
   const navigate = useNavigate();
   const userId = useAuthStore((s) => s.user?.id);
 
-  const { data: closet, isLoading, isError } = useCloset(id);
+  const { data: closet, isLoading, isError, refetch } = useCloset(id);
   const rename = useRenameCloset(id ?? '');
   const disband = useDisbandCloset();
   const leave = useLeaveCloset();
@@ -134,9 +134,12 @@ export function ClosetViewPage() {
           <p className="mb-4 rounded-lg bg-[#F4E7D5] px-3 py-2 text-sm text-onloan">{error}</p>
         )}
 
-        {/* Member summary — opens the members sheet */}
+        {/* Member summary — opens the members sheet (refetch so it's current) */}
         <button
-          onClick={() => setMembersOpen(true)}
+          onClick={() => {
+            setMembersOpen(true);
+            void refetch();
+          }}
           className="mb-8 flex w-full items-center gap-3 rounded-2xl border border-line bg-surface px-4 py-3 text-left transition-colors hover:bg-cream/60"
         >
           <div className="flex flex-none">
