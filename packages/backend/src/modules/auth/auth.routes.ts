@@ -12,6 +12,7 @@ router.post('/login', validate(loginSchema), authController.login);
 router.post('/logout', authController.logout);
 router.get('/google/config', authController.googleConfig);
 router.post('/google', validate(googleTokenSchema), authController.google);
+router.post('/google/callback', authController.googleCallback);
 
 // Protected
 router.post('/logout-all', authenticate, authController.logoutAll);

@@ -71,9 +71,7 @@ export function LoginPage() {
         </Button>
       </form>
 
-      <GoogleSignInButton
-        afterSignIn={() => navigate(joinToken ? `/join/${joinToken}` : from, { replace: true })}
-      />
+      <GoogleSignInButton redirectTo={joinToken ? `/join/${joinToken}` : from} />
 
       <p className="mt-5 text-center text-sm text-ink/70">
         New here?{' '}

@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { ProtectedRoute } from '@/components/routing/ProtectedRoute';
 import { OfflineIndicator, PWAUpdatePrompt, InstallPrompt } from '@/components/pwa';
-import { LoginPage, RegisterPage } from '@/features/auth';
+import { LoginPage, RegisterPage, GoogleCallbackPage } from '@/features/auth';
 import { HomePage } from '@/features/home';
 import { JewelryFormPage, ItemDetailPage } from '@/features/jewelry';
 import { SetViewPage } from '@/features/sets';
@@ -42,6 +42,7 @@ export default function App() {
               {/* Public */}
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/auth/callback" element={<GoogleCallbackPage />} />
               <Route path="/join/:token" element={<JoinClosetPage />} />
 
               {/* Protected */}

@@ -89,9 +89,7 @@ export function RegisterPage() {
         </Button>
       </form>
 
-      <GoogleSignInButton
-        afterSignIn={() => navigate(joinToken ? `/join/${joinToken}` : '/', { replace: true })}
-      />
+      <GoogleSignInButton redirectTo={joinToken ? `/join/${joinToken}` : '/'} />
 
       <p className="mt-5 text-center text-sm text-ink/70">
         Already have an account?{' '}

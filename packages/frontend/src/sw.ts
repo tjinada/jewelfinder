@@ -11,8 +11,11 @@ declare let self: ServiceWorkerGlobalScope;
 precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 
-// SPA navigation route
-registerRoute(new NavigationRoute(createHandlerBoundToURL('index.html')));
+// SPA navigation route. Exclude /api/* so server endpoints (e.g. the Google
+// redirect callback) are never served the app shell on a navigation request.
+registerRoute(
+  new NavigationRoute(createHandlerBoundToURL('index.html'), { denylist: [/^\/api\//] }),
+);
 
 // Jewelry images — cache-first (same approach v3 uses for covers)
 registerRoute(
