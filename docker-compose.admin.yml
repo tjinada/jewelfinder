@@ -39,7 +39,14 @@ services:
       # host:container — published on the LAN (reach it at http://<unraid-ip>:8091)
       - "8091:3000"
     environment:
-      - MONGO_URI=${MONGO_URI:-mongodb://jewel-mongo:27017/jewel-finder}
+      # Pinned literally to the Mongo container's hostname on the shared docker
+      # network. Do NOT write this as ${MONGO_URI:-...}: Compose would read
+      # MONGO_URI from the main app's .env in this directory (which is
+      # mongodb://localhost:27017 for local dev), and "localhost" inside THIS
+      # container is the container itself — not Mongo — so it would refuse the
+      # connection. "jewel-mongo" is the Mongo container_name from the main
+      # docker-compose.yml and resolves over the jewel network.
+      - MONGO_URI=mongodb://jewel-mongo:27017/jewel-finder
       - PORT=3000
     networks:
       - jewel
