@@ -18,6 +18,9 @@ export interface IUser {
     theme: 'light' | 'dark' | 'system';
   };
   isAdmin: boolean;
+  // Bumped to invalidate all of a user's existing tokens (logout-all, and
+  // later: password change / credential link).
+  tokenVersion: number;
 }
 
 export interface IUserDocument extends IUser, Document {
@@ -84,6 +87,10 @@ const UserSchema = new Schema<IUserDocument, IUserModel>({
   isAdmin: {
     type: Boolean,
     default: false,
+  },
+  tokenVersion: {
+    type: Number,
+    default: 0,
   },
 });
 

@@ -20,6 +20,11 @@ export const authController = {
     sendSuccess(res, { message: 'Logged out successfully' });
   }),
 
+  logoutAll: asyncHandler(async (req: Request, res: Response) => {
+    const result = await authService.logoutAll(req.userId!);
+    sendSuccess(res, result);
+  }),
+
   getMe: asyncHandler(async (req: Request, res: Response) => {
     const user = await authService.getUser(req.userId!);
     sendSuccess(res, { user });

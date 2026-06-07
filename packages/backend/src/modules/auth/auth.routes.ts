@@ -12,6 +12,7 @@ router.post('/login', validate(loginSchema), authController.login);
 router.post('/logout', authController.logout);
 
 // Protected
+router.post('/logout-all', authenticate, authController.logoutAll);
 router.get('/me', authenticate, authController.getMe);
 router.patch('/me', authenticate, validate(updateMeSchema), authController.updateMe);
 

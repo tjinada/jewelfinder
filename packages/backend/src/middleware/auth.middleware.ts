@@ -17,6 +17,11 @@ declare global {
 export interface JwtPayload {
   userId: string;
   email: string;
+  // Session generation. A token is only valid while it matches the user's
+  // current tokenVersion; bumping the version (logout-all, password change)
+  // invalidates every token issued before it. Optional so legacy tokens
+  // (issued before this field existed) still decode — they coerce to 0.
+  tokenVersion?: number;
   iat?: number;
   exp?: number;
 }
@@ -28,6 +33,7 @@ export const generateToken = (user: IUserDocument): string => {
   const payload: JwtPayload = {
     userId: (user._id as { toString(): string }).toString(),
     email: user.email,
+    tokenVersion: user.tokenVersion ?? 0,
   };
   return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };
@@ -49,6 +55,12 @@ export const authenticate = async (
     const user = await User.findById(decoded.userId).select('-password');
     if (!user) {
       throw new AppError('User not found', 401);
+    }
+
+    // Reject tokens from a previous session generation. Coerced so legacy
+    // tokens/users (no tokenVersion) compare equal at 0 — no migration needed.
+    if ((decoded.tokenVersion ?? 0) !== (user.tokenVersion ?? 0)) {
+      throw new AppError('Token expired', 401);
     }
 
     req.user = user;
@@ -86,7 +98,7 @@ export const optionalAuth = async (
 
     const decoded = jwt.verify(authHeader.substring(7), JWT_SECRET) as JwtPayload;
     const user = await User.findById(decoded.userId).select('-password');
-    if (user) {
+    if (user && (decoded.tokenVersion ?? 0) === (user.tokenVersion ?? 0)) {
       req.user = user;
       req.userId = (user._id as { toString(): string }).toString();
     }

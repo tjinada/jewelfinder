@@ -86,4 +86,20 @@ export const authService = {
     await user.save();
     return toPublicUser(user);
   },
+
+  /**
+   * Invalidate every token the user currently holds by bumping their session
+   * generation, then hand back a fresh token so the calling device stays signed
+   * in ("log out my other devices"). Other devices stop working on their next
+   * request.
+   */
+  async logoutAll(userId: string): Promise<AuthResponse> {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new AppError('User not found', 404);
+    }
+    user.tokenVersion = (user.tokenVersion ?? 0) + 1;
+    await user.save();
+    return { token: generateToken(user), user: toPublicUser(user) };
+  },
 };
