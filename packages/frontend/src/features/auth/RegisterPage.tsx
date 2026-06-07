@@ -4,13 +4,15 @@ import { Button, LocationInput } from '@/components/ui';
 import { useRegister, getErrorMessage } from './useAuth';
 import { GoogleSignInButton } from './GoogleSignInButton';
 import { AuthShell, inputClass, labelClass } from './AuthShell';
+import { getPendingJoin } from '@/features/closets/pendingJoin';
 
 export function RegisterPage() {
   const navigate = useNavigate();
   const register = useRegister();
   const [params] = useSearchParams();
   // Arrived from a closet invite link? Return there after sign-up to auto-join.
-  const joinToken = params.get('join');
+  // Fall back to the stored pending invite if the `?join=` param was lost.
+  const joinToken = params.get('join') ?? getPendingJoin();
 
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');

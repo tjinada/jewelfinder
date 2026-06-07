@@ -4,6 +4,7 @@ import { api, type ApiResponse } from '@/lib/api';
 import { useAuthStore, type AuthUser } from '@/stores/authStore';
 import { GOOGLE_REDIRECT_KEY } from './GoogleSignInButton';
 import { AuthShell } from './AuthShell';
+import { getPendingJoin } from '@/features/closets/pendingJoin';
 
 /**
  * Landing point after the Google redirect → backend callback. The session token
@@ -33,6 +34,13 @@ export function GoogleCallbackPage() {
       sessionStorage.removeItem(GOOGLE_REDIRECT_KEY);
     } catch {
       /* sessionStorage unavailable */
+    }
+
+    // If the round-trip dropped the redirect (e.g. an update relaunched the
+    // app mid-flow), recover a pending closet invite from durable storage.
+    if (dest === '/') {
+      const pending = getPendingJoin();
+      if (pending) dest = `/join/${pending}`;
     }
 
     if (!token) {

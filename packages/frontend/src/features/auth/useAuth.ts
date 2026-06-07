@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, type ApiResponse, getErrorMessage, getErrorCode } from '@/lib/api';
 import { useAuthStore, type AuthUser } from '@/stores/authStore';
+import { clearPendingJoin } from '@/features/closets/pendingJoin';
 
 interface AuthResponse {
   token: string;
@@ -94,6 +95,7 @@ export function useLogout() {
     } finally {
       logout();
       queryClient.clear();
+      clearPendingJoin();
     }
   };
 }

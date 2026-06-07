@@ -4,6 +4,7 @@ import { Button } from '@/components/ui';
 import { useLogin, getErrorMessage } from './useAuth';
 import { GoogleSignInButton } from './GoogleSignInButton';
 import { AuthShell, inputClass, labelClass } from './AuthShell';
+import { getPendingJoin } from '@/features/closets/pendingJoin';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -15,8 +16,9 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
 
   // A closet invite link sends us back to itself after login to auto-join;
-  // otherwise return wherever the user was headed.
-  const joinToken = params.get('join');
+  // otherwise return wherever the user was headed. Fall back to the stored
+  // pending invite in case the `?join=` param was lost to a reload/relaunch.
+  const joinToken = params.get('join') ?? getPendingJoin();
   const from = location.state?.from?.pathname || '/';
 
   const onSubmit = async (e: FormEvent) => {

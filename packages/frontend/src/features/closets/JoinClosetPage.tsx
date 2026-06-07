@@ -6,6 +6,7 @@ import { Button } from '@/components/ui';
 import { Hanger } from '@/components/icons/Hanger';
 import { getErrorMessage } from '@/features/auth';
 import { useResolveJoin, useJoinCloset } from './api';
+import { setPendingJoin, clearPendingJoin } from './pendingJoin';
 
 /** True when running as an installed standalone PWA (vs a normal browser tab). */
 function isStandalonePwa(): boolean {
@@ -46,6 +47,23 @@ export function JoinClosetPage() {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthed, token]);
+
+  // Persist the invite token so it survives a reload, a PWA relaunch at
+  // start_url, or the Google sign-in round-trip — the URL alone doesn't.
+  useEffect(() => {
+    if (token) setPendingJoin(token);
+  }, [token]);
+
+  // Once the invite reaches a definite outcome, drop the saved token so it
+  // can't later fire for the wrong closet.
+  useEffect(() => {
+    if (join.isSuccess || join.isError) clearPendingJoin();
+  }, [join.isSuccess, join.isError]);
+
+  const inviteUnavailable = !isAuthed && (resolve.isError || !!resolve.data?.expired);
+  useEffect(() => {
+    if (inviteUnavailable) clearPendingJoin();
+  }, [inviteUnavailable]);
 
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-cream px-5 py-10">
