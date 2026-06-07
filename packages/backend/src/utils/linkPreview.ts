@@ -19,7 +19,7 @@ const OG_END = '<!-- og:end -->';
 
 // Public origin used for absolute og:url / og:image (crawlers require absolute).
 const BASE_URL = 'https://theclasp.ca';
-const IMAGE_URL = `${BASE_URL}/icons/icon-512.png`;
+const IMAGE_URL = `${BASE_URL}/icons/icon-maskable-512.png`;
 
 const INVITE_DESCRIPTION =
   'Welcome to The Clasp. A space to share the beautiful pieces in your closet with the people you trust most.';
