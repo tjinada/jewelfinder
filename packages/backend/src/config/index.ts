@@ -28,6 +28,10 @@ export const config = {
   // Google sign-in (OAuth Web client ID). Blank disables Google sign-in.
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
 
+  // CSP runs in report-only mode (logs violations, blocks nothing) unless
+  // CSP_REPORT_ONLY is explicitly set to 'false', which enforces it.
+  cspReportOnly: process.env.CSP_REPORT_ONLY !== 'false',
+
   // Frontend origin (CORS in development)
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
 

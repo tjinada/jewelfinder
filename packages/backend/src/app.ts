@@ -30,15 +30,27 @@ const app: Express = express();
 // CF-Connecting-IP directly (see rateLimit.middleware).
 app.set('trust proxy', 1);
 
-// Security headers. CSP is intentionally OFF for now — it'll be added in a
-// later pass (report-only first, then enforced) to avoid breaking the PWA.
-// COOP is relaxed to `same-origin-allow-popups` so the Google sign-in popup
-// keeps its link back to the app window (default `same-origin` severs it and
-// the popup blanks out); the protection against cross-origin window attacks
-// otherwise stays in place.
+// Security headers. CSP starts in report-only mode (set CSP_REPORT_ONLY=false
+// to enforce once the console is clean). Overrides on top of helmet's defaults
+// allow the Google sign-in library/iframe (accounts.google.com), inline image
+// previews (data:/blob:) and Google profile images, and lock framing to none.
+// Helmet's defaults cover the rest: default-src 'self', object-src 'none', and
+// style/font allowing inline + https (needed for Tailwind and Google Fonts).
+// COOP stays `same-origin-allow-popups` so the Google sign-in popup keeps its
+// link back to the app window.
 app.use(
   helmet({
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: {
+      reportOnly: config.cspReportOnly,
+      directives: {
+        scriptSrc: ["'self'", 'https://accounts.google.com'],
+        connectSrc: ["'self'", 'https://accounts.google.com'],
+        frameSrc: ["'self'", 'https://accounts.google.com'],
+        imgSrc: ["'self'", 'data:', 'blob:', 'https://*.googleusercontent.com'],
+        formAction: ["'self'", 'https://accounts.google.com'],
+        frameAncestors: ["'none'"],
+      },
+    },
     crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
   }),
 );
