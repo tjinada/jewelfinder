@@ -22,6 +22,13 @@
 # and it stays on the trusted LAN. Keep it off the public tunnel.
 # =============================================================================
 
+# Own project name so this stack is isolated from the main one. Without it,
+# Compose assumes the project is the folder name (jewelfinder) and reports the
+# main app + Mongo as "orphans" — and `down --remove-orphans` would then DELETE
+# them. With a separate project name the admin app is fully independent; it
+# still attaches to the main stack's network via the external reference below.
+name: clasp-admin
+
 services:
   clasp-admin:
     container_name: clasp-admin
