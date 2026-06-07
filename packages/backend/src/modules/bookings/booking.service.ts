@@ -131,7 +131,17 @@ export const bookingService = {
   },
 
   /** Accepted date ranges for an item — used to grey out the calendar. */
-  async rangesForItem(itemId: string): Promise<DateRange[]> {
+  async rangesForItem(viewerId: string, itemId: string): Promise<DateRange[]> {
+    const item = await Jewelry.findById(itemId);
+    if (!item) throw new AppError('Item not found', 404);
+    const visible = await isVisibleTo(viewerId, {
+      ownerId: String(item.owner),
+      visibility: item.visibility,
+      sharedGroups: item.sharedGroups,
+    });
+    // 404 (not 403) so a hidden item's existence isn't leaked.
+    if (!visible) throw new AppError('Item not found', 404);
+
     const docs = await Booking.find({ item: itemId, status: 'accepted' }).select('startDate endDate');
     return docs.map((d) => ({ startDate: d.startDate, endDate: d.endDate }));
   },

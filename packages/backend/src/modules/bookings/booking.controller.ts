@@ -20,7 +20,7 @@ export const bookingController = {
   }),
 
   ranges: asyncHandler(async (req: Request, res: Response) => {
-    const ranges = await bookingService.rangesForItem(req.params.id);
+    const ranges = await bookingService.rangesForItem(req.userId!, req.params.id);
     sendSuccess(res, ranges);
   }),
 
