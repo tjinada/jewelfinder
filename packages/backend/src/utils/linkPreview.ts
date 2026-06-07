@@ -88,7 +88,7 @@ export function inviteHtml(closetName: string, pathname: string): string | null 
   // Don't repeat "Closet" when the name already contains the word.
   const name = closetName.trim();
   const label = /closet/i.test(name) ? name : `${name} Closet`;
-  const title = `You're invited to join ${label}.`;
+  const title = `You're invited to ${label}.`;
   const block = metaTags(title, INVITE_DESCRIPTION, `${BASE_URL}${pathname}`);
   return `${headPart}\n    ${block}\n    ${tailPart}`;
 }
