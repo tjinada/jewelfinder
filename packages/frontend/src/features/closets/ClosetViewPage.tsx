@@ -175,9 +175,6 @@ export function ClosetViewPage() {
           <div className="mb-3 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <h2 className="font-display text-xl font-bold text-ink">Items</h2>
-              <span className="text-xs text-muted">
-                {closet.itemCount} {closet.itemCount === 1 ? 'item' : 'items'}
-              </span>
               <button
                 onClick={() => setAddOpen(true)}
                 aria-label="Add items"
@@ -186,6 +183,9 @@ export function ClosetViewPage() {
                 <Plus className="h-4 w-4" />
               </button>
             </div>
+            <span className="text-xs text-muted">
+              {closet.itemCount} {closet.itemCount === 1 ? 'item' : 'items'}
+            </span>
             <DensityToggle />
           </div>
           <ClosetItems scope={closet._id} />
