@@ -3,12 +3,13 @@ import './env.js';
 
 import express, { type Express } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { connectDatabase } from './config/database.js';
 import { config, validateConfig } from './config/index.js';
-import { errorHandler, requestLogger } from './middleware/index.js';
+import { errorHandler, requestLogger, authLimiter, apiLimiter } from './middleware/index.js';
 import { sendSuccess } from './utils/response.js';
 import { authRoutes } from './modules/auth/index.js';
 import { jewelryRoutes } from './modules/jewelry/index.js';
@@ -24,6 +25,15 @@ const __dirname = path.dirname(__filename);
 
 const app: Express = express();
 
+// We sit behind a Cloudflare Tunnel (one trusted hop). This lets req.ip /
+// req.secure reflect the tunnel correctly; the rate limiter keys on
+// CF-Connecting-IP directly (see rateLimit.middleware).
+app.set('trust proxy', 1);
+
+// Security headers. CSP is intentionally OFF for now — it'll be added in a
+// later pass (report-only first, then enforced) to avoid breaking the PWA.
+app.use(helmet({ contentSecurityPolicy: false }));
+
 app.use(
   cors({
     origin: config.isDevelopment ? [config.frontendUrl, 'http://localhost:3000'] : true,
@@ -33,6 +43,9 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
+
+// Catch-all request throttle (media GETs excepted).
+app.use(apiLimiter);
 
 // Health checks
 app.get('/api/health', (_req, res) => {
@@ -61,6 +74,9 @@ app.get('/api/health/db', async (_req, res, next) => {
 });
 
 // Feature routes
+// Stricter throttle on the credential endpoints, before the auth router.
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/jewelry', jewelryRoutes);
 app.use('/api/sets', setRoutes);
