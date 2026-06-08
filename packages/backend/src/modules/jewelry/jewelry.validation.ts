@@ -86,7 +86,7 @@ export const listJewelryQuery = z.object({
   size: BangleSizeSchema.optional(),
   necklaceType: NecklaceTypeSchema.optional(),
   set: z.string().optional(),
-  // 'all' | 'public' | 'mine' | a circle id. Narrows within the visible set.
+  // 'all' | 'mine' | a closet id. Narrows within the visible set.
   scope: z.string().optional(),
   q: z.string().optional(),
 });

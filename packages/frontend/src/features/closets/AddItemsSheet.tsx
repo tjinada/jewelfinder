@@ -18,8 +18,7 @@ interface AddItemsSheetProps {
 /**
  * Bottom-sheet for adding your own items into a closet. Mirrors MembersSheet
  * (portal + framer-motion slide-up). Lists items you own that aren't already in
- * this closet; public items are omitted because they already appear in every
- * closet you belong to. Selecting items and confirming shares them in one call.
+ * this closet. Selecting items and confirming shares them in one call.
  */
 export function AddItemsSheet({ open, onClose, closetId }: AddItemsSheetProps) {
   const { data: mine, isLoading } = useJewelryList({ scope: 'mine' });
@@ -27,9 +26,9 @@ export function AddItemsSheet({ open, onClose, closetId }: AddItemsSheetProps) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [error, setError] = useState('');
 
-  // Items you can still curate in: yours, not public, not already shared here.
+  // Items you can still curate in: yours, not already shared here.
   const candidates = useMemo(
-    () => (mine ?? []).filter((i) => i.visibility !== 'public' && !i.sharedGroups.includes(closetId)),
+    () => (mine ?? []).filter((i) => !i.sharedGroups.includes(closetId)),
     [mine, closetId],
   );
 
@@ -157,10 +156,6 @@ export function AddItemsSheet({ open, onClose, closetId }: AddItemsSheetProps) {
                     );
                   })}
                 </ul>
-
-                <p className="mt-3 text-[11px] text-muted">
-                  Public items already appear in every closet you’re in.
-                </p>
 
                 <Button onClick={onAdd} disabled={selected.size === 0 || share.isPending} className="mt-3 w-full">
                   {share.isPending ? (

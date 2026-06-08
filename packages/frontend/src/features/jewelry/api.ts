@@ -98,7 +98,7 @@ export function useDeleteJewelry() {
   });
 }
 
-/** Add the signed-in user's own items to a closet (skips public items server-side). */
+/** Add the signed-in user's own items to a closet (flips them to closet visibility). */
 export function useShareItemsToCloset() {
   const qc = useQueryClient();
   return useMutation({

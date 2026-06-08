@@ -6,7 +6,7 @@ export interface IJewelry {
   category: string;
   images: string[];
   setId: Types.ObjectId | null;
-  visibility: 'private' | 'public' | 'groups';
+  visibility: 'private' | 'groups';
   sharedGroups: Types.ObjectId[];
   location?: string;
   condition?: number;
@@ -31,12 +31,11 @@ const JewelrySchema = new Schema<IJewelryDocument, IJewelryModel>(
     // Set membership lands in Phase 4; nullable until then.
     // (DB field is `setId` — `set` is a reserved Mongoose Document method.)
     setId: { type: Schema.Types.ObjectId, ref: 'Set', default: null, index: true },
-    // Visibility: 'private' (owner only), 'public' (everyone), or 'groups'
-    // (members of the circles in `sharedGroups`). New items default to private;
-    // existing items are backfilled to public by a one-time migration.
+    // Visibility: 'private' (owner only) or 'groups' (members of the closets in
+    // `sharedGroups`). New items default to private.
     visibility: {
       type: String,
-      enum: ['private', 'public', 'groups'],
+      enum: ['private', 'groups'],
       default: 'private',
     },
     sharedGroups: { type: [Schema.Types.ObjectId], ref: 'Group', default: [] },

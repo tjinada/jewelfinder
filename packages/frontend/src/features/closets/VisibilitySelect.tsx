@@ -11,11 +11,10 @@ export interface VisibilitySelection {
   sharedGroups: string[];
 }
 
-// UI order (Private, My closets, Public) with a short hint under each.
+// UI order (Private, My closets) with a short hint under each.
 const OPTIONS: { value: Visibility; hint: string }[] = [
   { value: 'private', hint: 'Only you' },
   { value: 'groups', hint: 'Chosen closets' },
-  { value: 'public', hint: 'Everyone' },
 ];
 
 interface VisibilitySelectProps {
@@ -73,7 +72,7 @@ export function VisibilitySelect({ value, onChange }: VisibilitySelectProps) {
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2">
         {OPTIONS.map(({ value: v, hint }) => (
           <button
             type="button"

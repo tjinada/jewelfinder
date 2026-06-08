@@ -197,10 +197,6 @@ async function main() {
   // ---- Jewelry + visibility gating ---------------------------------------
   section('Jewelry & visibility');
   const baseItem = { category: 'earring', images: ['regress.webp'], condition: 5 };
-  const mkPub = await req('POST', '/jewelry', { token: tokenA, body: { ...baseItem, name: 'Public Earrings', visibility: 'public' } });
-  const pubId = payload(mkPub)?._id;
-  check('Create PUBLIC item', ok(mkPub) && !!pubId, errMsg(mkPub));
-
   const mkPriv = await req('POST', '/jewelry', { token: tokenA, body: { ...baseItem, name: 'Private Earrings', visibility: 'private' } });
   const privId = payload(mkPriv)?._id;
   check('Create PRIVATE item', ok(mkPriv) && !!privId, errMsg(mkPriv));
@@ -220,31 +216,33 @@ async function main() {
 
   const listAItems = await req('GET', '/jewelry', { token: tokenA });
   const aIds = (payload(listAItems) || []).map((i) => i._id);
-  check('Owner sees their public, private and groups items', [pubId, privId, grpId].every((id) => aIds.includes(id)), JSON.stringify(aIds));
+  check('Owner sees their private and groups items', [privId, grpId].every((id) => aIds.includes(id)), JSON.stringify(aIds));
 
   const listBItems = await req('GET', '/jewelry', { token: tokenB });
   const bIds = (payload(listBItems) || []).map((i) => i._id);
-  check('B sees the PUBLIC item', bIds.includes(pubId));
-  check('B sees the GROUPS item (member of the closet)', bIds.includes(grpId));
+  check('B (member) sees the GROUPS item', bIds.includes(grpId));
   check('B does NOT see the PRIVATE item', !bIds.includes(privId));
 
   const cItems = await req('GET', '/jewelry', { token: tokenC });
   const cIds = (payload(cItems) || []).map((i) => i._id);
-  check('C (non-member) sees PUBLIC but not GROUPS/PRIVATE', cIds.includes(pubId) && !cIds.includes(grpId) && !cIds.includes(privId), JSON.stringify(cIds));
+  check('C (non-member) sees neither the GROUPS nor PRIVATE item', !cIds.includes(grpId) && !cIds.includes(privId), JSON.stringify(cIds));
 
   const getPrivAsB = await req('GET', `/jewelry/${privId}`, { token: tokenB });
   check('B fetching the private item directly is hidden (404)', getPrivAsB.status === 404, `got ${getPrivAsB.status}`);
 
-  const getPubAsB = await req('GET', `/jewelry/${pubId}`, { token: tokenB });
-  check('B can fetch the public item directly', ok(getPubAsB) && payload(getPubAsB)?._id === pubId, errMsg(getPubAsB));
+  const getGrpAsB = await req('GET', `/jewelry/${grpId}`, { token: tokenB });
+  check('B can fetch the closet item directly', ok(getGrpAsB) && payload(getGrpAsB)?._id === grpId, errMsg(getGrpAsB));
 
-  // Editing visibility revokes access: flip a public item to private.
-  const mkFlip = await req('POST', '/jewelry', { token: tokenA, body: { ...baseItem, name: 'Flip Earrings', visibility: 'public' } });
+  const getGrpAsC = await req('GET', `/jewelry/${grpId}`, { token: tokenC });
+  check('C (non-member) fetching the closet item is hidden (404)', getGrpAsC.status === 404, `got ${getGrpAsC.status}`);
+
+  // Editing visibility revokes access: flip a closet-shared item to private.
+  const mkFlip = await req('POST', '/jewelry', { token: tokenA, body: { ...baseItem, name: 'Flip Earrings', visibility: 'groups', sharedGroups: [closetId] } });
   const flipId = payload(mkFlip)?._id;
-  check('Create a public item to edit', ok(mkFlip) && !!flipId, errMsg(mkFlip));
+  check('Create a shared item to edit', ok(mkFlip) && !!flipId, errMsg(mkFlip));
 
   const bSeesFlip = await req('GET', `/jewelry/${flipId}`, { token: tokenB });
-  check('B can see it while public', ok(bSeesFlip), errMsg(bSeesFlip));
+  check('B can see it while shared to the closet', ok(bSeesFlip), errMsg(bSeesFlip));
 
   const flip = await req('PATCH', `/jewelry/${flipId}`, { token: tokenA, body: { ...baseItem, name: 'Flip Earrings', visibility: 'private' } });
   check('Owner edits it to private', ok(flip) && payload(flip)?.visibility === 'private', errMsg(flip));
@@ -255,18 +253,18 @@ async function main() {
   // ---- Bookings -----------------------------------------------------------
   section('Bookings');
   const start = isoPlus(7), end = isoPlus(8);
-  const ownBooking = await req('POST', '/bookings', { token: tokenA, body: { item: pubId, startDate: start, endDate: end } });
+  const ownBooking = await req('POST', '/bookings', { token: tokenA, body: { item: grpId, startDate: start, endDate: end } });
   check('Owner cannot request their own item (400)', ownBooking.status === 400, `got ${ownBooking.status}`);
 
-  const pastBooking = await req('POST', '/bookings', { token: tokenB, body: { item: pubId, startDate: isoPlus(-3), endDate: isoPlus(-1) } });
+  const pastBooking = await req('POST', '/bookings', { token: tokenB, body: { item: grpId, startDate: isoPlus(-3), endDate: isoPlus(-1) } });
   check('Booking with a past start date rejected (400)', pastBooking.status === 400, `got ${pastBooking.status}`);
 
   const hiddenBooking = await req('POST', '/bookings', { token: tokenC, body: { item: privId, startDate: start, endDate: end } });
   check('Cannot request an item you cannot see (404)', hiddenBooking.status === 404, `got ${hiddenBooking.status}`);
 
-  const booking = await req('POST', '/bookings', { token: tokenB, body: { item: pubId, startDate: start, endDate: end, note: 'Regression test note' } });
+  const booking = await req('POST', '/bookings', { token: tokenB, body: { item: grpId, startDate: start, endDate: end, note: 'Regression test note' } });
   const bookingId = payload(booking)?._id;
-  check('B requests to borrow the public item', ok(booking) && !!bookingId && payload(booking)?.status === 'pending', errMsg(booking));
+  check('B requests to borrow the closet item', ok(booking) && !!bookingId && payload(booking)?.status === 'pending', errMsg(booking));
 
   const incoming = await req('GET', '/bookings/incoming', { token: tokenA });
   check('Owner sees the request under Incoming', ok(incoming) && payload(incoming)?.some((b) => b._id === bookingId), errMsg(incoming));
@@ -279,22 +277,22 @@ async function main() {
   check('Owner accepts the request', ok(accept) && payload(accept)?.status === 'accepted', errMsg(accept));
   check('Accepting creates a conversation', !!convoId, 'no conversation id on accepted booking');
 
-  const ranges = await req('GET', `/bookings/item/${pubId}/ranges`, { token: tokenB });
+  const ranges = await req('GET', `/bookings/item/${grpId}/ranges`, { token: tokenB });
   check('Accepted dates appear in the item ranges', ok(ranges) && payload(ranges)?.some((r) => r.startDate === start), errMsg(ranges));
 
   const decideAgain = await req('PATCH', `/bookings/${bookingId}/decision`, { token: tokenA, body: { action: 'reject' } });
   check('Already-handled request cannot be decided again (400)', decideAgain.status === 400, `got ${decideAgain.status}`);
 
-  const overlap = await req('POST', '/bookings', { token: tokenD, body: { item: pubId, startDate: start, endDate: end } });
+  const overlap = await req('POST', '/bookings', { token: tokenD, body: { item: grpId, startDate: start, endDate: end } });
   check('Overlapping an accepted booking is rejected (409)', overlap.status === 409, `got ${overlap.status}`);
 
-  const toReject = await req('POST', '/bookings', { token: tokenD, body: { item: pubId, startDate: isoPlus(20), endDate: isoPlus(21) } });
+  const toReject = await req('POST', '/bookings', { token: tokenD, body: { item: grpId, startDate: isoPlus(20), endDate: isoPlus(21) } });
   const rejectId = payload(toReject)?._id;
   check('D requests a different range', ok(toReject) && !!rejectId, errMsg(toReject));
   const reject = await req('PATCH', `/bookings/${rejectId}/decision`, { token: tokenA, body: { action: 'reject' } });
   check('Owner rejects a pending request', ok(reject) && payload(reject)?.status === 'rejected', errMsg(reject));
 
-  const toCancel = await req('POST', '/bookings', { token: tokenD, body: { item: pubId, startDate: isoPlus(30), endDate: isoPlus(31) } });
+  const toCancel = await req('POST', '/bookings', { token: tokenD, body: { item: grpId, startDate: isoPlus(30), endDate: isoPlus(31) } });
   const cancelId = payload(toCancel)?._id;
   check('D makes a request to cancel', ok(toCancel) && !!cancelId, errMsg(toCancel));
   const cancelGuard = await req('PATCH', `/bookings/${cancelId}/cancel`, { token: tokenC });
@@ -412,7 +410,7 @@ async function main() {
 
   // ---- Cleanup (best effort) ---------------------------------------------
   section('Cleanup (best effort)');
-  for (const [name, id] of [['public', pubId], ['private', privId], ['groups', grpId], ['edited', flipId], ['shared', shareId]]) {
+  for (const [name, id] of [['private', privId], ['groups', grpId], ['edited', flipId], ['shared', shareId]]) {
     if (!id) continue;
     const del = await req('DELETE', `/jewelry/${id}`, { token: tokenA });
     check(`Delete ${name} item`, del.status === 204 || ok(del), `got ${del.status}`);

@@ -100,22 +100,10 @@ export const jewelryService = {
     // (it's ANDed with the visibility filter above).
     const scope = filters.scope?.trim();
     if (scope && scope !== 'all') {
-      if (scope === 'public') query.visibility = 'public';
-      else if (scope === 'mine') query.owner = viewerId;
-      else {
-        // A closet id. An item appears in a closet when it's explicitly shared
-        // into it OR when it's public and owned by one of the closet's members
-        // (a public item surfaces in every closet its owner belongs to).
-        const group = await Group.findById(scope).select('members');
-        const memberIds = group?.members ?? [];
-        const scopeOr: Record<string, unknown>[] = [{ sharedGroups: scope }];
-        if (memberIds.length > 0) {
-          scopeOr.push({ visibility: 'public', owner: { $in: memberIds } });
-        }
-        // Both the visibility filter and the scope filter must hold, so AND them.
-        query.$and = [{ $or }, { $or: scopeOr }];
-        delete query.$or;
-      }
+      if (scope === 'mine') query.owner = viewerId;
+      // Otherwise a closet id: items explicitly shared into that closet. The
+      // visibility $or above still applies, so a non-member matches nothing here.
+      else query.sharedGroups = scope;
     }
 
     const docs = await Jewelry.find(query).populate('owner', 'displayName location').sort({ createdAt: -1 });
@@ -174,10 +162,8 @@ export const jewelryService = {
   },
 
   /**
-   * Curate items into a closet: each owned, non-public item gets the closet
-   * added to its `sharedGroups` (flipping visibility to 'groups'). Public items
-   * are skipped — they already surface in every closet their owner belongs to,
-   * and demoting them to 'groups' would shrink their reach. Idempotent.
+   * Curate items into a closet: each owned item gets the closet added to its
+   * `sharedGroups` and its visibility flipped to 'groups'. Idempotent.
    */
   async shareToCloset(
     ownerId: string,
@@ -189,7 +175,7 @@ export const jewelryService = {
 
     const uniqueIds = [...new Set(itemIds)];
     const result = await Jewelry.updateMany(
-      { _id: { $in: uniqueIds }, owner: ownerId, visibility: { $ne: 'public' } },
+      { _id: { $in: uniqueIds }, owner: ownerId },
       { $set: { visibility: 'groups' }, $addToSet: { sharedGroups: closetId } },
     );
     return { added: result.modifiedCount };

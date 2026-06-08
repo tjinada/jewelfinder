@@ -93,7 +93,7 @@ export function HomePage() {
       <div className="mb-4 flex items-center justify-between gap-3">
         <h1 className="font-display text-2xl text-ink md:text-3xl">Discover</h1>
 
-        {/* Scope: narrow to public, your own, or a specific closet */}
+        {/* Scope: narrow to your own items or a specific closet */}
         <select
           value={scope}
           onChange={(e) => setScope(e.target.value)}
@@ -101,7 +101,6 @@ export function HomePage() {
           className={scopeSelectClass}
         >
           <option value="all">All visible</option>
-          <option value="public">Public</option>
           <option value="mine">Just mine</option>
           {closets && closets.length > 0 && (
             <optgroup label="Closets">
