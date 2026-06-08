@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Loader2, User, X } from 'lucide-react';
+import { Plus, Loader2, X } from 'lucide-react';
 import { Hanger } from '@/components/icons/Hanger';
 import { MainLayout } from '@/components/layout';
 import { Button } from '@/components/ui';
@@ -99,7 +99,7 @@ export function ClosetsPage() {
               }}
             >
               <div className="flex items-center justify-between">
-                <User className="h-5 w-5" style={{ color: MY_CLOSET_COLOR.text }} />
+                <Hanger className="h-5 w-5" style={{ color: MY_CLOSET_COLOR.text }} />
                 <span
                   className="rounded-md px-2 py-0.5 text-[10px] font-bold"
                   style={{ backgroundColor: MY_CLOSET_COLOR.text, color: MY_CLOSET_COLOR.bg }}

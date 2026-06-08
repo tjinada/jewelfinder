@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
-import { Users, MapPin } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import type { JewelryItem } from '@jewel/shared';
 import { Card } from '@/components/ui';
+import { Hanger } from '@/components/icons/Hanger';
 import { thumbImageUrl } from '@/lib/media';
 import { itemTitle } from './format';
 
@@ -37,7 +38,7 @@ export function JewelryCard({ item, closetLabel }: { item: JewelryItem; closetLa
               title="Shared to a closet"
               aria-label="Shared to a closet"
             >
-              <Users className="h-3.5 w-3.5" />
+              <Hanger className="h-3.5 w-3.5" />
             </span>
           )}
         </div>
@@ -51,7 +52,7 @@ export function JewelryCard({ item, closetLabel }: { item: JewelryItem; closetLa
           )}
           {closetLabel && (
             <div className="mt-1 flex items-center gap-1 text-xs text-muted">
-              <Users className="h-3.5 w-3.5 flex-none" />
+              <Hanger className="h-3.5 w-3.5 flex-none" />
               <span className="truncate">{closetLabel}</span>
             </div>
           )}

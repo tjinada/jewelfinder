@@ -28,9 +28,9 @@ export const Hanger = forwardRef<SVGSVGElement, HangerProps>(
       aria-hidden="true"
       {...props}
     >
-      <path d="M12 11V7a1.5 1.5 0 0 1 3 0V8.4" />
-      <path d="M3 18 12 11l9 7" />
-      <path d="M3 18h18" />
+      <path d="M12 10V6.8a1.8 1.8 0 1 1 1.8 1.8" />
+      <path d="M3.5 17 12 10l8.5 7" />
+      <path d="M3.5 17h17" />
     </svg>
   ),
 );
