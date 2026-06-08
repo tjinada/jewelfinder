@@ -5,14 +5,14 @@ export interface HangerProps extends SVGProps<SVGSVGElement> {
 }
 
 /**
- * Coat-hanger icon drawn in the Lucide style (24x24 grid, 2px currentColor
+ * Coat-hanger icon drawn in the Lucide style (24x24 grid, 2.5px currentColor
  * stroke, round caps/joins). Lucide's core set has no hanger — its only one
  * lives in the separate @lucide/lab package with a different API — so this is a
  * lightweight, dependency-free drop-in that matches how the other icons are used
  * (`<Hanger className="h-5 w-5" />`, `{ icon: Hanger }`, inline `style`, etc.).
  */
 export const Hanger = forwardRef<SVGSVGElement, HangerProps>(
-  ({ size = 24, strokeWidth = 2, className, ...props }, ref) => (
+  ({ size = 24, strokeWidth = 2.5, className, ...props }, ref) => (
     <svg
       ref={ref}
       xmlns="http://www.w3.org/2000/svg"
@@ -28,7 +28,7 @@ export const Hanger = forwardRef<SVGSVGElement, HangerProps>(
       aria-hidden="true"
       {...props}
     >
-      <path d="M12 10V6.8a1.8 1.8 0 1 1 1.8 1.8" />
+      <path d="M12 10V6.5a2 2 0 1 1 2 2" />
       <path d="M3.5 17 12 10l8.5 7" />
       <path d="M3.5 17h17" />
     </svg>
