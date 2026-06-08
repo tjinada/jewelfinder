@@ -37,7 +37,8 @@ export const METAL_LABELS: Record<Metal, string> = {
   gold: 'Gold',
   silver: 'Silver',
   bronze: 'Bronze',
-  pinkGold: 'Pink gold',
+  // Stored id stays `pinkGold` to avoid a data migration; label only is rebranded.
+  pinkGold: 'Rose gold',
   pearl: 'Pearl',
 };
 
@@ -60,6 +61,7 @@ export const COLOURS = [
   { id: 'green', label: 'Green', hex: '#3F7D5B' },
   { id: 'darkGreen', label: 'Dark Green', hex: '#1E5631' },
   { id: 'mint', label: 'Mint', hex: '#9DD9C0' },
+  { id: 'turquoise', label: 'Turquoise', hex: '#30D5C8' },
   { id: 'blue', label: 'Blue', hex: '#2E6DB4' },
   { id: 'lightBlue', label: 'Light Blue', hex: '#7FB5E6' },
   { id: 'navyBlue', label: 'Navy Blue', hex: '#1F3F66' },
