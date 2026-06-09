@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Loader2, MessageCircle } from 'lucide-react';
 import { MainLayout } from '@/components/layout';
@@ -8,9 +9,21 @@ import { formatWhen } from './format';
 export function ConversationListPage() {
   const { data: conversations, isLoading, isError } = useConversations();
 
+  // Defensive: guarantee newest activity on top regardless of server order.
+  const sorted = useMemo(
+    () =>
+      [...(conversations ?? [])].sort((a, b) => {
+        const at = new Date(a.lastMessage?.createdAt ?? a.lastMessageAt).getTime();
+        const bt = new Date(b.lastMessage?.createdAt ?? b.lastMessageAt).getTime();
+        return bt - at;
+      }),
+    [conversations],
+  );
+
   return (
     <MainLayout>
-      <h1 className="mb-4 font-display text-2xl text-ink md:text-3xl">Messages</h1>
+      <div className="mx-auto max-w-2xl">
+        <h1 className="mb-4 font-display text-2xl text-ink md:text-3xl">Messages</h1>
 
       {isLoading ? (
         <div className="flex justify-center py-20">
@@ -18,16 +31,15 @@ export function ConversationListPage() {
         </div>
       ) : isError ? (
         <p className="py-20 text-center font-display italic text-muted">Couldn’t load your messages. Please try again.</p>
-      ) : conversations && conversations.length > 0 ? (
-        <div className="mx-auto max-w-2xl divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
-          {conversations.map((c) => {
+      ) : sorted.length > 0 ? (
+        <div className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-surface">
+          {sorted.map((c) => {
             const name = c.other?.displayName ?? 'Unknown';
             const title = c.item?.name ?? name;
             const thumb = c.item?.thumb ? thumbImageUrl(c.item.thumb) : null;
-            const lastBody = c.lastMessage
-              ? `${c.lastMessage.fromMe ? 'You: ' : ''}${c.lastMessage.body}`
-              : 'New conversation';
-            const subtitle = `${name} · ${lastBody}`;
+            const subtitle = c.lastMessage
+              ? `${c.lastMessage.fromMe ? 'You' : name}: ${c.lastMessage.body}`
+              : `${name} · New conversation`;
             const unread = c.unreadCount > 0;
 
             return (
@@ -74,10 +86,11 @@ export function ConversationListPage() {
         <div className="flex flex-col items-center gap-3 py-20 text-center">
           <MessageCircle className="h-10 w-10 text-muted/60" />
           <p className="text-lg font-display italic text-muted">
-            No messages yet - but your next great borrow is one conversation away.
+            No messages yet — but your next great borrow is one conversation away.
           </p>
         </div>
       )}
+      </div>
     </MainLayout>
   );
 }
