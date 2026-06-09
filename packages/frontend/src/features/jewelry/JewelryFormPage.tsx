@@ -32,10 +32,21 @@ const labelClass = 'mb-1.5 block text-xs font-bold uppercase tracking-wide text-
 const selectClass =
   'w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20';
 
-function Field({ label, children }: { label: string; children: ReactNode }) {
+function Field({
+  label,
+  required,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  children: ReactNode;
+}) {
   return (
     <div>
-      <span className={labelClass}>{label}</span>
+      <span className={labelClass}>
+        {label}
+        {required && <span className="text-onloan"> *</span>}
+      </span>
       {children}
     </div>
   );
@@ -112,13 +123,26 @@ export function JewelryFormPage() {
 
   const removeImage = (file: string) => setImages((prev) => prev.filter((f) => f !== file));
 
+  // The first image is the cover (card thumb + detail hero) — tap to promote.
+  const makeCover = (file: string) =>
+    setImages((prev) => [file, ...prev.filter((f) => f !== file)]);
+
+  // Only guard Cancel in add mode — edit mode prefills, so "dirty" would always be true.
+  const dirty = !!name.trim() || images.length > 0 || !!category || condition !== undefined;
+  const onCancel = () => {
+    if (!editing && dirty && !window.confirm('Discard this item?')) return;
+    navigate(-1);
+  };
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!name.trim()) return setError('Please enter a name.');
-    if (!category) return setError('Please choose a category.');
-    if (images.length === 0) return setError('Please add at least one photo.');
-    if (!condition) return setError('Please rate the item’s condition.');
+    const missing: string[] = [];
+    if (images.length === 0) missing.push('a photo');
+    if (!name.trim()) missing.push('a name');
+    if (!category) missing.push('a category');
+    if (!condition) missing.push('a condition rating');
+    if (missing.length > 0) return setError(`Please add: ${missing.join(', ')}.`);
     if (setSel.mode === 'new' && !setSel.name.trim()) {
       return setError('Please name the new set, or choose “Not part of a set”.');
     }
@@ -173,16 +197,23 @@ export function JewelryFormPage() {
     <MainLayout>
       <div className="mx-auto max-w-2xl">
         <h1 className="mb-5 font-display text-2xl text-ink md:text-3xl">
-          {editing ? 'Edit item' : 'Add'}
+          {editing ? 'Edit item' : 'Add an item'}
         </h1>
 
-        <form onSubmit={onSubmit} className="space-y-5">
+        <form onSubmit={onSubmit} noValidate className="space-y-5">
           {/* Photos */}
-          <Field label="Photos">
+          <Field label="Photos" required>
             <div className="flex flex-wrap gap-3">
               {images.map((file) => (
                 <div key={file} className="relative h-24 w-24 overflow-hidden rounded-xl border border-line bg-tile">
-                  <img src={thumbImageUrl(file)} alt="" className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => makeCover(file)}
+                    aria-label="Make cover photo"
+                    className="block h-full w-full"
+                  >
+                    <img src={thumbImageUrl(file)} alt="" className="h-full w-full object-cover" />
+                  </button>
                   <button
                     type="button"
                     onClick={() => removeImage(file)}
@@ -208,10 +239,15 @@ export function JewelryFormPage() {
                 </label>
               )}
             </div>
+            {images.length > 1 && (
+              <p className="mt-2 text-xs text-muted">
+                First photo is the cover — tap another photo to make it the cover.
+              </p>
+            )}
           </Field>
 
           {/* Name */}
-          <Field label="Name">
+          <Field label="Name" required>
             <input
               type="text"
               maxLength={60}
@@ -224,7 +260,7 @@ export function JewelryFormPage() {
           </Field>
 
           {/* Category */}
-          <Field label="Category">
+          <Field label="Category" required>
             <select
               value={category}
               onChange={(e) => onCategoryChange(e.target.value as Category | '')}
@@ -327,7 +363,7 @@ export function JewelryFormPage() {
           </Field>
 
           {/* Condition — whole-star rating; optional note when under 5 */}
-          <Field label="Condition">
+          <Field label="Condition" required>
             <StarRating value={condition} onChange={setCondition} />
             {condition !== undefined && condition < 5 && (
               <textarea
@@ -347,9 +383,9 @@ export function JewelryFormPage() {
 
           <div className="flex gap-3 pt-1">
             <Button type="submit" disabled={saving} className="flex-1">
-              {saving ? 'Saving…' : editing ? 'Save changes' : 'Post'}
+              {saving ? 'Saving…' : editing ? 'Save changes' : 'Save'}
             </Button>
-            <Button type="button" variant="ghost" onClick={() => navigate(-1)}>
+            <Button type="button" variant="ghost" onClick={onCancel}>
               Cancel
             </Button>
           </div>
