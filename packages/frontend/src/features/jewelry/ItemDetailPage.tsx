@@ -11,6 +11,8 @@ import { itemTitle } from './format';
 import { useJewelryItem, useDeleteJewelry } from './api';
 import { ImageLightbox } from './ImageLightbox';
 import { LoanRequestModal } from '@/features/bookings';
+import { useOutgoingBookings, useItemRanges } from '@/features/bookings/api';
+import { formatRange } from '@/features/bookings/format';
 
 const colourLabel = (id?: string) => COLOURS.find((c) => c.id === id)?.label;
 
@@ -20,6 +22,8 @@ export function ItemDetailPage() {
   const userId = useAuthStore((s) => s.user?.id);
 
   const { data: item, isLoading, isError } = useJewelryItem(id);
+  const { data: outgoing } = useOutgoingBookings();
+  const { data: ranges } = useItemRanges(id);
   const del = useDeleteJewelry();
 
   const [active, setActive] = useState(0);
@@ -52,6 +56,15 @@ export function ItemDetailPage() {
 
   const isOwner = !!userId && userId === item.owner;
   const heroImage = fullImageUrl(item.images[active] ?? item.images[0]);
+
+  // A pending outgoing request for this item survives navigation — keep showing
+  // the "request sent" notice instead of inviting a duplicate request.
+  const hasPendingRequest = !!outgoing?.some(
+    (b) => b.item === item._id && b.status === 'pending',
+  );
+  const bookedRanges = [...(ranges ?? [])].sort((a, b) =>
+    a.startDate.localeCompare(b.startDate),
+  );
 
   const chips = [
     CATEGORY_LABELS[item.category],
@@ -135,7 +148,10 @@ export function ItemDetailPage() {
           )}
 
           {item.condition && (
-            <div className="mt-4">
+            <div className="mt-6">
+              <h2 className="mb-2.5 text-xs font-bold uppercase tracking-wide text-muted">
+                Condition
+              </h2>
               <div className="flex items-center gap-2">
                 <StarRating value={item.condition} readOnly size="sm" />
                 <span className="text-sm font-semibold text-ink">{item.condition}/5</span>
@@ -195,7 +211,13 @@ export function ItemDetailPage() {
               </>
             ) : (
               <div>
-                {requested ? (
+                {bookedRanges.length > 0 && (
+                  <p className="mb-3 flex items-center gap-1.5 text-sm text-muted">
+                    <CalendarDays className="h-4 w-4 flex-none" />
+                    Booked: {bookedRanges.map((r) => formatRange(r.startDate, r.endDate)).join(' · ')}
+                  </p>
+                )}
+                {requested || hasPendingRequest ? (
                   <div className="rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-primary">
                     Request sent — you’ll hear back once the owner responds.{' '}
                     <Link to="/requests" className="font-semibold underline">
