@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Search, SlidersHorizontal, Loader2, X } from 'lucide-react';
 import {
   CATEGORY_LABELS,
@@ -17,6 +17,8 @@ import { countActiveFilters, type SearchFilters } from '@/features/home/filters'
 interface ClosetItemsProps {
   /** A closet id, or 'mine' for the user's own items. */
   scope: string;
+  /** Optional CTA rendered under the "Nothing here yet." empty state. */
+  emptyAction?: ReactNode;
 }
 
 /**
@@ -26,7 +28,7 @@ interface ClosetItemsProps {
  * circular import between the home and closets features. Search/filter state is
  * local to the component.
  */
-export function ClosetItems({ scope }: ClosetItemsProps) {
+export function ClosetItems({ scope, emptyAction }: ClosetItemsProps) {
   const [text, setText] = useState('');
   const [filters, setFilters] = useState<SearchFilters>({});
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -77,7 +79,7 @@ export function ClosetItems({ scope }: ClosetItemsProps) {
             type="search"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Search by name…"
+            placeholder="Search…"
             className="w-full rounded-xl border border-line bg-surface py-3 pl-12 pr-4 text-sm text-ink outline-none placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
         </div>
@@ -123,15 +125,27 @@ export function ClosetItems({ scope }: ClosetItemsProps) {
           Couldn’t load items. Please try again.
         </p>
       ) : items && items.length > 0 ? (
-        <div className={cn('grid gap-3.5', gridColsClass[density])}>
-          {items.map((item) => (
-            <JewelryCard key={item._id} item={item} />
-          ))}
-        </div>
-      ) : (
+        <>
+          {narrowed && (
+            <p className="mb-3 text-xs text-muted">
+              {items.length} {items.length === 1 ? 'piece' : 'pieces'}
+            </p>
+          )}
+          <div className={cn('grid gap-3.5', gridColsClass[density])}>
+            {items.map((item) => (
+              <JewelryCard key={item._id} item={item} hideClosetBadge />
+            ))}
+          </div>
+        </>
+      ) : narrowed ? (
         <p className="py-10 text-center font-display text-sm italic text-muted">
-          {narrowed ? 'No items match your search.' : 'Nothing here yet.'}
+          No items match your search.
         </p>
+      ) : (
+        <div className="flex flex-col items-center gap-3 py-10 text-center">
+          <p className="font-display text-sm italic text-muted">Nothing here yet.</p>
+          {emptyAction}
+        </div>
       )}
 
       <FilterSheet

@@ -6,7 +6,16 @@ import { Hanger } from '@/components/icons/Hanger';
 import { thumbImageUrl } from '@/lib/media';
 import { itemTitle } from './format';
 
-export function JewelryCard({ item, closetLabel }: { item: JewelryItem; closetLabel?: string }) {
+export function JewelryCard({
+  item,
+  closetLabel,
+  hideClosetBadge = false,
+}: {
+  item: JewelryItem;
+  closetLabel?: string;
+  /** Inside a closet view every item is shared by definition — hide the badge. */
+  hideClosetBadge?: boolean;
+}) {
   const img = thumbImageUrl(item.images[0]);
 
   return (
@@ -32,7 +41,7 @@ export function JewelryCard({ item, closetLabel }: { item: JewelryItem; closetLa
               Set
             </span>
           )}
-          {item.visibility === 'groups' && !closetLabel && (
+          {!hideClosetBadge && item.visibility === 'groups' && !closetLabel && (
             <span
               className="absolute left-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-ink/60 text-white shadow-md ring-1 ring-white/30"
               title="Shared to a closet"

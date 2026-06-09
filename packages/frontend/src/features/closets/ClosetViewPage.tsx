@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Loader2, X, Pencil, Check, ChevronRight, Plus } from 'lucide-react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Loader2, X, Pencil, Check, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { MainLayout } from '@/components/layout';
 import { Button } from '@/components/ui';
 import { DensityToggle } from '@/components/ui/DensityToggle';
@@ -91,6 +91,12 @@ export function ClosetViewPage() {
       <div className="mx-auto max-w-2xl">
         {/* Header */}
         <div className="mb-4">
+          <Link
+            to="/closets"
+            className="mb-1 inline-flex items-center gap-0.5 text-sm font-semibold text-muted hover:text-primary"
+          >
+            <ChevronLeft className="h-4 w-4" /> Closets
+          </Link>
           {editingName ? (
             <div className="mt-1 flex items-center gap-2">
               <input
@@ -172,23 +178,25 @@ export function ClosetViewPage() {
 
         {/* Items shared into this closet */}
         <div>
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <h2 className="font-display text-xl font-bold text-ink">Items</h2>
-              <button
-                onClick={() => setAddOpen(true)}
-                aria-label="Add items"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-gold-light active:scale-95"
-              >
-                <Plus className="h-4 w-4" />
-              </button>
-            </div>
-            <span className="text-xs text-muted">
-              {closet.itemCount} {closet.itemCount === 1 ? 'item' : 'items'}
-            </span>
-            <DensityToggle />
+          <div className="mb-3 flex items-center gap-2">
+            <h2 className="font-display text-xl font-bold text-ink">Items</h2>
+            <span className="text-sm text-muted">· {closet.itemCount}</span>
+            <button
+              onClick={() => setAddOpen(true)}
+              className="flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-gold-light active:scale-95"
+            >
+              <Plus className="h-3.5 w-3.5" /> Share
+            </button>
+            <DensityToggle className="ml-auto" />
           </div>
-          <ClosetItems scope={closet._id} />
+          <ClosetItems
+            scope={closet._id}
+            emptyAction={
+              <Button onClick={() => setAddOpen(true)}>
+                <Plus className="h-4 w-4" /> Share items
+              </Button>
+            }
+          />
         </div>
       </div>
 

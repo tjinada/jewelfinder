@@ -1,4 +1,7 @@
+import { Link } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 import { MainLayout } from '@/components/layout';
+import { Button } from '@/components/ui';
 import { DensityToggle } from '@/components/ui/DensityToggle';
 import { ClosetItems } from './ClosetItems';
 
@@ -18,7 +21,16 @@ export function MyClosetPage() {
           <DensityToggle />
         </div>
 
-        <ClosetItems scope="mine" />
+        <ClosetItems
+          scope="mine"
+          emptyAction={
+            <Link to="/add">
+              <Button>
+                <Plus className="h-4 w-4" /> Add
+              </Button>
+            </Link>
+          }
+        />
       </div>
     </MainLayout>
   );
