@@ -128,7 +128,10 @@ function BookingRow({ booking, side, state }: { booking: Booking; side: Side; st
             </Button>
             <Button
               variant="ghost"
-              onClick={() => decide.mutate({ id: booking._id, action: 'reject' })}
+              onClick={() => {
+                if (!window.confirm('Decline this request? This can’t be undone.')) return;
+                decide.mutate({ id: booking._id, action: 'reject' });
+              }}
               disabled={decide.isPending}
               className="border-accent/40 px-3 py-1.5 text-sm text-accent hover:bg-accent/10"
             >
@@ -139,7 +142,10 @@ function BookingRow({ booking, side, state }: { booking: Booking; side: Side; st
 
         {side === 'outgoing' && state === 'pending' && (
           <button
-            onClick={() => cancel.mutate(booking._id)}
+            onClick={() => {
+              if (!window.confirm('Cancel this request?')) return;
+              cancel.mutate(booking._id);
+            }}
             disabled={cancel.isPending}
             className="mt-3 text-sm font-semibold text-accent"
           >
@@ -177,6 +183,12 @@ export function RequestsPage() {
   const incoming = useIncomingBookings();
   const outgoing = useOutgoingBookings();
 
+  // A fresh tab starts unfiltered — a carried-over filter can hide everything.
+  const switchTab = (t: Side) => {
+    setTab(t);
+    setFilter('all');
+  };
+
   const active = tab === 'incoming' ? incoming : outgoing;
   const bookings = active.data ?? [];
   const stated = bookings.map((b) => ({ b, state: loanState(b) }));
@@ -206,19 +218,20 @@ export function RequestsPage() {
 
   return (
     <MainLayout>
+      <div className="mx-auto max-w-2xl">
       <h1 className="mb-4 font-display text-2xl text-ink md:text-3xl">Requests</h1>
 
-      <div className="mx-auto mb-4 flex max-w-2xl gap-2 rounded-2xl border border-line bg-surface p-1.5">
-        <button onClick={() => setTab('incoming')} className={tabClass('incoming')}>
+      <div className="mb-4 flex gap-2 rounded-2xl border border-line bg-surface p-1.5">
+        <button onClick={() => switchTab('incoming')} className={tabClass('incoming')}>
           Sharing
         </button>
-        <button onClick={() => setTab('outgoing')} className={tabClass('outgoing')}>
+        <button onClick={() => switchTab('outgoing')} className={tabClass('outgoing')}>
           Borrowing
         </button>
       </div>
 
       {outCount > 0 && (
-        <p className="mx-auto mb-3 max-w-2xl px-1 text-sm text-muted">
+        <p className="mb-3 px-1 text-sm text-muted">
           {tab === 'incoming'
             ? `${outCount} of your pieces ${outCount === 1 ? 'is' : 'are'} out right now.`
             : `You have ${outCount} ${outCount === 1 ? 'piece' : 'pieces'} on loan.`}
@@ -226,9 +239,12 @@ export function RequestsPage() {
       )}
 
       {!active.isLoading && bookings.length > 0 && (
-        <div className="mx-auto mb-5 flex max-w-2xl flex-wrap gap-2 px-1">
+        <div className="mb-5 flex flex-wrap gap-2 px-1">
           {FILTERS.map((f) => {
             const selected = filter === f.key;
+            const count = countFor(f.key);
+            // A zero-count pill only leads to an empty screen — don't offer it.
+            if (f.key !== 'all' && count === 0) return null;
             return (
               <button
                 key={f.key}
@@ -242,7 +258,7 @@ export function RequestsPage() {
               >
                 {f.label}
                 <span className={cn('text-xs', selected ? 'text-gold-light/80' : 'text-muted')}>
-                  {countFor(f.key)}
+                  {count}
                 </span>
               </button>
             );
@@ -260,13 +276,21 @@ export function RequestsPage() {
           <p className="text-lg font-display italic text-muted">
             {tab === 'incoming'
               ? 'Every piece has its next moment. Yours is coming.'
-              : "Nothing yet - have you explored what's in your closets?"}
+              : 'Nothing yet — have you explored what’s in your closets?'}
           </p>
         </div>
       ) : (
-        <div className="mx-auto max-w-2xl">
+        <div>
           {visibleSections.length === 0 ? (
-            <p className="py-16 text-center font-display italic text-muted">Nothing here.</p>
+            <div className="py-16 text-center">
+              <p className="font-display italic text-muted">Nothing here.</p>
+              <button
+                onClick={() => setFilter('all')}
+                className="mt-2 text-sm font-semibold text-primary"
+              >
+                Show all
+              </button>
+            </div>
           ) : (
             visibleSections.map(({ section, items }) => (
               <div key={section.title} className="mb-6">
@@ -283,6 +307,7 @@ export function RequestsPage() {
           )}
         </div>
       )}
+      </div>
     </MainLayout>
   );
 }
