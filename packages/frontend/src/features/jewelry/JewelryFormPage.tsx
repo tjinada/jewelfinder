@@ -143,6 +143,8 @@ export function JewelryFormPage() {
     if (!category) missing.push('a category');
     if (!condition) missing.push('a condition rating');
     if (missing.length > 0) return setError(`Please add: ${missing.join(', ')}.`);
+    // Unreachable at runtime (covered by `missing` above) — narrows the types for TS.
+    if (!category || !condition) return;
     if (setSel.mode === 'new' && !setSel.name.trim()) {
       return setError('Please name the new set, or choose “Not part of a set”.');
     }
