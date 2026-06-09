@@ -34,7 +34,9 @@ export function HomePage() {
   // Card label: only closets the viewer belongs to resolve to a name, and the
   // "+N" count is taken from those resolved names — so an item also shared to a
   // closet the viewer isn't in never reveals that closet's name or existence.
+  // When the scope is already a specific closet, the label is redundant — skip it.
   const closetLabelFor = (item: JewelryItem): string | undefined => {
+    if (scope !== 'all' && scope !== 'mine') return undefined;
     if (item.visibility !== 'groups') return undefined;
     const names = item.sharedGroups
       .map((id) => closetNameById.get(id))
@@ -93,25 +95,29 @@ export function HomePage() {
       <div className="mb-4 flex items-center justify-between gap-3">
         <h1 className="font-display text-2xl text-ink md:text-3xl">Discover</h1>
 
-        {/* Scope: narrow to your own items or a specific closet */}
-        <select
-          value={scope}
-          onChange={(e) => setScope(e.target.value)}
-          aria-label="Filter by visibility"
-          className={scopeSelectClass}
-        >
-          <option value="all">All visible</option>
-          <option value="mine">Just mine</option>
-          {closets && closets.length > 0 && (
-            <optgroup label="Closets">
-              {closets.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
-            </optgroup>
-          )}
-        </select>
+        <div className="flex items-center gap-2">
+          {/* Scope: narrow to your own items or a specific closet */}
+          <select
+            value={scope}
+            onChange={(e) => setScope(e.target.value)}
+            aria-label="Filter by visibility"
+            className={scopeSelectClass}
+          >
+            <option value="all">Everything</option>
+            <option value="mine">Just mine</option>
+            {closets && closets.length > 0 && (
+              <optgroup label="Closets">
+                {closets.map((c) => (
+                  <option key={c._id} value={c._id}>
+                    {c.name}
+                  </option>
+                ))}
+              </optgroup>
+            )}
+          </select>
+
+          <DensityToggle />
+        </div>
       </div>
 
       {/* Search + filters (formerly the dedicated Search page) */}
@@ -122,7 +128,7 @@ export function HomePage() {
             type="search"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Search by name…"
+            placeholder="Search…"
             className="w-full rounded-xl border border-line bg-surface py-3 pl-12 pr-4 text-sm text-ink outline-none placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
         </div>
@@ -139,8 +145,6 @@ export function HomePage() {
             </span>
           )}
         </button>
-
-        <DensityToggle className="self-center" />
       </div>
 
       {activeChips.length > 0 && (
@@ -168,16 +172,35 @@ export function HomePage() {
       ) : isError ? (
         <p className="py-20 text-center font-display italic text-muted">Couldn’t load items. Please try again.</p>
       ) : items && items.length > 0 ? (
-        <div className={cn('grid gap-3.5', gridColsClass[density])}>
-          {items.map((item) => (
-            <JewelryCard key={item._id} item={item} closetLabel={closetLabelFor(item)} />
-          ))}
-        </div>
+        <>
+          {narrowed && (
+            <p className="mb-3 text-xs text-muted">
+              {items.length} {items.length === 1 ? 'piece' : 'pieces'}
+            </p>
+          )}
+          <div className={cn('grid gap-3.5', gridColsClass[density])}>
+            {items.map((item) => (
+              <JewelryCard key={item._id} item={item} closetLabel={closetLabelFor(item)} />
+            ))}
+          </div>
+        </>
       ) : narrowed ? (
-        <p className="py-20 text-center font-display italic text-muted">This closet is empty for now. Every great collection starts somewhere.</p>
+        <div className="flex flex-col items-center gap-4 py-20 text-center">
+          <p className="font-display italic text-muted">No pieces match your search.</p>
+          <button
+            onClick={() => {
+              setText('');
+              setFilters({});
+              setScope('all');
+            }}
+            className="rounded-xl border border-primary px-4 py-2 text-sm font-semibold text-primary"
+          >
+            Clear search & filters
+          </button>
+        </div>
       ) : (
         <div className="flex flex-col items-center gap-4 py-20 text-center">
-          <p className="text-lg font-display italic text-muted">This closet is empty for now. Every great collection starts somewhere.</p>
+          <p className="text-lg font-display italic text-muted">Nothing here yet. Every great collection starts somewhere.</p>
           <Link to="/add">
             <Button>
               <Plus className="h-4 w-4" /> Add

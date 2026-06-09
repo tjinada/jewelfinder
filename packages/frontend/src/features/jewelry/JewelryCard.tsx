@@ -43,7 +43,7 @@ export function JewelryCard({ item, closetLabel }: { item: JewelryItem; closetLa
           )}
         </div>
         <div className="px-3 pb-3.5">
-          <div className="truncate text-[15px] font-semibold">{itemTitle(item)}</div>
+          <div className="line-clamp-2 text-[15px] font-semibold leading-snug">{itemTitle(item)}</div>
           {item.location && (
             <div className="mt-1 flex items-center gap-1 text-xs text-muted">
               <MapPin className="h-3.5 w-3.5 flex-none" />
