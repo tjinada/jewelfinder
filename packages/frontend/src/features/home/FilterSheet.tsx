@@ -22,11 +22,13 @@ interface FilterSheetProps {
   onChange: (next: SearchFilters) => void;
   onClear: () => void;
   onClose: () => void;
+  /** Live count of items matching the current filters — shown on the CTA. */
+  resultCount?: number;
 }
 
 const labelClass = 'mb-2 block text-xs font-bold uppercase tracking-wide text-muted';
 
-export function FilterSheet({ open, value, onChange, onClear, onClose }: FilterSheetProps) {
+export function FilterSheet({ open, value, onChange, onClear, onClose, resultCount }: FilterSheetProps) {
   // Which attribute filters to show: the chosen category's attributes, or all when none.
   const shownAttrs = value.category
     ? CATEGORY_ATTRIBUTES[value.category].filter((k) =>
@@ -71,9 +73,9 @@ export function FilterSheet({ open, value, onChange, onClear, onClose }: FilterS
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 320 }}
-            className="fixed inset-x-0 bottom-0 z-[60] mx-auto max-h-[85vh] max-w-lg overflow-y-auto rounded-t-3xl border-t border-white/60 bg-cream/95 px-5 pt-5 pb-[calc(1.5rem_+_env(safe-area-inset-bottom))] backdrop-blur-2xl"
+            className="fixed inset-x-0 bottom-0 z-[60] mx-auto flex max-h-[85vh] max-w-lg flex-col rounded-t-3xl border-t border-white/60 bg-cream/95 px-5 pt-5 pb-[calc(1rem_+_env(safe-area-inset-bottom))] backdrop-blur-2xl"
           >
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex flex-none items-center justify-between">
               <h2 className="font-display text-xl text-ink">Filters</h2>
               <div className="flex items-center gap-3">
                 {active > 0 && (
@@ -87,6 +89,8 @@ export function FilterSheet({ open, value, onChange, onClear, onClose }: FilterS
               </div>
             </div>
 
+            {/* Scrollable filter sections — the CTA below stays pinned */}
+            <div className="min-h-0 flex-1 overflow-y-auto">
             {/* Category */}
             <div className="mb-5">
               <span className={labelClass}>Category</span>
@@ -123,7 +127,7 @@ export function FilterSheet({ open, value, onChange, onClear, onClose }: FilterS
             {/* Necklace type */}
             {shownAttrs.includes('necklaceType') && (
               <div className="mb-5">
-                <span className={labelClass}>Type</span>
+                <span className={labelClass}>{value.category ? 'Type' : 'Necklace type'}</span>
                 <div className="flex flex-wrap gap-2">
                   {NECKLACE_TYPES.map((t) => (
                     <Chip
@@ -141,7 +145,7 @@ export function FilterSheet({ open, value, onChange, onClear, onClose }: FilterS
             {/* Size */}
             {shownAttrs.includes('size') && (
               <div className="mb-5">
-                <span className={labelClass}>Size</span>
+                <span className={labelClass}>{value.category ? 'Size' : 'Bangle size'}</span>
                 <div className="flex flex-wrap gap-2">
                   {BANGLE_SIZES.map((s) => (
                     <Chip
@@ -158,7 +162,7 @@ export function FilterSheet({ open, value, onChange, onClear, onClose }: FilterS
 
             {/* Colour */}
             {shownAttrs.includes('colour') && (
-              <div className="mb-6">
+              <div className="mb-2">
                 <span className={labelClass}>Colour</span>
                 <div className="flex flex-wrap gap-2">
                   {COLOURS.map((c) => (
@@ -173,9 +177,12 @@ export function FilterSheet({ open, value, onChange, onClear, onClose }: FilterS
                 </div>
               </div>
             )}
+            </div>
 
-            <Button onClick={onClose} className="w-full">
-              Show results
+            <Button onClick={onClose} className="mt-4 w-full flex-none">
+              {resultCount === undefined
+                ? 'Show results'
+                : `Show ${resultCount} ${resultCount === 1 ? 'piece' : 'pieces'}`}
             </Button>
           </motion.div>
         </>

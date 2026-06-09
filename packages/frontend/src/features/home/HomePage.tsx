@@ -215,6 +215,7 @@ export function HomePage() {
         onChange={setFilters}
         onClear={() => setFilters({})}
         onClose={() => setSheetOpen(false)}
+        resultCount={isLoading ? undefined : items?.length}
       />
     </MainLayout>
   );
