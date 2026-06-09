@@ -10,8 +10,8 @@ export function JewelryCard({ item, closetLabel }: { item: JewelryItem; closetLa
   const img = thumbImageUrl(item.images[0]);
 
   return (
-    <Link to={`/item/${item._id}`}>
-      <Card className="cursor-pointer transition-shadow hover:shadow-lg hover:shadow-primary/10">
+    <Link to={`/item/${item._id}`} className="block h-full">
+      <Card className="h-full cursor-pointer transition-shadow hover:shadow-lg hover:shadow-primary/10">
         <div className="relative m-2 overflow-hidden rounded-xl bg-tile">
           <div className="aspect-square">
             {img ? (

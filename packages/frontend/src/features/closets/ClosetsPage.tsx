@@ -98,15 +98,7 @@ export function ClosetsPage() {
                 border: `2px solid ${MY_CLOSET_COLOR.sub}`,
               }}
             >
-              <div className="flex items-center justify-between">
-                <Hanger className="h-5 w-5" style={{ color: MY_CLOSET_COLOR.text }} />
-                <span
-                  className="rounded-md px-2 py-0.5 text-[10px] font-bold"
-                  style={{ backgroundColor: MY_CLOSET_COLOR.text, color: MY_CLOSET_COLOR.bg }}
-                >
-                  Yours
-                </span>
-              </div>
+              <Hanger className="h-5 w-5" style={{ color: MY_CLOSET_COLOR.text }} />
               <div>
                 <p className="font-semibold" style={{ color: MY_CLOSET_COLOR.text }}>
                   My closet
@@ -127,13 +119,24 @@ export function ClosetsPage() {
                   className={tileBase}
                   style={{ backgroundColor: color.bg }}
                 >
-                  <Hanger className="h-5 w-5" style={{ color: color.text }} />
+                  <div className="flex items-center justify-between">
+                    <Hanger className="h-5 w-5" style={{ color: color.text }} />
+                    {c.isOwner && (
+                      <span
+                        className="rounded-md px-2 py-0.5 text-[10px] font-bold"
+                        style={{ backgroundColor: color.sub, color: color.bg }}
+                      >
+                        Owner
+                      </span>
+                    )}
+                  </div>
                   <div>
-                    <p className="truncate font-semibold" style={{ color: color.text }}>
+                    <p className="line-clamp-2 font-semibold leading-snug" style={{ color: color.text }}>
                       {c.name}
                     </p>
                     <p className="text-xs" style={{ color: color.sub }}>
-                      {c.itemCount} {c.itemCount === 1 ? 'item' : 'items'}
+                      {c.itemCount} {c.itemCount === 1 ? 'item' : 'items'} · {c.memberCount}{' '}
+                      {c.memberCount === 1 ? 'member' : 'members'}
                     </p>
                   </div>
                 </Link>
@@ -150,6 +153,12 @@ export function ClosetsPage() {
               <span className="text-sm font-semibold">New closet</span>
             </button>
           </div>
+        )}
+
+        {!isLoading && closets && closets.length === 0 && (
+          <p className="mt-5 text-center font-display text-sm italic text-muted">
+            Have an invite link? Open it to join a friend’s closet.
+          </p>
         )}
       </div>
     </MainLayout>

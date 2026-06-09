@@ -93,15 +93,15 @@ export function HomePage() {
   return (
     <MainLayout>
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h1 className="font-display text-2xl text-ink md:text-3xl">Discover</h1>
+        <h1 className="flex-none font-display text-2xl text-ink md:text-3xl">Discover</h1>
 
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           {/* Scope: narrow to your own items or a specific closet */}
           <select
             value={scope}
             onChange={(e) => setScope(e.target.value)}
             aria-label="Filter by visibility"
-            className={scopeSelectClass}
+            className={cn(scopeSelectClass, 'min-w-0')}
           >
             <option value="all">Everything</option>
             <option value="mine">Just mine</option>
