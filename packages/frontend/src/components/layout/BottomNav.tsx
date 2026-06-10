@@ -32,10 +32,16 @@ export function BottomNav() {
     );
 
   return (
-    <GlassSurface
-      as="nav"
-      className="fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-3xl px-2 py-2 safe-bottom md:hidden"
-    >
+    <>
+      {/* Content fades into the page bottom instead of slicing past the floating pill. */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-30 h-24 bg-gradient-to-t from-cream via-cream/80 to-transparent md:hidden"
+      />
+      <GlassSurface
+        as="nav"
+        className="fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-3xl px-2 py-2 safe-bottom md:hidden"
+      >
       {items.map(({ to, label, icon: Icon, end }) => (
         <NavLink key={to} to={to} end={end} className={link}>
           <Icon className="h-5 w-5" />
@@ -67,6 +73,7 @@ export function BottomNav() {
           </NavLink>
         );
       })}
-    </GlassSurface>
+      </GlassSurface>
+    </>
   );
 }
