@@ -153,6 +153,19 @@ function BookingRow({ booking, side, state }: { booking: Booking; side: Side; st
           </button>
         )}
 
+        {side === 'outgoing' && state === 'upcoming' && (
+          <button
+            onClick={() => {
+              if (!window.confirm('Cancel this upcoming loan? The owner will be notified.')) return;
+              cancel.mutate(booking._id);
+            }}
+            disabled={cancel.isPending}
+            className="mr-4 mt-3 text-sm font-semibold text-accent"
+          >
+            Cancel loan
+          </button>
+        )}
+
         {side === 'incoming' && (state === 'onloan' || state === 'overdue') && (
           <Button
             variant="gold"

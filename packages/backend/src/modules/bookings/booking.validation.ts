@@ -13,7 +13,19 @@ export const createBookingBody = z
   .refine((v) => v.startDate <= v.endDate, {
     message: 'End date must be on or after the start date',
     path: ['endDate'],
-  });
+  })
+  .refine(
+    (v) => (Date.parse(v.endDate) - Date.parse(v.startDate)) / 86_400_000 < 60,
+    { message: 'Loans are limited to 60 days', path: ['endDate'] },
+  )
+  .refine(
+    (v) => {
+      const limit = new Date();
+      limit.setFullYear(limit.getFullYear() + 1);
+      return v.startDate <= limit.toISOString().slice(0, 10);
+    },
+    { message: 'The start date can be at most a year away', path: ['startDate'] },
+  );
 
 export const decisionBody = z.object({
   action: z.enum(['accept', 'reject']),

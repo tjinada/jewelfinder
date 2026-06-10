@@ -54,6 +54,14 @@ function fmt(iso: string): string {
 }
 const fmtRange = (start: string, end: string) => (start === end ? fmt(start) : `${fmt(start)} – ${fmt(end)}`);
 
+/** Lazily cancel pending requests whose window has fully passed — run on list reads. */
+async function expireStalePending(scope: { owner?: string; requester?: string }): Promise<void> {
+  await Booking.updateMany(
+    { ...scope, status: 'pending', endDate: { $lt: todayISO() } },
+    { status: 'cancelled' },
+  );
+}
+
 /** Is there an accepted booking on this item overlapping [start, end]? */
 async function hasAcceptedOverlap(
   itemId: unknown,
@@ -93,6 +101,17 @@ export const bookingService = {
     if (await hasAcceptedOverlap(item._id, input.startDate, input.endDate)) {
       throw new AppError('Those dates are no longer available', 409);
     }
+    // One pending request per requester/item/date-window — no duplicates.
+    const duplicate = await Booking.exists({
+      item: item._id,
+      requester: requesterId,
+      status: 'pending',
+      startDate: { $lte: input.endDate },
+      endDate: { $gte: input.startDate },
+    });
+    if (duplicate) {
+      throw new AppError('You already have a pending request for these dates', 409);
+    }
 
     const booking = await Booking.create({
       item: item._id,
@@ -116,6 +135,7 @@ export const bookingService = {
 
   /** Requests received by the owner. */
   async listIncoming(ownerId: string): Promise<BookingDTO[]> {
+    await expireStalePending({ owner: ownerId });
     const docs = await Booking.find({ owner: ownerId })
       .sort({ createdAt: -1 })
       .populate('item', 'name images')
@@ -125,6 +145,7 @@ export const bookingService = {
 
   /** Requests the user has sent. */
   async listOutgoing(requesterId: string): Promise<BookingDTO[]> {
+    await expireStalePending({ requester: requesterId });
     const docs = await Booking.find({ requester: requesterId })
       .sort({ createdAt: -1 })
       .populate('item', 'name images')
@@ -170,7 +191,11 @@ export const bookingService = {
       return toClient(booking);
     }
 
-    // accept — re-check overlap in case another request was accepted meanwhile
+    // accept — the dates must still be in the future…
+    if (booking.endDate < todayISO()) {
+      throw new AppError('Those dates have already passed', 400);
+    }
+    // …and re-check overlap in case another request was accepted meanwhile
     if (await hasAcceptedOverlap(booking.item, booking.startDate, booking.endDate, booking._id)) {
       throw new AppError('Those dates were just booked by someone else', 409);
     }
@@ -194,17 +219,55 @@ export const bookingService = {
       )}). Let's sort out the details here.`,
     );
 
+    // Other pending requests overlapping the accepted dates can never be
+    // fulfilled — decline them now and tell their requesters.
+    const conflicts = await Booking.find({
+      item: booking.item,
+      status: 'pending',
+      _id: { $ne: booking._id },
+      startDate: { $lte: booking.endDate },
+      endDate: { $gte: booking.startDate },
+    });
+    if (conflicts.length > 0) {
+      await Booking.updateMany(
+        { _id: { $in: conflicts.map((c) => c._id) } },
+        { status: 'rejected' },
+      );
+      for (const c of conflicts) {
+        void notificationService.notifyUser(String(c.requester), {
+          title: 'Loan request declined',
+          body: `${item?.name ?? 'The piece'} is already loaned out for ${fmtRange(c.startDate, c.endDate)}`,
+          tag: `booking-${c._id}`,
+          data: { url: '/requests' },
+        });
+      }
+    }
+
     return toClient(booking);
   },
 
-  /** Requester cancels their own pending request. */
+  /** Requester cancels their own request — pending, or accepted before it starts. */
   async cancel(requesterId: string, id: string): Promise<BookingDTO> {
     const booking = await Booking.findById(id);
     if (!booking) throw new AppError('Request not found', 404);
     if (String(booking.requester) !== requesterId) throw new AppError('This is not your request', 403);
-    if (booking.status !== 'pending') throw new AppError('Only pending requests can be cancelled', 400);
+    const isPending = booking.status === 'pending';
+    const isUpcomingAccepted =
+      booking.status === 'accepted' && !booking.returnedAt && booking.startDate > todayISO();
+    if (!isPending && !isUpcomingAccepted) {
+      throw new AppError('Only pending requests or loans that haven’t started can be cancelled', 400);
+    }
     booking.status = 'cancelled';
     await booking.save();
+
+    const item = await Jewelry.findById(booking.item).select('name');
+    void notificationService.notifyUser(String(booking.owner), {
+      title: isPending ? 'Loan request cancelled' : 'Upcoming loan cancelled',
+      body: `${item?.name ?? 'A piece'} · ${fmtRange(booking.startDate, booking.endDate)}`,
+      tag: `booking-${booking._id}`,
+      data: { url: '/requests' },
+    });
+
     return toClient(booking);
   },
 
@@ -219,6 +282,15 @@ export const bookingService = {
     if (booking.returnedAt) throw new AppError('This loan is already marked returned', 400);
     booking.returnedAt = new Date();
     await booking.save();
+
+    const item = await Jewelry.findById(booking.item).select('name');
+    void notificationService.notifyUser(String(booking.requester), {
+      title: 'Loan marked returned',
+      body: `${item?.name ?? 'Your loan'} · ${fmtRange(booking.startDate, booking.endDate)}`,
+      tag: `booking-${booking._id}`,
+      data: { url: '/requests' },
+    });
+
     return toClient(booking);
   },
 };
