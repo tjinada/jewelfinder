@@ -2,6 +2,7 @@ import { Conversation, Message, IMessageDocument } from './conversation.model.js
 import { User } from '../users/user.model.js';
 import { AppError } from '../../middleware/error.middleware.js';
 import { notificationService } from '../notifications/notification.service.js';
+import { track } from '../analytics/analytics.service.js';
 import type { Message as MessageDTO } from '@jewel/shared';
 
 interface OtherParticipant {
@@ -137,6 +138,8 @@ export const conversationService = {
     });
     convo.lastMessageAt = new Date();
     await convo.save();
+
+    track(userId, 'message_sent', { conversationId: id });
 
     const otherId = convo.participants.map(String).find((p) => p !== userId);
     if (otherId) {

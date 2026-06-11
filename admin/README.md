@@ -11,9 +11,14 @@ the backend — it talks to the MongoDB collections directly and only ever reads
 - **Bookings** — total, by status, acceptance rate (accepted ÷ decided), average loan length.
 - **Closets** — total, average members, items shared to closets.
 - **Messaging** — threads and message volume (7/30d).
-- **Activity** — 30-day trend lines for signups, items, bookings, and messages.
+- **Activity** — 30-day trend lines for signups, items, bookings, messages, and
+  (from the event stream) true daily active users.
+- **Engagement** (server-side event stream) — item views (owner self-views
+  excluded), most-viewed items with view→request conversion, top searches,
+  filter usage, per-member activity, and the 30-day event mix.
 
-All figures are aggregate counts — no emails or other personal data leave Mongo.
+Figures are aggregate counts plus per-member activity by display name — no
+emails, credentials, or message bodies. Nothing leaves Mongo or the LAN.
 
 ## Running it (on the Unraid server)
 
@@ -59,11 +64,19 @@ MONGO_URI="mongodb://localhost:27017/jewel-finder" npm start
   aggregation. There are no writes.
 - The jewelry collection name (`jewelry` vs `jewelries`) is discovered at
   runtime, matching `scripts/clean-regression.sh`.
-- Data is computed live on each load (a **Refresh** button re-pulls). No history
-  is stored, so active-user *trends* are point-in-time only; signup/item/booking/
-  message trends are reconstructed from `createdAt`.
+- Granular engagement numbers come from the `analyticsevents` collection
+  (frozen name), written fire-and-forget by the backend's
+  `modules/analytics` and only ever **read** here. Before the first deploy
+  with event tracking the collection doesn't exist — those sections simply
+  show "No event data yet".
+- Data is computed live on each load (a **Refresh** button re-pulls). No
+  snapshot history is stored; the DAU trend is reconstructed from the event
+  stream, the signup/item/booking/message trends from `createdAt`.
 
 ## Deliberately out of scope (YAGNI)
 
-No auth, no write paths, no per-user/PII views, no stored snapshots, no CSV
-export, no real-time. Each is a small add later if a real need appears.
+No auth, no write paths, no stored snapshots, no CSV export, no real-time, no
+client-side beacons. Per-member activity (by display name) **is** shown — that
+former boundary was relaxed for the pilot (all users known, LAN-only); the
+standing rule is that nothing leaves the LAN. Each omission is a small add
+later if a real need appears.

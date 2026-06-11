@@ -1,6 +1,7 @@
 import { User, IUserDocument } from '../users/user.model.js';
 import { AppError } from '../../middleware/error.middleware.js';
 import { generateToken } from '../../middleware/auth.middleware.js';
+import { track } from '../analytics/analytics.service.js';
 import { config } from '../../config/index.js';
 import { verifyGoogleToken } from './google.js';
 import type { RegisterInput, LoginInput, UpdateMeInput } from './auth.validation.js';
@@ -70,6 +71,8 @@ export const authService = {
 
     user.lastSeen = new Date();
     await user.save();
+
+    track(String(user._id), 'login', { method: 'password' });
 
     return { token: generateToken(user), user: toPublicUser(user) };
   },
@@ -142,6 +145,7 @@ export const authService = {
 
     user.lastSeen = new Date();
     await user.save();
+    track(String(user._id), 'login', { method: 'google' });
     return { token: generateToken(user), user: toPublicUser(user) };
   },
 

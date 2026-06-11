@@ -3,6 +3,7 @@ import { Booking, IBookingDocument } from './booking.model.js';
 import { Jewelry } from '../jewelry/jewelry.model.js';
 import { conversationService } from '../conversations/conversation.service.js';
 import { notificationService } from '../notifications/notification.service.js';
+import { track } from '../analytics/analytics.service.js';
 import { isVisibleTo } from '../groups/visibility.js';
 import { AppError } from '../../middleware/error.middleware.js';
 import type { Booking as BookingDTO, DateRange } from '@jewel/shared';
@@ -53,6 +54,11 @@ function fmt(iso: string): string {
   });
 }
 const fmtRange = (start: string, end: string) => (start === end ? fmt(start) : `${fmt(start)} – ${fmt(end)}`);
+
+/** Decision latency in hours (one decimal) for booking_decision analytics. */
+function hoursSince(date: Date): number {
+  return Math.round(((Date.now() - date.getTime()) / 36e5) * 10) / 10;
+}
 
 /** Lazily cancel pending requests whose window has fully passed — run on list reads. */
 async function expireStalePending(scope: { owner?: string; requester?: string }): Promise<void> {
@@ -123,6 +129,14 @@ export const bookingService = {
       status: 'pending',
     });
 
+    track(requesterId, 'booking_request', {
+      bookingId: String(booking._id),
+      itemId: String(item._id),
+      ownerId: String(item.owner),
+      startDate: input.startDate,
+      endDate: input.endDate,
+    });
+
     void notificationService.notifyUser(
       String(item.owner),
       {
@@ -185,6 +199,12 @@ export const bookingService = {
     if (action === 'reject') {
       booking.status = 'rejected';
       await booking.save();
+      track(ownerId, 'booking_decision', {
+        bookingId: String(booking._id),
+        itemId: String(booking.item),
+        decision: 'rejected',
+        hoursToDecision: hoursSince(booking.createdAt),
+      });
       const item = await Jewelry.findById(booking.item).select('name');
       void notificationService.notifyUser(
         String(booking.requester),
@@ -216,6 +236,13 @@ export const bookingService = {
     booking.status = 'accepted';
     booking.conversation = new Types.ObjectId(convo._id);
     await booking.save();
+
+    track(ownerId, 'booking_decision', {
+      bookingId: String(booking._id),
+      itemId: String(booking.item),
+      decision: 'accepted',
+      hoursToDecision: hoursSince(booking.createdAt),
+    });
 
     const item = await Jewelry.findById(booking.item).select('name');
     await conversationService.sendMessage(
@@ -272,6 +299,11 @@ export const bookingService = {
     booking.status = 'cancelled';
     await booking.save();
 
+    track(requesterId, 'booking_cancel', {
+      bookingId: String(booking._id),
+      itemId: String(booking.item),
+    });
+
     const item = await Jewelry.findById(booking.item).select('name');
     void notificationService.notifyUser(
       String(booking.owner),
@@ -298,6 +330,11 @@ export const bookingService = {
     if (booking.returnedAt) throw new AppError('This loan is already marked returned', 400);
     booking.returnedAt = new Date();
     await booking.save();
+
+    track(ownerId, 'booking_return', {
+      bookingId: String(booking._id),
+      itemId: String(booking.item),
+    });
 
     const item = await Jewelry.findById(booking.item).select('name');
     void notificationService.notifyUser(

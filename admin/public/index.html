@@ -108,6 +108,20 @@
         font-size: 14px;
       }
       .footnote { color: var(--muted); font-size: 12px; margin-top: 10px; }
+      table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      th {
+        text-align: left;
+        font-weight: 600;
+        color: var(--muted);
+        font-size: 11px;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        padding: 0 10px 8px;
+        border-bottom: 1px solid var(--line);
+      }
+      td { padding: 9px 10px; border-bottom: 1px solid var(--line); }
+      tbody tr:last-child td { border-bottom: 0; }
+      th.num, td.num { text-align: right; font-variant-numeric: tabular-nums; }
     </style>
   </head>
   <body>
@@ -148,6 +162,28 @@
           <h2>Items by condition</h2>
           <div class="canvas-wrap"><canvas id="condition"></canvas></div>
         </div>
+        <div class="panel wide">
+          <h2>Most viewed items — last 30 days</h2>
+          <div id="topItems"></div>
+          <div class="footnote">Owner self-views excluded. Conversion = loan requests ÷ views.</div>
+        </div>
+        <div class="panel">
+          <h2>Events by type — last 30 days</h2>
+          <div class="canvas-wrap"><canvas id="eventTypes"></canvas></div>
+        </div>
+        <div class="panel">
+          <h2>Filter usage — last 30 days</h2>
+          <div class="canvas-wrap"><canvas id="filterUsage"></canvas></div>
+        </div>
+        <div class="panel">
+          <h2>Top searches — last 30 days</h2>
+          <div id="searches"></div>
+        </div>
+        <div class="panel wide">
+          <h2>Member activity — last 30 days</h2>
+          <div id="perUser"></div>
+          <div class="footnote">From the server-side event stream — events start recording from the deploy that introduced tracking. LAN-only dashboard; all pilot members are known.</div>
+        </div>
       </section>
     </main>
 
@@ -162,6 +198,7 @@
         green: '#8fae9b',
         pink: '#b5879c',
         blue: '#7f93b5',
+        rust: '#c97f6a',
         grid: '#342c24',
       };
 
@@ -191,6 +228,8 @@
         const cards = [
           kpiCard('Users', d.users.total.toLocaleString(), `+${d.users.new30} in 30d`),
           kpiCard('Active (30d)', d.users.active30.toLocaleString(), `${d.users.active7} in 7d`),
+          kpiCard('Item views (30d)', (d.events?.views30 ?? 0).toLocaleString(), `${d.events?.views7 ?? 0} in 7d`),
+          kpiCard('Searches (30d)', (d.events?.searches30 ?? 0).toLocaleString(), ''),
           kpiCard('Google-linked', d.users.googleLinked.toLocaleString(), ''),
           kpiCard('Items', d.jewelry.total.toLocaleString(), `+${d.jewelry.new30} in 30d`),
           kpiCard('Bookings', d.bookings.total.toLocaleString(), ''),
@@ -219,17 +258,19 @@
 
       function renderTrends(d) {
         const labels = d.trends.signups.map((p) => p.date.slice(5)); // MM-DD
+        const datasets = [
+          lineDataset('Signups', d.trends.signups, C.accent),
+          lineDataset('Items', d.trends.items, C.green),
+          lineDataset('Bookings', d.trends.bookings, C.blue),
+          lineDataset('Messages', d.trends.messages, C.pink),
+        ];
+        // True DAU from the event stream (zero before tracking was deployed).
+        if (d.events?.dau?.length === d.trends.signups.length) {
+          datasets.push(lineDataset('Active users', d.events.dau, C.rust));
+        }
         draw('trends', {
           type: 'line',
-          data: {
-            labels,
-            datasets: [
-              lineDataset('Signups', d.trends.signups, C.accent),
-              lineDataset('Items', d.trends.items, C.green),
-              lineDataset('Bookings', d.trends.bookings, C.blue),
-              lineDataset('Messages', d.trends.messages, C.pink),
-            ],
-          },
+          data: { labels, datasets },
           options: {
             maintainAspectRatio: false,
             interaction: { mode: 'index', intersect: false },
@@ -290,6 +331,7 @@
       function render(d) {
         renderKpis(d);
         renderTrends(d);
+        renderEvents(d);
         doughnut('bookingStatus', d.bookings.byStatus, titleCase, [C.green, C.accent, C.pink, C.blue]);
         doughnut('visibility', d.jewelry.byVisibility, visLabel, [C.blue, C.accent, C.green]);
         bar('category', d.jewelry.byCategory, titleCase, C.accent);
@@ -303,6 +345,83 @@
 
         document.getElementById('generated').textContent =
           'Generated ' + new Date(d.generatedAt).toLocaleString();
+      }
+
+      // ---- event-stream sections ----------------------------------------
+
+      const esc = (s) =>
+        String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+      function table(elId, head, rows) {
+        const el = document.getElementById(elId);
+        if (!rows.length) {
+          el.innerHTML = '<div class="empty">No event data yet</div>';
+          return;
+        }
+        const th = head.map((h) => `<th${h.num ? ' class="num"' : ''}>${h.label}</th>`).join('');
+        const trs = rows
+          .map(
+            (r) =>
+              '<tr>' +
+              r.map((c, i) => `<td${head[i].num ? ' class="num"' : ''}>${c}</td>`).join('') +
+              '</tr>',
+          )
+          .join('');
+        el.innerHTML = `<table><thead><tr>${th}</tr></thead><tbody>${trs}</tbody></table>`;
+      }
+
+      const typeLabel = (k) => String(k).replace(/_/g, ' ');
+
+      function renderEvents(d) {
+        const ev = d.events || {};
+        bar('eventTypes', ev.byType || [], typeLabel, C.blue);
+        bar('filterUsage', ev.filters || [], (k) => k, C.pink);
+
+        table(
+          'topItems',
+          [
+            { label: 'Item' },
+            { label: 'Views', num: 1 },
+            { label: 'Unique viewers', num: 1 },
+            { label: 'Requests', num: 1 },
+            { label: 'Conversion', num: 1 },
+          ],
+          (ev.topItems || []).map((i) => [
+            esc(i.name),
+            i.views,
+            i.uniqueViewers,
+            i.requests,
+            fmtPct(i.conversion),
+          ]),
+        );
+
+        table(
+          'searches',
+          [{ label: 'Search' }, { label: 'Times', num: 1 }, { label: 'Avg results', num: 1 }],
+          (ev.searches || []).map((s) => [esc(s.query), s.count, s.avgResults == null ? '—' : s.avgResults]),
+        );
+
+        table(
+          'perUser',
+          [
+            { label: 'Member' },
+            { label: 'Views', num: 1 },
+            { label: 'Searches', num: 1 },
+            { label: 'Requests', num: 1 },
+            { label: 'Messages', num: 1 },
+            { label: 'Items added', num: 1 },
+            { label: 'Last active' },
+          ],
+          (ev.perUser || []).map((u) => [
+            esc(u.name),
+            u.views,
+            u.searches,
+            u.requests,
+            u.messages,
+            u.itemsAdded,
+            new Date(u.lastEvent).toLocaleDateString(),
+          ]),
+        );
       }
 
       async function load() {

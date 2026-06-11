@@ -1,5 +1,6 @@
 import { Jewelry, IJewelryDocument } from './jewelry.model.js';
 import { AppError } from '../../middleware/error.middleware.js';
+import { track } from '../analytics/analytics.service.js';
 import { removeImage } from '../media/media.service.js';
 import { JewelrySet } from '../sets/set.model.js';
 import { Group } from '../groups/group.model.js';
@@ -107,6 +108,22 @@ export const jewelryService = {
     }
 
     const docs = await Jewelry.find(query).populate('owner', 'displayName location').sort({ createdAt: -1 });
+
+    // Analytics: only deliberate searches/filtered browses — a plain grid load
+    // or scope switch (All/Mine/closet) is navigation, not search intent.
+    const applied: Record<string, string> = {};
+    for (const key of ['category', 'metal', 'colour', 'size', 'necklaceType'] as const) {
+      if (filters[key]) applied[key] = String(filters[key]);
+    }
+    const search = filters.q?.trim();
+    if (search || Object.keys(applied).length > 0) {
+      track(viewerId, 'item_list', {
+        filters: applied,
+        search: search || undefined,
+        resultCount: docs.length,
+      });
+    }
+
     return docs.map(toClient);
   },
 
@@ -124,6 +141,12 @@ export const jewelryService = {
     // 404 (not 403) so a hidden item's existence isn't leaked.
     if (!visible) throw new AppError('Item not found', 404);
 
+    track(viewerId, 'item_view', {
+      itemId: String(doc._id),
+      ownerId,
+      isOwnerView: ownerId === viewerId,
+    });
+
     return toClient(doc);
   },
 
@@ -131,6 +154,7 @@ export const jewelryService = {
     await assertOwnedSet(ownerId, input.set);
     await assertSharedGroups(ownerId, input.visibility, input.sharedGroups);
     const doc = await Jewelry.create({ ...normalizeForCategory(input), owner: ownerId });
+    track(ownerId, 'item_create', { itemId: String(doc._id), category: doc.category });
     await doc.populate('owner', 'displayName location');
     return toClient(doc);
   },
@@ -147,6 +171,7 @@ export const jewelryService = {
     await doc.save();
 
     await Promise.allSettled(removed.map((f) => removeImage(f)));
+    track(ownerId, 'item_update', { itemId: String(doc._id), category: doc.category });
     await doc.populate('owner', 'displayName location');
     return toClient(doc);
   },
@@ -157,7 +182,9 @@ export const jewelryService = {
     if (String(doc.owner) !== ownerId) throw new AppError('You can only delete your own items', 403);
 
     const images = [...doc.images];
+    const category = doc.category;
     await doc.deleteOne();
+    track(ownerId, 'item_delete', { itemId: id, category });
     await Promise.allSettled(images.map((f) => removeImage(f)));
   },
 
@@ -178,6 +205,11 @@ export const jewelryService = {
       { _id: { $in: uniqueIds }, owner: ownerId },
       { $set: { visibility: 'groups' }, $addToSet: { sharedGroups: closetId } },
     );
+    track(ownerId, 'share_to_closet', {
+      groupId: closetId,
+      itemIds: uniqueIds,
+      added: result.modifiedCount,
+    });
     return { added: result.modifiedCount };
   },
 };

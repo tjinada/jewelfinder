@@ -2,6 +2,7 @@ import { Group, IGroupDocument } from './group.model.js';
 import { User } from '../users/user.model.js';
 import { Jewelry } from '../jewelry/jewelry.model.js';
 import { notificationService } from '../notifications/notification.service.js';
+import { track } from '../analytics/analytics.service.js';
 import { AppError } from '../../middleware/error.middleware.js';
 import { randomBytes } from 'crypto';
 import type { Group as GroupDTO, GroupWithMembers } from '@jewel/shared';
@@ -136,6 +137,7 @@ export const groupService = {
 
     await Group.updateOne({ _id: id }, { $pull: { members: userId } });
     await pruneGroupFromItems(id, userId);
+    track(userId, 'closet_leave', { groupId: id });
   },
 
   /** Owner disbands the closet; clears every dangling reference to it. */
@@ -218,6 +220,7 @@ export const groupService = {
     const alreadyMember = doc.members.some((m) => String(m) === userId);
     if (!alreadyMember) {
       await Group.updateOne({ _id: doc._id }, { $addToSet: { members: userId } });
+      track(userId, 'closet_join', { groupId: closetId });
       // Notify the owner (skip if the joiner is the owner). Fire-and-forget.
       if (String(doc.owner) !== userId) {
         const user = await User.findById(userId).select('displayName');
