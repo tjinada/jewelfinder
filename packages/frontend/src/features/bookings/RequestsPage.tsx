@@ -6,6 +6,7 @@ import { MainLayout } from '@/components/layout';
 import { Button } from '@/components/ui';
 import { thumbImageUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
+import { requestPushPrompt } from '@/features/notifications';
 import {
   useIncomingBookings,
   useOutgoingBookings,
@@ -120,7 +121,13 @@ function BookingRow({ booking, side, state }: { booking: Booking; side: Side; st
           <div className="mt-3 flex gap-2">
             <Button
               variant="gold"
-              onClick={() => decide.mutate({ id: booking._id, action: 'accept' })}
+              onClick={() =>
+                decide.mutate(
+                  { id: booking._id, action: 'accept' },
+                  // High-intent moment for the owner — offer notifications.
+                  { onSuccess: () => requestPushPrompt('request-accepted') },
+                )
+              }
               disabled={decide.isPending}
               className="px-3 py-1.5 text-sm"
             >

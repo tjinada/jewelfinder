@@ -105,6 +105,24 @@ export async function subscribeToPush(): Promise<boolean> {
   return true;
 }
 
+/**
+ * Quietly repair this device's push registration on app load. Only acts when
+ * permission is already *granted*, so no browser prompt can ever appear — it
+ * just fixes the silent-failure states: a device with permission but no
+ * subscription (reinstalled PWA, cleared site data, new browser profile), a
+ * stale subscription from a VAPID key rotation, or a backend that lost the
+ * registration. Idempotent and best-effort; safe to call on every launch.
+ */
+export async function autoHealPush(): Promise<void> {
+  if (!isPushSupported()) return;
+  if (Notification.permission !== 'granted') return;
+  try {
+    await subscribeToPush();
+  } catch {
+    /* heal is best-effort — never disturb the app over it */
+  }
+}
+
 /** Turn off push on this device. */
 export async function disablePush(): Promise<void> {
   if (!isPushSupported()) return;

@@ -6,7 +6,6 @@ import { GlassSurface } from '@/components/ui';
 import { useAuthStore } from '@/stores/authStore';
 import { thumbImageUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
-import { PushNotificationPrompt } from '@/features/notifications';
 import { useThread, useSendMessage, type ConversationSummary } from './api';
 import { formatTime } from './format';
 
@@ -130,8 +129,6 @@ export function ThreadPage() {
           </p>
         )}
       </div>
-
-      <PushNotificationPrompt />
 
       {/* Composer */}
       <form

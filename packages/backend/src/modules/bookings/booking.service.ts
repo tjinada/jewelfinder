@@ -123,12 +123,16 @@ export const bookingService = {
       status: 'pending',
     });
 
-    void notificationService.notifyUser(String(item.owner), {
-      title: 'New loan request',
-      body: `${item.name} · ${fmtRange(input.startDate, input.endDate)}`,
-      tag: `booking-${booking._id}`,
-      data: { url: '/requests' },
-    });
+    void notificationService.notifyUser(
+      String(item.owner),
+      {
+        title: 'New loan request',
+        body: `${item.name} · ${fmtRange(input.startDate, input.endDate)}`,
+        tag: `booking-${booking._id}`,
+        data: { url: '/requests' },
+      },
+      'booking',
+    );
 
     return toClient(booking);
   },
@@ -182,12 +186,16 @@ export const bookingService = {
       booking.status = 'rejected';
       await booking.save();
       const item = await Jewelry.findById(booking.item).select('name');
-      void notificationService.notifyUser(String(booking.requester), {
-        title: 'Loan request declined',
-        body: `${item?.name ?? 'Your request'} · ${fmtRange(booking.startDate, booking.endDate)}`,
-        tag: `booking-${booking._id}`,
-        data: { url: '/requests' },
-      });
+      void notificationService.notifyUser(
+        String(booking.requester),
+        {
+          title: 'Loan request declined',
+          body: `${item?.name ?? 'Your request'} · ${fmtRange(booking.startDate, booking.endDate)}`,
+          tag: `booking-${booking._id}`,
+          data: { url: '/requests' },
+        },
+        'booking',
+      );
       return toClient(booking);
     }
 
@@ -234,12 +242,16 @@ export const bookingService = {
         { status: 'rejected' },
       );
       for (const c of conflicts) {
-        void notificationService.notifyUser(String(c.requester), {
-          title: 'Loan request declined',
-          body: `${item?.name ?? 'The piece'} is already loaned out for ${fmtRange(c.startDate, c.endDate)}`,
-          tag: `booking-${c._id}`,
-          data: { url: '/requests' },
-        });
+        void notificationService.notifyUser(
+          String(c.requester),
+          {
+            title: 'Loan request declined',
+            body: `${item?.name ?? 'The piece'} is already loaned out for ${fmtRange(c.startDate, c.endDate)}`,
+            tag: `booking-${c._id}`,
+            data: { url: '/requests' },
+          },
+          'booking',
+        );
       }
     }
 
@@ -261,12 +273,16 @@ export const bookingService = {
     await booking.save();
 
     const item = await Jewelry.findById(booking.item).select('name');
-    void notificationService.notifyUser(String(booking.owner), {
-      title: isPending ? 'Loan request cancelled' : 'Upcoming loan cancelled',
-      body: `${item?.name ?? 'A piece'} · ${fmtRange(booking.startDate, booking.endDate)}`,
-      tag: `booking-${booking._id}`,
-      data: { url: '/requests' },
-    });
+    void notificationService.notifyUser(
+      String(booking.owner),
+      {
+        title: isPending ? 'Loan request cancelled' : 'Upcoming loan cancelled',
+        body: `${item?.name ?? 'A piece'} · ${fmtRange(booking.startDate, booking.endDate)}`,
+        tag: `booking-${booking._id}`,
+        data: { url: '/requests' },
+      },
+      'booking',
+    );
 
     return toClient(booking);
   },
@@ -284,12 +300,16 @@ export const bookingService = {
     await booking.save();
 
     const item = await Jewelry.findById(booking.item).select('name');
-    void notificationService.notifyUser(String(booking.requester), {
-      title: 'Loan marked returned',
-      body: `${item?.name ?? 'Your loan'} · ${fmtRange(booking.startDate, booking.endDate)}`,
-      tag: `booking-${booking._id}`,
-      data: { url: '/requests' },
-    });
+    void notificationService.notifyUser(
+      String(booking.requester),
+      {
+        title: 'Loan marked returned',
+        body: `${item?.name ?? 'Your loan'} · ${fmtRange(booking.startDate, booking.endDate)}`,
+        tag: `booking-${booking._id}`,
+        data: { url: '/requests' },
+      },
+      'booking',
+    );
 
     return toClient(booking);
   },

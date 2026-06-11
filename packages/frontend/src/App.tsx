@@ -13,7 +13,7 @@ import { SetViewPage } from '@/features/sets';
 import { ClosetsPage, ClosetViewPage, MyClosetPage, JoinClosetPage } from '@/features/closets';
 import { ConversationListPage, ThreadPage } from '@/features/messaging';
 import { RequestsPage } from '@/features/bookings';
-import { SettingsPage } from '@/features/notifications';
+import { SettingsPage, PushNotificationPrompt } from '@/features/notifications';
 
 /** Marks loading complete when there's no token to validate. */
 function AuthInitializer({ children }: { children: ReactNode }) {
@@ -71,6 +71,7 @@ export default function App() {
 
             <PWAUpdatePrompt />
             <InstallPrompt />
+            <PushNotificationPrompt />
           </AuthInitializer>
         </BrowserRouter>
       </QueryClientProvider>

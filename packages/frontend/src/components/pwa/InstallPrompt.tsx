@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Share, X } from 'lucide-react';
 import { GlassSurface } from '@/components/ui';
+import { isIOS, isStandalone } from '@/lib/pwa';
 
 /** The Chromium-only event that lets us trigger the native install dialog. */
 interface BeforeInstallPromptEvent extends Event {
@@ -20,19 +21,6 @@ function recentlyDismissed(): boolean {
     return false;
   }
 }
-
-const isStandalone = (): boolean =>
-  typeof window !== 'undefined' &&
-  (window.matchMedia?.('(display-mode: standalone)').matches ||
-    // iOS Safari exposes this when launched from the home screen
-    (navigator as unknown as { standalone?: boolean }).standalone === true);
-
-const isIOS = (): boolean => {
-  if (typeof navigator === 'undefined') return false;
-  const ua = navigator.userAgent;
-  // iPhone/iPod/iPad, plus iPadOS which reports a desktop-Mac UA but is touch.
-  return /iphone|ipad|ipod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
-};
 
 /**
  * Prompts mobile users to install the PWA.

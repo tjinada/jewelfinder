@@ -76,11 +76,17 @@ export const notificationService = {
     await user.save();
   },
 
-  /** Send a notification to every device the user has registered; prune dead ones. */
-  async notifyUser(userId: string, payload: PushPayload): Promise<void> {
+  /** Send a notification to every device the user has registered; prune dead ones.
+   *  The "messages" preference mutes chat pushes only — booking events always send. */
+  async notifyUser(
+    userId: string,
+    payload: PushPayload,
+    kind: 'message' | 'booking' = 'message',
+  ): Promise<void> {
     if (!configured) return;
     const user = await User.findById(userId);
-    if (!user || !user.preferences.notifications.messages || !user.pushSubscriptions.length) return;
+    if (!user || !user.pushSubscriptions.length) return;
+    if (kind === 'message' && !user.preferences.notifications.messages) return;
 
     const body = JSON.stringify({
       title: payload.title,

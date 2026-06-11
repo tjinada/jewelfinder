@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { getErrorMessage } from '@/features/auth';
+import { requestPushPrompt } from '@/features/notifications';
 import { Calendar, type RangeValue } from './Calendar';
 import { useItemRanges, useCreateBooking } from './api';
 import { formatRange } from './format';
@@ -38,6 +39,8 @@ export function LoanRequestModal({ open, itemId, itemName, onClose, onDone }: Lo
         endDate: range.end,
         note: note.trim() || undefined,
       });
+      // The moment they care most about hearing back — offer notifications.
+      requestPushPrompt('request-sent');
       onDone();
     } catch (err) {
       setError(getErrorMessage(err));

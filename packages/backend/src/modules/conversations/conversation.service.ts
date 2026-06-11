@@ -141,13 +141,18 @@ export const conversationService = {
     const otherId = convo.participants.map(String).find((p) => p !== userId);
     if (otherId) {
       const sender = await User.findById(userId).select('displayName');
-      // Fire-and-forget: a push failure must not fail the send.
-      void notificationService.notifyUser(otherId, {
-        title: sender?.displayName || 'New message',
-        body: body.trim().slice(0, 140),
-        tag: `conversation-${id}`,
-        data: { url: `/messages/${id}` },
-      });
+      // Fire-and-forget: a push failure must not fail the send. 'message' kind
+      // respects the user's message-notification preference.
+      void notificationService.notifyUser(
+        otherId,
+        {
+          title: sender?.displayName || 'New message',
+          body: body.trim().slice(0, 140),
+          tag: `conversation-${id}`,
+          data: { url: `/messages/${id}` },
+        },
+        'message',
+      );
     }
 
     return toClientMessage(message);
