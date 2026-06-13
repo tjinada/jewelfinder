@@ -81,7 +81,7 @@ update/offline, push delivery, and the iOS invite-link behaviour.
 ## 7. Invite links & joining  *(core recent feature)*
 **Owner side (Members sheet):**
 - [ ] Open Members → no email field; **Invite link** section present.
-- [ ] "Create invite link" → ✅ link appears with **Copy** and **Share**, note "Anyone with this link can join", and an "expires in …" label (~72h).
+- [ ] "Create invite link" → ✅ link appears with **Copy** and **Share**, note "Anyone with this link can join", and an "expires in …" label (~30 days).
 - [ ] **Reset** → ✅ a new link is minted (old one stops working — verify by trying the old link).
 - [ ] **Turn off** → ✅ link removed; opening it shows "Link unavailable".
 - [ ] Copy the link; confirm it's `https://<host>/join/<token>`.

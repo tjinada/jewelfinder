@@ -36,8 +36,8 @@ function toGroupWithMembers(
   return { ...toGroup(doc, viewerId, itemCount), memberCount: members.length, members };
 }
 
-// Join links stay valid for 72 hours; the owner resets to mint a fresh one.
-const JOIN_TTL_MS = 72 * 60 * 60 * 1000;
+// Join links stay valid for 30 days; the owner resets to mint a fresh one.
+const JOIN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 /** Owner-only guard, shared by the management methods. */
 function assertOwner(doc: IGroupDocument, ownerId: string): void {

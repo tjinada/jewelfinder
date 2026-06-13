@@ -13,7 +13,7 @@ export const config = {
 
   // JWT
   jwtSecret: process.env.JWT_SECRET || 'change-this-in-production',
-  jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN || '30d',
 
   // Media storage (uploaded jewelry images)
   mediaDir: process.env.MEDIA_DIR

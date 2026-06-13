@@ -46,6 +46,15 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'jewel-auth',
       partialize: (state) => ({ token: state.token, user: state.user }),
+      // Trust a persisted token on boot so the app renders immediately instead
+      // of blocking on a network round-trip. /auth/me then validates it in the
+      // background (see ProtectedRoute), logging out on a confirmed 401.
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.isAuthenticated = !!state.token;
+          state.isLoading = false;
+        }
+      },
     },
   ),
 );
