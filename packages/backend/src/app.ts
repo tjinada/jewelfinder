@@ -20,6 +20,8 @@ import { bookingRoutes } from './modules/bookings/index.js';
 import { notificationRoutes, initWebPush } from './modules/notifications/index.js';
 import { mediaRoutes, ensureMediaDirs } from './modules/media/index.js';
 import { groupService } from './modules/groups/groups.service.js';
+import { bookingService } from './modules/bookings/booking.service.js';
+import { scheduleDaily } from './utils/scheduler.js';
 import { initLinkPreview, inviteHtml } from './utils/linkPreview.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -160,6 +162,8 @@ const start = async () => {
     await connectDatabase();
     await ensureMediaDirs();
     initWebPush();
+    // Daily 09:00 (server time) sweep — overdue-loan reminders.
+    scheduleDaily('overdue reminders', 9, () => bookingService.sendOverdueReminders());
     app.listen(config.port, () => {
       console.log('');
       console.log('💎 Jewel Finder - Backend');

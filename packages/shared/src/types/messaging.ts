@@ -5,6 +5,9 @@ export const MessageSchema = z.object({
   conversation: z.string(),
   sender: z.string(),
   body: z.string().min(1).max(2000),
+  // Automated message (e.g. overdue reminder) — rendered as a neutral chip,
+  // not a sender bubble. `sender` is still set for data integrity.
+  system: z.boolean().optional(),
   readBy: z.array(z.string()).default([]),
   createdAt: z.string().or(z.date()),
 });

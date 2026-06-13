@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 import { Booking, IBookingDocument } from './booking.model.js';
 import { Jewelry } from '../jewelry/jewelry.model.js';
 import { conversationService } from '../conversations/conversation.service.js';
+import { Conversation, Message } from '../conversations/conversation.model.js';
 import { notificationService } from '../notifications/notification.service.js';
 import { track } from '../analytics/analytics.service.js';
 import { isVisibleTo } from '../groups/visibility.js';
@@ -349,5 +350,86 @@ export const bookingService = {
     );
 
     return toClient(booking);
+  },
+
+  /** Daily sweep (see utils/scheduler): remind both parties about overdue
+   *  loans — first on the day after the due date, then every 3rd day until the
+   *  owner marks the loan returned. Each reminder drops a system message into
+   *  the booking's conversation and sends a booking-kind push (which ignores
+   *  the messages mute) to borrower and owner. */
+  async sendOverdueReminders(): Promise<void> {
+    // "Every 3rd day" with a 60h threshold instead of 72h — the sweep fires at
+    // roughly the same time each day, so a strict 72h check could slip a day
+    // on scheduling jitter. 60h still skips days 2–3 and reliably fires day 4.
+    const repeatThreshold = new Date(Date.now() - 60 * 60 * 60 * 1000);
+    const overdue = await Booking.find({
+      status: 'accepted',
+      returnedAt: null,
+      endDate: { $lt: todayISO() },
+      $or: [
+        { lastOverdueReminderAt: null },
+        { lastOverdueReminderAt: { $lte: repeatThreshold } },
+      ],
+    });
+    if (!overdue.length) return;
+    console.log(`⏰ Overdue sweep: ${overdue.length} reminder(s) to send`);
+
+    for (const booking of overdue) {
+      try {
+        const item = await Jewelry.findById(booking.item).select('name');
+        const itemName = item?.name ?? 'A piece';
+        const dueDate = fmt(booking.endDate);
+
+        // System message into the loan's conversation (unread for both —
+        // readBy starts empty — so it bumps the badge). Created directly
+        // rather than via sendMessage so it skips the message-kind push and
+        // message_sent analytics; the pushes below cover both parties.
+        if (booking.conversation) {
+          await Message.create({
+            conversation: booking.conversation,
+            sender: booking.owner,
+            body: `🔔 Reminder: “${itemName}” was due back on ${dueDate}.`,
+            system: true,
+            readBy: [],
+          });
+          await Conversation.updateOne(
+            { _id: booking.conversation },
+            { lastMessageAt: new Date() },
+          );
+        }
+
+        const url = booking.conversation
+          ? `/messages/${booking.conversation}`
+          : '/requests';
+        // Same tag for both — repeat reminders replace, never stack.
+        const tag = `overdue-${booking._id}`;
+        void notificationService.notifyUser(
+          String(booking.requester),
+          {
+            title: 'Loan overdue',
+            body: `${itemName} was due back ${dueDate}`,
+            tag,
+            data: { url },
+          },
+          'booking',
+        );
+        void notificationService.notifyUser(
+          String(booking.owner),
+          {
+            title: 'Loan overdue',
+            body: `${itemName} is overdue (due ${dueDate})`,
+            tag,
+            data: { url: '/requests' },
+          },
+          'booking',
+        );
+
+        booking.lastOverdueReminderAt = new Date();
+        await booking.save();
+      } catch (err) {
+        // One bad booking must not halt the sweep — log and continue.
+        console.error(`Overdue reminder failed for booking ${booking._id}:`, err);
+      }
+    }
   },
 };

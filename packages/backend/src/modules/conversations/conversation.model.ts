@@ -31,6 +31,9 @@ export interface IMessage {
   conversation: Types.ObjectId;
   sender: Types.ObjectId;
   body: string;
+  // Automated message (e.g. overdue reminder). Sender is still set (the owner)
+  // for data integrity, but the frontend renders these as a neutral chip.
+  system: boolean;
   readBy: Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
@@ -43,6 +46,7 @@ const MessageSchema = new Schema<IMessageDocument, IMessageModel>(
     conversation: { type: Schema.Types.ObjectId, ref: 'Conversation', required: true, index: true },
     sender: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     body: { type: String, required: true, trim: true, minlength: 1, maxlength: 2000 },
+    system: { type: Boolean, default: false },
     readBy: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   },
   { timestamps: true },

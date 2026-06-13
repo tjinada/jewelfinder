@@ -39,6 +39,7 @@ function toClientMessage(doc: IMessageDocument): MessageDTO {
     conversation: String(doc.conversation),
     sender: String(doc.sender),
     body: doc.body,
+    system: doc.system || undefined,
     readBy: doc.readBy.map(String),
     createdAt: doc.createdAt,
   };

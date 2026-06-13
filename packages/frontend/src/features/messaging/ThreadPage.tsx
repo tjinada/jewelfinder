@@ -102,6 +102,18 @@ export function ThreadPage() {
         ) : thread && thread.messages.length > 0 ? (
           <div className="mx-auto flex max-w-2xl flex-col gap-2">
             {thread.messages.map((m) => {
+              // Automated messages (overdue reminders) render as a neutral
+              // centered chip, not a sender bubble.
+              if (m.system) {
+                return (
+                  <div key={m._id} className="flex justify-center py-1">
+                    <div className="max-w-[85%] rounded-full border border-line bg-tile px-3.5 py-1.5 text-center text-xs text-ink/70">
+                      <p>{m.body}</p>
+                      <p className="mt-0.5 text-[10px] text-muted">{formatTime(m.createdAt)}</p>
+                    </div>
+                  </div>
+                );
+              }
               const mine = m.sender === meId;
               return (
                 <div key={m._id} className={cn('flex', mine ? 'justify-end' : 'justify-start')}>

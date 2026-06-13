@@ -11,6 +11,9 @@ export interface IBooking {
   note?: string;
   conversation: Types.ObjectId | null;
   returnedAt?: Date | null;
+  // When the last overdue reminder went out (null = never). Absent on old
+  // documents — treated the same as null, so no migration is needed.
+  lastOverdueReminderAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,6 +31,7 @@ const BookingSchema = new Schema<IBookingDocument, IBookingModel>(
     note: { type: String, trim: true, maxlength: 500 },
     conversation: { type: Schema.Types.ObjectId, ref: 'Conversation', default: null },
     returnedAt: { type: Date, default: null },
+    lastOverdueReminderAt: { type: Date, default: null },
   },
   { timestamps: true },
 );
